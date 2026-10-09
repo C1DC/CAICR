@@ -17,10 +17,23 @@ Open a terminal in the lab folder and run:
 
 You'll see every lab, whether its targets are running, and your progress.
 
+### Learn, then do
+
+Every module has a full teaching lesson you read in the terminal — plain-language
+explanation, a real Ghana example, common mistakes, and a self-check quiz:
+
+```
+./labctl learn                  # the course map — all 10 modules
+./labctl learn m3               # read module 3's full lesson
+```
+
+Read the lesson first, then launch the matching lab and do it for real.
+
 ### A lab, start to finish
 
 ```
 ./labctl whoami Your Name       # once — puts your name on your progress
+./labctl learn m3               # read the lesson for the module
 ./labctl info m3                # read the mission + see the target IPs
 ./labctl start m3               # bring the targets up (wait for "ready")
 #   ... now do the work in your own terminal: nmap, wireshark, etc. ...
