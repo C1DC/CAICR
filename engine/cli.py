@@ -103,8 +103,13 @@ def cmd_start(args) -> int:
     lab = load_one(args.lab)
     if not lab.has_targets:
         # File-based lab: no containers, just point the student at the evidence.
+        from . import seed
+        vals = seed.compute(lab)
+        seed.prepare(lab, vals)   # personalise the evidence files for this student
         ui.header(f"{lab.module}: {lab.title}")
         ui.ok("This is a file-based lab — no targets to launch.")
+        if vals:
+            ui.info("Evidence personalised for you — your answers differ from others'.")
         assets = lab.directory / "assets"
         if assets.is_dir():
             files = [p for p in sorted(assets.iterdir())
@@ -122,8 +127,7 @@ def cmd_start(args) -> int:
         return 2
     from . import seed
     vals = seed.compute(lab)
-    if vals:
-        seed.render_assets(lab, vals)   # render assets/*.tmpl for this student
+    seed.prepare(lab, vals)   # render assets/*.tmpl + run generators for this student
     ui.header(f"Starting {lab.module}: {lab.title}")
     ui.info(f"Bringing up isolated targets on {lab.subnet} (project {lab.project})…")
     if vals:

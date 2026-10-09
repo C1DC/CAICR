@@ -12,19 +12,22 @@ Valid classic PCAP, pure stdlib, deterministic output.
 """
 from __future__ import annotations
 
+import os
 import struct
 import sys
 from pathlib import Path
 
 LINK = 1  # Ethernet
-C2_DOMAIN = "sync-telemetry.duckdns.org"
+# Per-student values come from the lab engine via CAIC_* env (defaults preserve
+# the standalone static behaviour).
+C2_DOMAIN = os.environ.get("CAIC_C2_DOMAIN", "sync-telemetry.duckdns.org")
 INFECTED = "10.13.3.30"
 RESOLVER = "10.13.3.1"
 BEACON_INTERVAL = 30
 FTP_CLIENT = "10.13.3.50"
 FTP_SERVER = "10.13.3.20"
-FTP_USER = "backupsvc"
-FTP_PASS = "Backup#2021"
+FTP_USER = os.environ.get("CAIC_FTP_USER", "backupsvc")
+FTP_PASS = os.environ.get("CAIC_FTP_PASS", "Backup#2021")
 
 
 def ipb(ip): return bytes(int(o) for o in ip.split("."))

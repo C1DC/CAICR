@@ -51,6 +51,7 @@ class Lab:
     checks: list[Check]
     ready: list[str]   # "ip:port" endpoints to probe before a lab is "ready"
     randomize: dict    # per-student randomization spec (empty = static lab)
+    generators: list   # scripts to run at start (binary assets), with CAIC_* env
 
     @property
     def project(self) -> str:
@@ -136,6 +137,7 @@ def load_lab(directory: Path) -> Lab:
         checks=checks,
         ready=[str(x) for x in net.get("ready", [])],
         randomize=data.get("randomize", {}) or {},
+        generators=[str(x) for x in (data.get("generators") or lab.get("generators", []))],
     )
 
 

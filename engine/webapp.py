@@ -59,6 +59,10 @@ def _module_rows() -> list[dict]:
 
 
 def _lab_detail(lab) -> dict:
+    if not lab.has_targets:
+        # personalise a file-based lab's evidence when its page is opened
+        from . import seed
+        seed.prepare(lab, seed.compute(lab))
     entry = state.lab_status(lab.id)
     verified = entry.get("verified", {})
     return {
@@ -127,8 +131,7 @@ def _run_lab_op(lab_id: str, op: str) -> None:
         if op == "start":
             from . import seed
             vals = seed.compute(lab)
-            if vals:
-                seed.render_assets(lab, vals)
+            seed.prepare(lab, vals)
             dockerctl.up(lab, env=seed.env_for(vals))
             dockerctl.wait_ready(lab)
             state.mark_started(lab.id)
@@ -156,6 +159,7 @@ def _start_op(lab_id: str, op: str) -> dict:
 def _grade(lab, answers: dict) -> dict:
     from . import seed
     vals = seed.compute(lab)
+    seed.prepare(lab, vals)   # ensure on-disk evidence matches the grading
     results = []
     score = 0
     verified = {}

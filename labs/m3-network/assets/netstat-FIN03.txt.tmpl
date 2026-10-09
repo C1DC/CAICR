@@ -5,14 +5,14 @@
 Active Internet connections (servers and established)
 Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
 tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      712/sshd
-tcp        0      0 0.0.0.0:4444            0.0.0.0:*               LISTEN      3391/svch0st
-tcp        0      0 10.13.3.30:49780        185.220.101.44:443      ESTABLISHED 3391/svch0st
+tcp        0      0 0.0.0.0:__BACKDOOR_PORT__            0.0.0.0:*               LISTEN      3391/svch0st
+tcp        0      0 10.13.3.30:49780        __C2_IP__:443      ESTABLISHED 3391/svch0st
 tcp        0      0 10.13.3.30:22           10.13.3.9:51022         ESTABLISHED 712/sshd
 udp        0      0 10.13.3.30:40007        10.13.3.1:53            ESTABLISHED 3391/svch0st
 
 # Analyst notes for the student:
 #  - 'svch0st' (note the ZERO) is masquerading as the legitimate Windows
 #    'svchost'. It is LISTENING on tcp/4444 (a backdoor) AND holding an
-#    established outbound session to 185.220.101.44:443.
+#    established outbound session to __C2_IP__:443.
 #  - The same PID (3391) is making the DNS queries seen in the capture — so the
 #    C2 DOMAIN in the pcap resolves to the C2 IP seen here.

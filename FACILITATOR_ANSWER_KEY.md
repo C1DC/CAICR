@@ -63,21 +63,21 @@
 7. Which protocol on the fileserver transmits credentials in cleartext?
    → **ftp**  _(also: ftp (21), file transfer protocol)_
 8. In network-capture.pcap, what domain is the infected host beaconing to?
-   → **sync-telemetry.duckdns.org**  _(also: duckdns.org)_
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 9. What is the beaconing interval, in seconds?
    → **30**
 10. Which internal IP is making those beacon queries?
    → **10.13.3.30**
 11. Follow the FTP TCP stream in the capture. What USERNAME logged in?
-   → **backupsvc**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 12. And what PASSWORD was sent — in the clear?
-   → **Backup#2021**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 13. In netstat-FIN03.txt, what process name is masquerading as a Windows service?
    → **svch0st**  _(also: svch0st (pid 3391), sv ch0st)_
 14. What TCP port is that malware LISTENING on as a backdoor?
-   → **4444**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 15. What external C2 IP does the malware hold an ESTABLISHED connection to? (correlates with the beacon domain)
-   → **185.220.101.44**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 16. Which MITRE ATT&CK technique covers the DNS command-and-control channel?
    → **T1071**  _(also: T1071.004)_
 
@@ -123,23 +123,23 @@
 1. In the spoofed email, which header reveals the true envelope sender (where bounces go)?
    → **return-path**  _(also: return path, return-path:)_
 2. What is the source IP of the server that actually sent the spoof?
-   → **45.137.112.63**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 3. Did SPF pass or fail on the SPOOFED email?
    → **fail**  _(also: failed, spf fail, spf=fail)_
 4. And in the GENUINE earlier email (genuine-quote.eml), did SPF pass or fail?
    → **pass**  _(also: passed, spf=pass)_
 5. What look-alike domain does the spoof use in Reply-To / Return-Path?
-   → **zenith-supplies.com**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 6. What is the real supplier domain the attacker impersonates?
    → **zenithsupplies.com.gh**
 7. The spoof hijacks the real thread by reusing its PO number. What is it?
    → **ZS-20418**  _(also: zs-20418, 20418)_
 8. What NEW bank account number does the spoof ask payment to go to?
-   → **1402300087654**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 9. Run exiftool on remittance-advice.pdf. What AUTHOR is recorded in its metadata?
-   → **k1ngpin**  _(also: kingpin)_
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 10. The attachment's Create Date carries a UTC offset inconsistent with a Ghanaian (+00:00) supplier. What offset?
-   → **+07:00**  _(also: +0700, +07, 7, +7, utc+7)_
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 11. Was the attachment created BEFORE the email was sent (evidence of premeditation)?
    → **yes**  _(also: before, y, created before, premeditated)_
 12. Name the payment control that would have stopped this fraud.
@@ -187,15 +187,15 @@
 1. The AI sandbox is reachable on 10.13.7.10:8080
    → _(automatic script check — verifies live state)_
 2. Direct injection via /chat: extract the hidden admin override code.
-   → **FLAG{pr0mpt_1nj3ction_sh4d0w_ai}**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 3. Query /ask about the supplier bank account. The knowledge base has been tampered with — what class of attack is that?
    → **rag poisoning**  _(also: rag-poisoning, knowledge base poisoning, data poisoning, poisoning)_
 4. What fraudulent bank account number does the poisoned RAG answer return?
-   → **9900778100**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 5. Feeding the poisoned supplier-memo.txt to /summarize makes the AI ACT. What class of injection is that?
    → **indirect**  _(also: indirect prompt injection, indirect-prompt-injection, document injection)_
 6. That document makes the assistant abuse its send_email tool. What address does it exfiltrate data to?
-   → **collector@mule-net.su**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 7. The assistant runs tools (read_file, send_email) named in untrusted input. Which principle would contain this?
    → **least privilege**  _(also: least-privilege, principle of least privilege, tool permissioning, limit tool permissions, privilege separation, restrict tools, sandboxing tools)_
 8. Which OWASP LLM Top 10 item is prompt injection (id or name)?

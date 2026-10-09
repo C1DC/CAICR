@@ -6,6 +6,9 @@ services:
   ai-sandbox:
     build: ./sandbox
     image: caic-aisandbox:1.0
+    environment:
+      CAIC_FLAG: ${CAIC_FLAG:-FLAG{pr0mpt_1nj3ction_sh4d0w_ai}}
+      CAIC_RAG_ACCOUNT: ${CAIC_RAG_ACCOUNT:-9900778100}
     networks: { range: { ipv4_address: 10.13.7.10 } }
     restart: unless-stopped
 

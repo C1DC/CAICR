@@ -68,6 +68,7 @@ def interactive(lab: Lab) -> None:
     ui.dim("  Enter what you found. Type 's' to skip a check, 'q' to quit.\n")
 
     vals = seed.compute(lab)
+    seed.prepare(lab, vals)   # ensure on-disk evidence matches the grading
     results: dict[str, bool] = {}
     score = 0
     for i, check in enumerate(lab.checks, 1):

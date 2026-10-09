@@ -91,6 +91,30 @@ def env_for(vals: dict) -> dict:
     return {f"CAIC_{k.upper()}": str(v) for k, v in vals.items()}
 
 
+def run_generators(lab, vals: dict) -> None:
+    """Run the lab's declared generator scripts (for binary assets like PCAPs)
+    with the per-student values in the environment as CAIC_<VAR>."""
+    import os
+    import subprocess
+    import sys
+    scripts = getattr(lab, "generators", None) or []
+    if not scripts:
+        return
+    env = os.environ.copy()
+    env.update(env_for(vals))
+    for rel in scripts:
+        script = lab.directory / rel
+        if script.is_file():
+            subprocess.run([sys.executable, str(script)], cwd=str(lab.directory),
+                           env=env, capture_output=True, text=True)
+
+
+def prepare(lab, vals: dict) -> None:
+    """Everything to personalise a lab's on-disk assets before launch."""
+    render_assets(lab, vals)
+    run_generators(lab, vals)
+
+
 def render_assets(lab, vals: dict) -> None:
     """Render assets/*.tmpl -> stripped name, substituting __VAR__ tokens."""
     if not vals:

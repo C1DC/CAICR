@@ -4,6 +4,7 @@ module = "M3"
 day = 2
 title = "Network Compromise Investigation — Nmap, NSE & Wireshark"
 tools = ["nmap", "nmap NSE", "wireshark", "tcpdump", "netstat"]
+generators = ["assets/generate_pcap.py"]
 estimated_minutes = 120
 briefing = "briefing.md"
 objective = """
@@ -98,7 +99,7 @@ hint = "nmap -sV -p21 10.13.3.20  — and see the capture"
 id = "c2_domain"
 type = "string_any"
 prompt = "In network-capture.pcap, what domain is the infected host beaconing to?"
-accept = ["sync-telemetry.duckdns.org", "duckdns.org"]
+accept = ["{{c2_domain}}"]
 hint = "wireshark assets/network-capture.pcap ; filter: dns"
 
 [[check]]
@@ -120,14 +121,14 @@ hint = "The source IP of the repeated DNS queries"
 id = "ftp_user"
 type = "string_any"
 prompt = "Follow the FTP TCP stream in the capture. What USERNAME logged in?"
-accept = ["backupsvc"]
+accept = ["{{ftp_user}}"]
 hint = "Wireshark: right-click an FTP packet → Follow → TCP Stream (or tcpdump -A)"
 
 [[check]]
 id = "ftp_pass"
 type = "string"
 prompt = "And what PASSWORD was sent — in the clear?"
-answer = "Backup#2021"
+answer = "{{ftp_pass}}"
 hint = "It's in the same FTP stream, right after USER"
 
 # ── Part 3: correlate the netstat capture from the suspect host ─────────────
@@ -142,14 +143,14 @@ hint = "cat assets/netstat-FIN03.txt — look closely at the spelling of 'svchos
 id = "backdoor_port"
 type = "numeric"
 prompt = "What TCP port is that malware LISTENING on as a backdoor?"
-answer = 4444
+answer = "{{backdoor_port}}"
 hint = "The LISTEN line owned by the suspicious process"
 
 [[check]]
 id = "c2_ip"
 type = "string"
 prompt = "What external C2 IP does the malware hold an ESTABLISHED connection to? (correlates with the beacon domain)"
-answer = "185.220.101.44"
+answer = "{{c2_ip}}"
 hint = "The ESTABLISHED foreign address owned by the malware process"
 
 [[check]]
@@ -158,3 +159,23 @@ type = "string_any"
 prompt = "Which MITRE ATT&CK technique covers the DNS command-and-control channel?"
 accept = ["T1071", "T1071.004"]
 hint = "Command and Control → Application Layer Protocol (DNS sub-technique)"
+
+
+[randomize.ftp_user]
+kind = "choice"
+choices = ["backupsvc", "svc_backup", "ftpadmin", "deploy", "sqlsvc", "batchjob"]
+
+[randomize.ftp_pass]
+kind = "password"
+
+[randomize.c2_domain]
+kind = "choice"
+choices = ["sync-telemetry.duckdns.org", "cdn-update.ddns.net", "telemetry-sync.myftp.org",
+           "update-check.hopto.org", "metrics-cdn.duckdns.org", "win-telemetry.zapto.org"]
+
+[randomize.c2_ip]
+kind = "ip_public"
+
+[randomize.backdoor_port]
+kind = "choice"
+choices = ["4444", "1337", "31337", "8443", "9001", "5555", "6666"]

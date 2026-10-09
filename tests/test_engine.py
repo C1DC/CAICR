@@ -82,11 +82,20 @@ class TestGrading(unittest.TestCase):
 class TestArtefacts(unittest.TestCase):
     LABS = ROOT / "labs"
 
+    def _prepare(self, mid):
+        """Generate a lab's (possibly randomized) assets for this test run."""
+        from engine import seed, manifest
+        lab = manifest.load_one(mid)
+        seed.prepare(lab, seed.compute(lab))
+        return lab
+
     def test_m3_pcap_is_valid(self):
+        self._prepare("m3")
         data = (self.LABS / "m3-network/assets/network-capture.pcap").read_bytes()
         magic = struct.unpack("<I", data[:4])[0]
         self.assertEqual(magic, 0xA1B2C3D4, "pcap magic wrong")
-        self.assertIn(b"sync-telemetry", data, "C2 domain missing from capture")
+        self.assertIn(b"USER ", data, "FTP credentials missing from capture")
+        self.assertIn(b"\x00\x01\x00\x01", data[:0] + data, "no DNS query in capture")
 
     def test_m6_image_is_fat16(self):
         img = (self.LABS / "m6-forensics/assets/evidence.img").read_bytes()
@@ -106,9 +115,11 @@ class TestArtefacts(unittest.TestCase):
         self.assertIn("sync-malware-c2.net", decoded)
 
     def test_m5_email_has_spoof_indicators(self):
+        self._prepare("m5")
         eml = (self.LABS / "m5-bec/assets/invoice-change-request.eml").read_text()
-        self.assertIn("zenith-supplies.com", eml)      # look-alike
         self.assertIn("spf=fail", eml)
+        self.assertIn("zenith", eml.lower())           # a zenith look-alike is present
+        self.assertIn("Reply-To:", eml)
 
     def test_answers_in_manifests_are_gradable(self):
         """Every string/numeric check's own answer should grade as correct,

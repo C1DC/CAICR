@@ -10,13 +10,18 @@
 The analyst compares the two emails, traces the spoof, and runs exiftool on the
 PDF to expose the author and the authoring timezone.
 """
+import os
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 LEGIT = "zenithsupplies.com.gh"
-LOOKALIKE = "zenith-supplies.com"
-SRC_IP = "45.137.112.63"
-FRAUD_ACCT = "1402300087654"
+# Per-student values from the lab engine (defaults keep it standalone).
+LOOKALIKE = os.environ.get("CAIC_LOOKALIKE", "zenith-supplies.com")
+SRC_IP = os.environ.get("CAIC_SOURCE_IP", "45.137.112.63")
+FRAUD_ACCT = os.environ.get("CAIC_FRAUD_ACCOUNT", "1402300087654")
+PDF_AUTHOR = os.environ.get("CAIC_PDF_AUTHOR", "k1ngpin")
+PDF_TZ = os.environ.get("CAIC_PDF_TZ", "+07:00")          # exiftool-style offset
+_TZ_PDF = PDF_TZ.replace(":", "'") + "'"                   # -> +07'00'
 
 GENUINE = f"""\
 Return-Path: <k.mensah@{LEGIT}>
@@ -82,10 +87,10 @@ def build_pdf() -> bytes:
     objs.append(b"<< /Length %d >>\nstream\n%s\nendstream" % (len(stream), stream))
     objs.append(b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>")
     # Object 6: the Info dictionary — the forensic goldmine
-    objs.append(b"<< /Title (Remittance Advice) /Author (k1ngpin) "
+    objs.append(b"<< /Title (Remittance Advice) /Author (" + PDF_AUTHOR.encode() + b") "
                 b"/Creator (Microsoft Office Word) /Producer (Skia/PDF m118) "
-                b"/CreationDate (D:20260928090000+07'00') "
-                b"/ModDate (D:20260928090000+07'00') >>")
+                b"/CreationDate (D:20260928090000" + _TZ_PDF.encode() + b") "
+                b"/ModDate (D:20260928090000" + _TZ_PDF.encode() + b") >>")
 
     out = bytearray(b"%PDF-1.5\n%\xe2\xe3\xcf\xd3\n")
     offsets = []

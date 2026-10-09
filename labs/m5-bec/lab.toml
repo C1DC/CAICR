@@ -4,6 +4,7 @@ module = "M5"
 day = 3
 title = "Business Email Compromise — Header & Attachment Forensics"
 tools = ["grep", "exiftool", "pdfinfo", "dig", "whois"]
+generators = ["assets/generate_evidence.py"]
 estimated_minutes = 120
 briefing = "briefing.md"
 objective = """
@@ -27,7 +28,7 @@ hint = "grep -iE '^(Return-Path|From|Reply-To)' invoice-change-request.eml"
 id = "source_ip"
 type = "string"
 prompt = "What is the source IP of the server that actually sent the spoof?"
-answer = "45.137.112.63"
+answer = "{{source_ip}}"
 hint = "The earliest 'Received: from ... (unknown [IP])' line"
 
 [[check]]
@@ -48,7 +49,7 @@ hint = "Compare the two — the contrast is the proof"
 id = "lookalike_domain"
 type = "string_any"
 prompt = "What look-alike domain does the spoof use in Reply-To / Return-Path?"
-accept = ["zenith-supplies.com"]
+accept = ["{{lookalike}}"]
 hint = "Compare it to the real supplier domain in the From: display"
 
 [[check]]
@@ -69,7 +70,7 @@ hint = "Both emails reference the same purchase order"
 id = "fraud_account"
 type = "string"
 prompt = "What NEW bank account number does the spoof ask payment to go to?"
-answer = "1402300087654"
+answer = "{{fraud_account}}"
 hint = "It's in the spoof's message body"
 
 # ── The malicious attachment (exiftool) ─────────────────────────────────────
@@ -77,14 +78,14 @@ hint = "It's in the spoof's message body"
 id = "pdf_author"
 type = "string_any"
 prompt = "Run exiftool on remittance-advice.pdf. What AUTHOR is recorded in its metadata?"
-accept = ["k1ngpin", "kingpin"]
+accept = ["{{pdf_author}}"]
 hint = "exiftool remittance-advice.pdf  — the Author field"
 
 [[check]]
 id = "pdf_tz"
 type = "string_any"
 prompt = "The attachment's Create Date carries a UTC offset inconsistent with a Ghanaian (+00:00) supplier. What offset?"
-accept = ["+07:00", "+0700", "+07", "7", "+7", "utc+7"]
+accept = ["{{pdf_tz}}"]
 hint = "exiftool ... — the Create Date ends in the authoring timezone"
 
 [[check]]
@@ -110,3 +111,23 @@ type = "string_any"
 prompt = "Which MITRE ATT&CK technique covers this phishing/impersonation?"
 accept = ["T1566", "T1566.002", "T1656"]
 hint = "Initial Access → Phishing, or Impersonation (T1656)"
+
+[randomize.source_ip]
+kind = "ip_public"
+
+[randomize.lookalike]
+kind = "choice"
+choices = ["zenith-supplies.com", "zenithsupplies-gh.com", "zenith-supplies.net",
+           "zenithsupplies.co", "zenith-supply.com"]
+
+[randomize.fraud_account]
+kind = "digits"
+length = 13
+
+[randomize.pdf_author]
+kind = "choice"
+choices = ["k1ngpin", "d0ct0r", "payday", "ghost-acct", "mule-01", "zero-cool"]
+
+[randomize.pdf_tz]
+kind = "choice"
+choices = ["+07:00", "+08:00", "+03:00", "+09:00", "+05:30"]

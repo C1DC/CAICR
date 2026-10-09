@@ -23,3 +23,9 @@ dist/
 # per-student rendered lab assets (generated at start from *.tmpl)
 labs/m1-threat-intel/assets/whois-lab-corp.txt
 labs/*/assets/*.rendered
+labs/m3-network/assets/netstat-FIN03.txt
+labs/m7-ai-security/assets/supplier-memo.txt
+labs/m5-bec/assets/genuine-quote.eml
+labs/m5-bec/assets/invoice-change-request.eml
+labs/m5-bec/assets/remittance-advice.pdf
+labs/m3-network/assets/network-capture.pcap
