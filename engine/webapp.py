@@ -16,7 +16,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
 from . import __version__, dockerctl, paths, state, verify
-from .course import COMMANDS, COURSE_MAP, DAY_TITLES, TOOLS
+from .course import COMMANDS, COURSE_MAP, DAY_TITLES, LINUX_COMMANDS, TOOLS
 from .manifest import ManifestError, discover_labs, load_one
 from .mdhtml import md_to_html
 
@@ -112,6 +112,7 @@ def _bootstrap() -> dict:
         "modules": mods,
         "tools": TOOLS,
         "commands": [{"group": g, "cmd": c, "desc": d} for g, c, d in COMMANDS],
+        "linux": [{"group": g, "cmd": c, "desc": d} for g, c, d in LINUX_COMMANDS],
         "summary": {"labsComplete": done, "totalLabs": len(gradable),
                     "totalModules": len(mods),
                     "dockerOk": dockerctl.preflight().ok,

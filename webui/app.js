@@ -48,6 +48,7 @@ function paletteItems() {
     go: () => { location.hash = "materials"; setTimeout(() => { const el = [...document.querySelectorAll(".toolrow summary")].find(s => s.textContent.trim().startsWith(t.name)); if (el) { el.parentElement.open = true; el.scrollIntoView({ block: "center" }); } }, 140); }
   }));
   (BOOT.commands || []).forEach(c => items.push({ t: c.cmd, s: c.desc, ic: "⌨", k: "copy", go: () => copy(c.cmd) }));
+  (BOOT.linux || []).forEach(c => items.push({ t: c.cmd, s: c.desc + " · Linux", ic: "▶_", k: "copy", go: () => copy(c.cmd) }));
   return items;
 }
 function openPalette() {
@@ -448,14 +449,40 @@ function vMaterials() {
   };
 }
 
+function cmdSection(list, q) {
+  q = (q || "").toLowerCase();
+  const items = q ? list.filter(c => (c.cmd + " " + c.desc + " " + c.group).toLowerCase().includes(q)) : list;
+  const groups = [...new Set(items.map(c => c.group))];
+  return groups.map(g => `<div class="section-title">${esc(g)}</div>
+    ${items.filter(c => c.group === g).map(c => `
+      <div class="cmdline"><code>${esc(c.cmd)}</code><span class="dim" style="flex:2">${esc(c.desc)}</span><button data-c="${esc(c.cmd)}">copy</button></div>`).join("")}`).join("")
+    || `<p class="dim">No commands match.</p>`;
+}
 function vCommands() {
   setActive("commands"); crumb([{ t: "Commands" }]);
-  const groups = [...new Set(BOOT.commands.map(c => c.group))];
-  view.innerHTML = `<p class="muted">Everything the lab is also drivable from your terminal. Click a command to copy it.</p>` +
-    groups.map(g => `<div class="section-title">${esc(g)}</div>
-      ${BOOT.commands.filter(c => c.group === g).map(c => `
-        <div class="cmdline"><code>${esc(c.cmd)}</code><span class="dim" style="flex:2">${esc(c.desc)}</span><button data-c="${esc(c.cmd)}">copy</button></div>`).join("")}`).join("");
-  view.querySelectorAll(".cmdline button").forEach(b => b.onclick = () => copy(b.dataset.c));
+  const linux = BOOT.linux || [];
+  view.innerHTML = `
+    <p class="muted">Two references: the <strong>Linux / Kali</strong> command line (the same primer as the Day-1 orientation, <code>labctl learn m0</code>), and the <strong>labctl</strong> commands that drive this course. Click any command to copy it.</p>
+    <input id="cmdSearch" placeholder="Search commands…"
+      style="width:100%;padding:10px 13px;margin:8px 0 6px;background:var(--panel2);border:1px solid var(--border2);border-radius:9px;color:var(--fg);font-size:14px">
+    <div class="row" style="gap:8px;margin-bottom:6px">
+      <button class="btn sec seg-btn" data-seg="linux">Linux / Kali</button>
+      <button class="btn sec seg-btn" data-seg="labctl">labctl</button>
+    </div>
+    <div id="cmdBody"></div>`;
+  const body = $("#cmdBody"), search = $("#cmdSearch");
+  let seg = "linux";
+  const paint = () => {
+    const q = search.value;
+    body.innerHTML = seg === "linux"
+      ? (linux.length ? cmdSection(linux, q) : `<p class="dim">Linux reference unavailable — update the backend.</p>`)
+      : cmdSection(BOOT.commands, q);
+    body.querySelectorAll(".cmdline button").forEach(b => b.onclick = () => copy(b.dataset.c));
+    view.querySelectorAll(".seg-btn").forEach(b => b.style.outline = b.dataset.seg === seg ? "2px solid var(--brand)" : "none");
+  };
+  view.querySelectorAll(".seg-btn").forEach(b => b.onclick = () => { seg = b.dataset.seg; paint(); });
+  search.oninput = paint;
+  paint();
 }
 
 function vProgress() {
