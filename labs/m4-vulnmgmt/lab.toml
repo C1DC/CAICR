@@ -3,13 +3,15 @@ id = "m4"
 module = "M4"
 day = 2
 title = "Vulnerability Management & SOC Operations"
-tools = ["nikto", "hydra", "john", "wazuh (triage)"]
-estimated_minutes = 120
+tools = ["nmap", "nikto", "gobuster", "whatweb", "hashcat", "john", "hydra", "jq (Wazuh)"]
+estimated_minutes = 150
 briefing = "briefing.md"
 objective = """
-Scan a web server with Nikto and prioritise what you find, demonstrate why weak \
-passwords fall to Hydra and John, then triage a set of real-shaped Wazuh SIEM \
-alerts — correlating them into one attack story and classifying each one."""
+Run a full web assessment and a cracking chain, then triage the SOC: fingerprint \
+and scan the web server (nmap/whatweb/nikto), brute-force hidden content \
+(gobuster) to find a leaked database backup, crack its unsalted MD5 hashes \
+(hashcat/john), demonstrate weak SSH credentials (Hydra), and correlate the \
+Wazuh alert feed into one attack story with a remediation register and SOC ticket."""
 
 [network]
 name = "caic_m4_range"
@@ -19,14 +21,14 @@ ready = ["10.13.4.10:80", "10.13.4.20:22"]
 [[targets]]
 name = "web"
 ip = "10.13.4.10"
-role = "Leaky Apache web server — scan with Nikto"
+role = "Leaky Apache web server — scan, fuzz and loot"
 
 [[targets]]
 name = "ssh"
 ip = "10.13.4.20"
 role = "SSH host with a weak account — authorised Hydra demo target"
 
-# ── Checks ───────────────────────────────────────────────────────────────────
+# ── Part 1: assess the web server ───────────────────────────────────────────
 [[check]]
 id = "web_up"
 type = "script"
@@ -40,53 +42,97 @@ prompt = "The SSH target (10.13.4.20) is listening"
 points = 1
 
 [[check]]
-id = "admin_path"
+id = "web_server"
 type = "string_any"
-prompt = "Nikto/robots.txt reveal a sensitive admin path — what is it?"
-accept = ["/admin/", "/admin", "admin", "admin/"]
-hint = "nikto -h http://10.13.4.10   (or: curl http://10.13.4.10/robots.txt)"
+prompt = "Fingerprint the web server — what server software is it?"
+accept = ["apache", "apache httpd", "httpd"]
+hint = "nmap -sV -p80 10.13.4.10   (or: whatweb http://10.13.4.10)"
 
 [[check]]
-id = "backup_file"
+id = "admin_path"
 type = "string_any"
-prompt = "A leftover backup file exposes database credentials — name it."
-accept = ["config.php.bak", "/config.php.bak", "config.bak"]
-hint = "It's listed in robots.txt; open it with curl"
+prompt = "Brute-force the web content. What administrative path is exposed?"
+accept = ["/admin/", "/admin", "admin", "admin/"]
+hint = "gobuster dir -u http://10.13.4.10 -w /usr/share/wordlists/dirb/common.txt"
+
+[[check]]
+id = "leaked_dump"
+type = "string_any"
+prompt = "A database backup was left world-readable under /backup/. Name the file."
+accept = ["db_dump.sql", "/backup/db_dump.sql", "backup/db_dump.sql"]
+hint = "curl http://10.13.4.10/backup/   (directory listing is on)"
+
+[[check]]
+id = "config_db_pass"
+type = "string"
+prompt = "A leftover config backup leaks the database password. What is it?"
+answer = "Acme#2019"
+hint = "curl http://10.13.4.10/config.php.bak"
+
+# ── Part 2: crack the looted hashes ─────────────────────────────────────────
+[[check]]
+id = "hash_algo"
+type = "string_any"
+prompt = "How are the passwords in db_dump.sql stored (the weakness)?"
+accept = ["md5", "raw-md5", "unsalted md5", "raw md5", "unsalted", "md5 unsalted"]
+hint = "Look at the comment and the 32-hex-char values; what hashcat mode (-m 0) is that?"
+
+[[check]]
+id = "admin_hash"
+type = "string"
+prompt = "What is the stored hash for the 'admin' account?"
+answer = "5f4dcc3b5aa765d61d8327deb882cf99"
+hint = "It's the pass_md5 value on the admin row"
+
+[[check]]
+id = "admin_cracked"
+type = "string"
+prompt = "Crack it. What is admin's plaintext password?"
+answer = "password"
+hint = "hashcat -m 0 -a 0 hashes.txt assets/lab-wordlist.txt   (or john --format=raw-md5)"
+
+[[check]]
+id = "backup_cracked"
+type = "string"
+prompt = "Crack the 'backup' service account's hash too. What is its password?"
+answer = "12345"
+hint = "Same wordlist; 827ccb0eea8a706c4c34a16891f84e7b"
 
 [[check]]
 id = "hydra_pass"
 type = "string"
-prompt = "Hydra: what password works for user 'labuser' over SSH?"
+prompt = "Hydra: what password works for 'labuser' over SSH?"
 answer = "Password123"
 hint = "hydra -l labuser -P assets/lab-wordlist.txt ssh://10.13.4.20"
 
-[[check]]
-id = "john_admin"
-type = "string"
-prompt = "John: crack lab_hashes.txt — what is user 'admin's password?"
-answer = "iloveyou"
-hint = "john --wordlist=assets/lab-wordlist.txt assets/lab_hashes.txt ; john --show ..."
-
+# ── Part 3: triage & correlate the SOC alerts ──────────────────────────────
 [[check]]
 id = "brute_src_ip"
 type = "string"
-prompt = "In the Wazuh alerts, which source IP is behind the brute force AND the web scan?"
+prompt = "In the Wazuh feed, which source IP is behind the brute force AND the web scan?"
 answer = "10.13.4.66"
-hint = "jq '.[].data.srcip' assets/wazuh-alerts.json | sort | uniq -c"
+hint = "jq -r '.[].data.srcip // empty' assets/wazuh-alerts.json | sort | uniq -c | sort -rn"
 
 [[check]]
 id = "top_level"
 type = "numeric"
 prompt = "What is the highest Wazuh rule level (severity) firing?"
-answer = 10
+answer = 12
 hint = "jq '[.[].rule.level] | max' assets/wazuh-alerts.json"
 
 [[check]]
 id = "got_in"
 type = "string_any"
-prompt = "Did the attacker ultimately succeed in logging in? (yes/no, or the rule id that proves it)"
+prompt = "Did the attacker ultimately succeed in logging in? (yes/no or the rule id)"
 accept = ["yes", "5715", "authentication success", "successful login", "success"]
-hint = "Look for an sshd authentication SUCCESS from the same srcip, after the failures"
+hint = "Find an sshd authentication SUCCESS from the same srcip, after the failures"
+
+[[check]]
+id = "persistence_technique"
+type = "string_any"
+prompt = "After root access, how did the attacker establish persistence (ATT&CK technique or method)?"
+accept = ["T1053", "T1053.003", "cron", "cron job", "scheduled task", "scheduled task/job"]
+hint = "Look for the highest-severity alert — what did they create as root?"
 
 [[check]]
 id = "attack_technique"

@@ -2,3 +2,4 @@ User-agent: *
 Disallow: /admin/
 Disallow: /backup/
 Disallow: /config.php.bak
+Disallow: /uploads/
