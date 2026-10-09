@@ -187,5 +187,37 @@ class TestLessonsHtml(unittest.TestCase):
         self.assertEqual(set(data), {f"m{n}" for n in range(1, 11)})
 
 
+class TestWebApp(unittest.TestCase):
+    def test_course_data(self):
+        from engine import course
+        self.assertEqual(len(course.COURSE_MAP), 10)
+        self.assertTrue(course.TOOLS and course.COMMANDS)
+
+    def test_module_rows_and_bootstrap(self):
+        from engine import webapp
+        rows = webapp._module_rows()
+        self.assertEqual(len(rows), 10)
+        for r in rows:
+            self.assertIn("id", r); self.assertIn("complete", r)
+        boot = webapp._bootstrap()
+        self.assertEqual(len(boot["modules"]), 10)
+        self.assertTrue(boot["tools"] and boot["commands"])
+        self.assertIn("summary", boot)
+
+    def test_lab_detail_never_leaks_answers(self):
+        """The browser must receive prompts/hints but NEVER expected answers."""
+        from engine import webapp
+        from engine.manifest import load_one
+        for mid in ("m1", "m4", "m6"):
+            d = webapp._lab_detail(load_one(mid))
+            for c in d["checks"]:
+                self.assertNotIn("answer", c)
+                self.assertNotIn("accept", c)
+
+    def test_webui_assets_present(self):
+        for f in ("index.html", "app.js", "styles.css"):
+            self.assertTrue((ROOT / "webui" / f).is_file(), f"webui/{f} missing")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

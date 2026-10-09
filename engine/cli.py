@@ -5,6 +5,7 @@ import argparse
 import sys
 
 from . import __version__, dockerctl, state, ui
+from .course import COURSE_MAP
 from .manifest import Lab, ManifestError, discover_labs, load_one
 
 
@@ -266,20 +267,6 @@ def cmd_whoami(args) -> int:
     return 0
 
 
-COURSE_MAP = [
-    ("m1",  1, "Threat Landscape & Cyber Threat Intelligence", True),
-    ("m2",  1, "Institutional Cyber Risk & Digital Resilience", False),
-    ("m3",  2, "Network, Endpoint & Identity Security", True),
-    ("m4",  2, "Vulnerability Management & SOC Operations", True),
-    ("m5",  3, "Cyber Fraud, BEC & Mobile Money Security", True),
-    ("m6",  3, "Digital Forensics & Incident Response", True),
-    ("m7",  4, "AI Security, Deepfakes & Emerging Threats", True),
-    ("m8",  4, "Data Protection, Privacy & Compliance", False),
-    ("m9",  5, "Cyber Governance & Business Continuity", False),
-    ("m10", 5, "Operation Cyber Resilience — Capstone", True),
-]
-
-
 def cmd_learn(args) -> int:
     from . import mdrender, paths
     if not args.module:
@@ -352,6 +339,46 @@ def cmd_worksheet(args) -> int:
             ui.ok(f"copied {src.name}")
     ui.info("Open them in any editor and fill in the [...] placeholders.")
     print(f"  {ui.cmd('cd ' + str(paths.WORK_DIR))}")
+    return 0
+
+
+def cmd_serve(args) -> int:
+    """Launch the unified web application (dashboard, course, labs, materials)."""
+    import webbrowser
+    from . import webapp
+    host = "127.0.0.1"
+    port = args.port
+    httpd = None
+    for cand in range(port, port + 12):
+        try:
+            httpd = webapp.serve(host, cand)
+            port = cand
+            break
+        except OSError:
+            continue
+    if httpd is None:
+        ui.error(f"could not bind a port near {args.port}")
+        return 2
+    url = f"http://{host}:{port}/"
+    ui.banner("CAIC CyberLab — web application")
+    ui.ok(f"running at {ui.BOLD}{url}{ui.RESET}")
+    pf = dockerctl.preflight()
+    (ui.ok if pf.ok else ui.warn)(
+        "Docker ready — labs can launch from the browser" if pf.ok
+        else "Docker not ready — course/lessons work; labs need Docker (labctl doctor)")
+    if not args.no_browser:
+        try:
+            webbrowser.open(url)
+        except Exception:
+            pass
+    ui.dim("  Press Ctrl-C to stop.")
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print()
+        ui.info("stopping web server…")
+    finally:
+        httpd.server_close()   # release the port in this same thread
     return 0
 
 
@@ -463,6 +490,9 @@ def build_parser() -> argparse.ArgumentParser:
     add("verify", cmd_verify, "submit findings and get graded", lab="required")
     add("reset", cmd_reset, "destroy and rebuild a lab clean", lab="required")
     add("stop", cmd_stop, "stop a lab's targets (or all)")
+    srv = add("serve", cmd_serve, "launch the unified web application", lab="none")
+    srv.add_argument("--port", type=int, default=8899, help="port (default 8899)")
+    srv.add_argument("--no-browser", action="store_true", help="don't open a browser")
     add("prep", cmd_prep, "pre-build all lab images for offline use (run once)")
     add("progress", cmd_progress, "show your overall course progress", lab="none")
     add("doctor", cmd_doctor, "check docker + tools are ready", lab="none")

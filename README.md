@@ -5,15 +5,33 @@ The learning environment for the **Professional Certificate in Cybersecurity, AI
 & Digital Resilience** — a 5-day intensive course run by KAIPTC (Kofi Annan
 International Peacekeeping Training Centre), Accra, Ghana.
 
-It has **two complementary parts:**
+## The one thing to run
+
+```
+./start.sh
+```
+
+This launches the **CAIC CyberLab web application** — a single place where
+students do everything: a dashboard, the full course, every deep lesson, the
+hands-on **labs launched and graded from the browser**, the Kali tool
+reference, deliverable templates, a command reference, and progress tracking.
+It opens in your browser automatically; press Ctrl-C to stop.
+
+Under the hood it's a local web app (`labctl serve`) whose API drives the same
+lab engine as the terminal, so the browser and `labctl` stay in sync.
+
+---
+
+It has **complementary parts**, all reachable from the web app or on their own:
 
 | Part | What it is | Start here |
 |------|------------|-----------|
-| 📘 **Courseware** | A browser-based guide with theory, command references and quizzes. No install. | open `cyberlab.html` |
-| 🐉 **Practical lab engine** | `labctl` — launches real, isolated hands-on labs on the student's Kali box and grades their findings. | see `STUDENT_GUIDE.md` |
+| 🖥 **Web application** | The unified GUI — course, lessons, labs, tools, materials, commands. | `./start.sh` |
+| 🐉 **Lab engine (`labctl`)** | The CLI that launches isolated labs and grades findings. | `STUDENT_GUIDE.md` |
+| 📘 **Lessons reader** | Standalone offline browser reader for the deep lessons. | open `cyberlab-lessons.html` |
+| 🎓 **Legacy courseware** | The original single-file quiz app. | open `cyberlab.html` |
 
-The courseware *teaches*; the lab engine makes students *do*. This README
-covers the courseware. For the hands-on labs:
+For the hands-on labs in the terminal:
 
 - **Students:** `STUDENT_GUIDE.md` — the one-page "how to use `labctl`".
 - **Facilitators / developers:** `LAB_ENGINE.md` — architecture, the lab

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KAIPTC CAIC CyberLab</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+  <aside class="rail">
+    <div class="brand">
+      <div class="brand-mark">C1D</div>
+      <div class="brand-text">
+        <strong>CAIC CyberLab</strong>
+        <span>KAIPTC · Cyber1Defense</span>
+      </div>
+    </div>
+    <nav class="rail-nav">
+      <a data-view="dashboard"><span class="ic">▣</span> Dashboard</a>
+      <a data-view="course"><span class="ic">◈</span> Course</a>
+      <a data-view="labs"><span class="ic">⌘</span> Labs</a>
+      <a data-view="materials"><span class="ic">◉</span> Tools &amp; Materials</a>
+      <a data-view="commands"><span class="ic">⌨</span> Commands</a>
+      <a data-view="progress"><span class="ic">▤</span> Progress</a>
+    </nav>
+    <div class="rail-foot">
+      <div class="who" id="who" title="Click to set your name">—</div>
+      <button class="ghost" id="themeBtn">◐ Theme</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="ghost menu" id="menuBtn">☰</button>
+      <div class="crumb" id="crumb">Dashboard</div>
+      <div class="spacer"></div>
+      <span class="pill" id="dockerPill">Docker: …</span>
+    </header>
+    <main id="view"><div class="loading">Loading…</div></main>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
