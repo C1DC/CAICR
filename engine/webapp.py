@@ -102,7 +102,8 @@ def _lab_runtime(lab) -> dict:
 
 def _bootstrap() -> dict:
     mods = _module_rows()
-    done = sum(1 for m in mods if m["complete"])
+    gradable = [m for m in mods if m["maxPoints"] > 0]
+    done = sum(1 for m in gradable if m["complete"])
     return {
         "version": __version__,
         "student": state.get_student(),
@@ -110,7 +111,8 @@ def _bootstrap() -> dict:
         "modules": mods,
         "tools": TOOLS,
         "commands": [{"group": g, "cmd": c, "desc": d} for g, c, d in COMMANDS],
-        "summary": {"labsComplete": done, "totalModules": len(mods),
+        "summary": {"labsComplete": done, "totalLabs": len(gradable),
+                    "totalModules": len(mods),
                     "dockerOk": dockerctl.preflight().ok},
     }
 

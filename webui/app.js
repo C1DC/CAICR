@@ -44,9 +44,11 @@ function modBadges(m) {
 /* ---------- views ---------- */
 function vDashboard() {
   setActive("dashboard"); crumb([{ t: "Dashboard" }]);
-  const done = BOOT.summary.labsComplete, total = BOOT.summary.totalModules;
+  const done = BOOT.summary.labsComplete, total = BOOT.summary.totalLabs;
   const pct = total ? Math.round(100 * done / total) : 0;
-  const next = BOOT.modules.find(m => !m.complete) || BOOT.modules[0];
+  const anyProgress = BOOT.modules.some(m => m.bestScore > 0);
+  const next = !anyProgress ? (modById("m0") || BOOT.modules[0])
+    : (BOOT.modules.find(m => m.hasLab && !m.complete) || BOOT.modules[0]);
   const days = [...new Set(BOOT.modules.map(m => m.day))].sort();
   view.innerHTML = `
   <div class="hero">
@@ -62,9 +64,9 @@ function vDashboard() {
         </div>
       </div>
       <div style="min-width:170px">
-        <div class="stat"><span class="n">${done}/${total}</span><span class="l">modules complete</span></div>
+        <div class="stat"><span class="n">${done}/${total}</span><span class="l">labs completed</span></div>
         <div class="bar"><i style="width:${pct}%"></i></div>
-        <div class="dim" style="margin-top:6px;font-size:12.5px">${pct}% of the programme</div>
+        <div class="dim" style="margin-top:6px;font-size:12.5px">${pct}% of the hands-on labs</div>
       </div>
     </div>
   </div>
@@ -91,7 +93,7 @@ function vDashboard() {
   </div>`;
   $("#nameSave").onclick = saveName;
   $("#nameIn").addEventListener("keydown", e => { if (e.key === "Enter") saveName(); });
-  $("#continueCard").onclick = () => { location.hash = "course/" + next.id; };
+  $("#continueCard").onclick = () => { location.hash = (next.hasLab ? "labs/" : "course/") + next.id; };
   view.querySelectorAll("[data-day]").forEach(c => c.onclick = () => { location.hash = "course"; });
 }
 async function saveName() {
@@ -297,10 +299,9 @@ function vCommands() {
 
 function vProgress() {
   setActive("progress"); crumb([{ t: "Progress" }]);
-  const done = BOOT.modules.filter(m => m.complete).length;
   view.innerHTML = `
   <div class="row" style="gap:26px;margin-bottom:10px">
-    <div class="stat"><span class="n">${done}/${BOOT.modules.length}</span><span class="l">modules complete</span></div>
+    <div class="stat"><span class="n">${BOOT.summary.labsComplete}/${BOOT.summary.totalLabs}</span><span class="l">labs completed</span></div>
     <div class="stat"><span class="n">${BOOT.student ? esc(BOOT.student) : "—"}</span><span class="l">student</span></div>
   </div>
   <div class="card" style="padding:0;overflow:auto"><table>

@@ -40,6 +40,13 @@ explanation, a real Ghana example, common mistakes, and a self-check quiz:
 
 Read the lesson first, then launch the matching lab and do it for real.
 
+**Brand new? Start with the orientation** — it explains how the course works,
+the rules of engagement, and gives you a complete Linux command-line primer:
+
+```
+./labctl learn m0
+```
+
 ### Produce the deliverable
 
 Each module has a professional template — a risk register, a chain-of-custody

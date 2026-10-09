@@ -21,6 +21,11 @@ from engine import manifest, verify  # noqa: E402
 from engine.manifest import Check, ManifestError  # noqa: E402
 
 
+from engine import course  # noqa: E402
+
+LESSON_IDS = [mid for mid, _, _, _ in course.COURSE_MAP]
+
+
 class TestManifests(unittest.TestCase):
     def test_all_labs_discover_and_validate(self):
         labs = manifest.discover_labs()
@@ -117,27 +122,27 @@ class TestArtefacts(unittest.TestCase):
 class TestLessons(unittest.TestCase):
     LESSONS = ROOT / "lessons"
 
-    def test_all_ten_lessons_exist(self):
-        for n in range(1, 11):
-            self.assertTrue((self.LESSONS / f"m{n}.md").is_file(),
-                            f"lessons/m{n}.md missing")
+    def test_every_course_module_has_a_lesson(self):
+        for mid in LESSON_IDS:
+            self.assertTrue((self.LESSONS / f"{mid}.md").is_file(),
+                            f"lessons/{mid}.md missing")
 
     def test_lessons_render_without_error(self):
         import io
         import contextlib
         from engine import mdrender
-        for n in range(1, 11):
-            md = (self.LESSONS / f"m{n}.md").read_text(encoding="utf-8")
+        for mid in LESSON_IDS:
+            md = (self.LESSONS / f"{mid}.md").read_text(encoding="utf-8")
             buf = io.StringIO()
             with contextlib.redirect_stdout(buf):
                 mdrender.render(md)
-            self.assertGreater(len(buf.getvalue()), 500, f"m{n} rendered too short")
+            self.assertGreater(len(buf.getvalue()), 500, f"{mid} rendered too short")
 
     def test_lessons_have_core_sections(self):
-        for n in range(1, 11):
-            text = (self.LESSONS / f"m{n}.md").read_text(encoding="utf-8")
+        for mid in LESSON_IDS:
+            text = (self.LESSONS / f"{mid}.md").read_text(encoding="utf-8")
             for heading in ("Key takeaways", "Check yourself", "Glossary"):
-                self.assertIn(heading, text, f"m{n} missing '{heading}'")
+                self.assertIn(heading, text, f"{mid} missing '{heading}'")
 
 
 class TestWorksheets(unittest.TestCase):
@@ -184,23 +189,25 @@ class TestLessonsHtml(unittest.TestCase):
         self.assertNotIn("/*__DATA__*/", html)
         m = re.search(r"const DATA = (\{.*?\});\s*\nconst DAYS", html, re.S)
         data = json.loads(m.group(1))
-        self.assertEqual(set(data), {f"m{n}" for n in range(1, 11)})
+        self.assertTrue({f"m{n}" for n in range(1, 11)}.issubset(set(data)))
+        self.assertIn("m0", data)
 
 
 class TestWebApp(unittest.TestCase):
     def test_course_data(self):
-        from engine import course
-        self.assertEqual(len(course.COURSE_MAP), 10)
+        # 10 numbered modules (m1..m10) plus the m0 orientation session
+        self.assertEqual(len(course.COURSE_MAP), 11)
+        self.assertEqual(course.COURSE_MAP[0][0], "m0")
         self.assertTrue(course.TOOLS and course.COMMANDS)
 
     def test_module_rows_and_bootstrap(self):
         from engine import webapp
         rows = webapp._module_rows()
-        self.assertEqual(len(rows), 10)
         for r in rows:
             self.assertIn("id", r); self.assertIn("complete", r)
+        self.assertEqual(len(rows), len(course.COURSE_MAP))
         boot = webapp._bootstrap()
-        self.assertEqual(len(boot["modules"]), 10)
+        self.assertEqual(len(boot["modules"]), len(course.COURSE_MAP))
         self.assertTrue(boot["tools"] and boot["commands"])
         self.assertIn("summary", boot)
 
