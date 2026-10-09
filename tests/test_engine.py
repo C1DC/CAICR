@@ -114,5 +114,31 @@ class TestArtefacts(unittest.TestCase):
                     self.assertTrue(out.passed, f"{lab.id}:{c.id} answer not self-consistent")
 
 
+class TestLessons(unittest.TestCase):
+    LESSONS = ROOT / "lessons"
+
+    def test_all_ten_lessons_exist(self):
+        for n in range(1, 11):
+            self.assertTrue((self.LESSONS / f"m{n}.md").is_file(),
+                            f"lessons/m{n}.md missing")
+
+    def test_lessons_render_without_error(self):
+        import io
+        import contextlib
+        from engine import mdrender
+        for n in range(1, 11):
+            md = (self.LESSONS / f"m{n}.md").read_text(encoding="utf-8")
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                mdrender.render(md)
+            self.assertGreater(len(buf.getvalue()), 500, f"m{n} rendered too short")
+
+    def test_lessons_have_core_sections(self):
+        for n in range(1, 11):
+            text = (self.LESSONS / f"m{n}.md").read_text(encoding="utf-8")
+            for heading in ("Key takeaways", "Check yourself", "Glossary"):
+                self.assertIn(heading, text, f"m{n} missing '{heading}'")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

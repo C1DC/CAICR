@@ -266,6 +266,47 @@ def cmd_whoami(args) -> int:
     return 0
 
 
+COURSE_MAP = [
+    ("m1",  1, "Threat Landscape & Cyber Threat Intelligence", True),
+    ("m2",  1, "Institutional Cyber Risk & Digital Resilience", False),
+    ("m3",  2, "Network, Endpoint & Identity Security", True),
+    ("m4",  2, "Vulnerability Management & SOC Operations", True),
+    ("m5",  3, "Cyber Fraud, BEC & Mobile Money Security", True),
+    ("m6",  3, "Digital Forensics & Incident Response", True),
+    ("m7",  4, "AI Security, Deepfakes & Emerging Threats", True),
+    ("m8",  4, "Data Protection, Privacy & Compliance", False),
+    ("m9",  5, "Cyber Governance & Business Continuity", False),
+    ("m10", 5, "Operation Cyber Resilience — Capstone", True),
+]
+
+
+def cmd_learn(args) -> int:
+    from . import mdrender, paths
+    if not args.module:
+        ui.banner("CAIC CyberLab — course lessons")
+        rows = []
+        for mid, day, title, has_lab in COURSE_MAP:
+            lesson = paths.LESSONS_DIR / f"{mid}.md"
+            avail = f"{ui.GREEN}✔{ui.RESET}" if lesson.is_file() else f"{ui.GREY}—{ui.RESET}"
+            lab = f"{ui.CYAN}labctl start {mid}{ui.RESET}" if has_lab else f"{ui.GREY}(no lab){ui.RESET}"
+            rows.append([f"{ui.BOLD}{mid}{ui.RESET}", f"D{day}", title, avail, lab])
+        ui.table(rows, ["MOD", "DAY", "TITLE", "LESSON", "HANDS-ON"])
+        print()
+        ui.dim("  labctl learn m1     read a module's full lesson")
+        return 0
+    mid = args.module.lower()
+    lesson = paths.LESSONS_DIR / f"{mid}.md"
+    if not lesson.is_file():
+        ui.error(f"no lesson for '{mid}' yet (try: labctl learn)")
+        return 1
+    mdrender.render(lesson.read_text(encoding="utf-8"))
+    print()
+    has_lab = next((hl for m, _, _, hl in COURSE_MAP if m == mid), False)
+    if has_lab:
+        ui.info(f"Now do it for real:  {ui.cmd('labctl start ' + mid)}")
+    return 0
+
+
 def cmd_prep(args) -> int:
     """Build every lab image up front, so later launches work fully offline.
     Run this ONCE on each machine while internet is available."""
@@ -364,6 +405,8 @@ def build_parser() -> argparse.ArgumentParser:
         return sp
 
     add("list", cmd_list, "list all labs and their status", lab="none")
+    learn = add("learn", cmd_learn, "read a module's full teaching lesson", lab="none")
+    learn.add_argument("module", nargs="?", help="module id, e.g. m1 (omit to list)")
     add("info", cmd_info, "show a lab's briefing and targets", lab="required")
     add("start", cmd_start, "bring up a lab's isolated targets", lab="required")
     add("status", cmd_status, "show which lab targets are running")

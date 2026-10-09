@@ -8,6 +8,7 @@ from pathlib import Path
 # <root>/engine/paths.py  ->  ROOT = <root>
 ROOT = Path(__file__).resolve().parent.parent
 LABS_DIR = ROOT / "labs"
+LESSONS_DIR = ROOT / "lessons"
 
 # Per-student mutable state (progress, which labs are running).
 # Kept out of the (possibly read-only, root-owned) install tree.
