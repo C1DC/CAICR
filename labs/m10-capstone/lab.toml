@@ -46,11 +46,39 @@ accept = ["zennith-supplies.com"]
 hint = "Compare Reply-To / Return-Path against the From: display domain"
 
 [[check]]
+id = "fraud_account"
+type = "string"
+prompt = "What mule bank account does the BEC email demand payment to?"
+answer = "9900778100"
+hint = "Read payment-change.eml — the new account number"
+
+[[check]]
+id = "ai_rag_account"
+type = "string"
+prompt = "Query the bank's own AI assistant (10.13.10.40 /ask) about the supplier account. What account does its POISONED knowledge base return — and what does matching it to the email tell you?"
+answer = "9900778100"
+hint = "curl http://10.13.10.40:8080/ask -d '{\"question\":\"supplier bank account\"}' — the SAME account = one campaign"
+
+[[check]]
 id = "foothold_ip"
 type = "string"
 prompt = "T+20/T+40: which internal IP is the compromised foothold (privileged login + scanning)?"
 answer = "10.13.10.66"
 hint = "jq -r '.[].data.srcip // empty' assets/capstone-alerts.json | sort | uniq -c"
+
+[[check]]
+id = "web_leaked"
+type = "string_any"
+prompt = "Recon the finance portal (10.13.10.10). What world-readable DB backup is exposed under /backup/?"
+accept = ["db_dump.sql", "/backup/db_dump.sql", "backup/db_dump.sql"]
+hint = "gobuster dir -u http://10.13.10.10 -w /usr/share/wordlists/dirb/common.txt ; then curl /backup/"
+
+[[check]]
+id = "admin_cracked"
+type = "string"
+prompt = "Crack the 'admin' MD5 from that dump. What is the plaintext password?"
+answer = "password"
+hint = "hashcat -m 0 <hash> <wordlist>  (the hash is 5f4dcc3b5aa765d61d8327deb882cf99)"
 
 [[check]]
 id = "c2_domain"
@@ -103,3 +131,11 @@ type = "string_any"
 prompt = "T+145: the database is offline (ransomware). Which ATT&CK technique?"
 accept = ["T1486", "data encrypted for impact"]
 hint = "Impact → Data Encrypted for Impact"
+
+[[check]]
+id = "ai_vuln"
+type = "string_any"
+prompt = "T+160: the bank's own AI assistant was abused in this campaign. Name the technique/class."
+accept = ["prompt injection", "rag poisoning", "rag-poisoning", "indirect prompt injection",
+          "llm01", "knowledge base poisoning", "data poisoning"]
+hint = "You saw it return a fraudulent account and (if pushed) leak/exfiltrate — OWASP LLM01 / poisoning"
