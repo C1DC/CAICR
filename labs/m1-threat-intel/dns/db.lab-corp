@@ -1,0 +1,27 @@
+$TTL 600
+@       IN SOA  ns1.lab-corp.com.gh. hostmaster.lab-corp.com.gh. (
+                2026100601  ; serial
+                1200        ; refresh
+                180         ; retry
+                1209600     ; expire
+                600 )       ; minimum
+; --- name servers ---
+@               IN NS   ns1.lab-corp.com.gh.
+@               IN NS   ns2.lab-corp.com.gh.
+; --- apex / public hosts ---
+@               IN A    41.210.15.20
+@               IN AAAA 2001:db8:ac10:f15::20
+@               IN MX 10 mail.lab-corp.com.gh.
+@               IN TXT  "v=spf1 ip4:41.210.15.21 ~all"
+default._domainkey IN TXT "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQLabCorpDkimPublicKeyExample000111222333"
+ns1             IN A    41.210.15.5
+ns2             IN A    41.210.15.6
+www             IN A    41.210.15.20
+mail            IN A    41.210.15.21
+vpn             IN A    41.210.15.30
+dev             IN A    41.210.15.40
+; --- internal hosts that should NEVER have been in a public zone ---
+; discoverable ONLY via the AXFR zone-transfer misconfiguration:
+vpn-admin       IN A    10.20.0.7
+backup          IN A    10.20.0.9
+; NOTE: no _dmarc record (domain is spoofable) and no CAA record (any CA may issue).

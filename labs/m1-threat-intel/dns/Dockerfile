@@ -1,8 +1,13 @@
-# Authoritative-ish DNS for the M1 OSINT lab. dnsmasq serves a small lab zone
-# so dig returns real answers with no internet. The zone deliberately has an
-# SPF record but NO DMARC record — the finding the student must spot.
-FROM alpine:3.20
-RUN apk add --no-cache dnsmasq
-COPY dnsmasq.conf /etc/dnsmasq.conf
+# Authoritative DNS for the M1 recon lab — real BIND9, the industry-standard
+# server students meet in the field. The zone is deliberately misconfigured with
+# `allow-transfer { any; }`, so a zone transfer (AXFR) leaks the whole zone —
+# including a hidden internal host not published anywhere else. It also omits
+# DMARC and CAA on purpose. Training target only.
+FROM debian:12-slim
+RUN apt-get update && apt-get install -y --no-install-recommends bind9 bind9-utils dnsutils \
+    && rm -rf /var/lib/apt/lists/*
+COPY named.conf /etc/bind/named.conf
+COPY db.lab-corp /etc/bind/db.lab-corp
 EXPOSE 53/udp 53/tcp
-ENTRYPOINT ["dnsmasq", "-k", "-C", "/etc/dnsmasq.conf"]
+# Foreground, authoritative only.
+ENTRYPOINT ["named", "-g", "-c", "/etc/bind/named.conf"]

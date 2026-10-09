@@ -66,6 +66,34 @@ accept = ["ns1.lab-corp.com.gh", "ns1.lab-corp.com.gh."]
 hint = "dig @10.13.1.10 lab-corp.com.gh SOA +short  (first field)"
 
 [[check]]
+id = "axfr_allowed"
+type = "string_any"
+prompt = "Attempt a zone transfer (AXFR). Does the server allow it? (a serious misconfiguration)"
+accept = ["yes", "allowed", "successful", "it works", "transfer allowed", "y"]
+hint = "dig AXFR @10.13.1.10 lab-corp.com.gh  — did it dump the whole zone?"
+
+[[check]]
+id = "hidden_host"
+type = "string_any"
+prompt = "The zone transfer leaks an internal admin host not published anywhere else. Name it."
+accept = ["vpn-admin", "vpn-admin.lab-corp.com.gh", "vpn-admin.lab-corp.com.gh."]
+hint = "Read the AXFR output — which host has a private (10.x) address?"
+
+[[check]]
+id = "hidden_ip"
+type = "string"
+prompt = "What internal IP does that leaked admin host resolve to?"
+answer = "10.20.0.7"
+hint = "It's in the AXFR dump next to vpn-admin"
+
+[[check]]
+id = "dns_service"
+type = "string_any"
+prompt = "Run nmap against 10.13.1.10 — what service/software does it fingerprint on port 53?"
+accept = ["bind", "isc bind", "domain", "dns", "bind9", "named"]
+hint = "nmap -sV -p53 10.13.1.10"
+
+[[check]]
 id = "spf_qualifier"
 type = "string_any"
 prompt = "The SPF record ends in a qualifier — what is it, and what does it mean?"
