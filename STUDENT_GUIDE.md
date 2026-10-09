@@ -7,9 +7,20 @@ and checks your answers.
 
 ---
 
-## The only command you need: `labctl`
+## Start here: one command
 
 Open a terminal in the lab folder and run:
+
+```
+./start.sh
+```
+
+This opens the CyberLab home page in your browser (lessons + courseware) and
+gets the labs ready. Leave it running; press Ctrl-C when you're done.
+
+## The command you drive the labs with: `labctl`
+
+Everything hands-on runs through `labctl`. In the lab folder:
 
 ```
 ./labctl list

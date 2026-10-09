@@ -26,6 +26,17 @@ deliverable template). Read lessons in the terminal with `labctl learn`, or open
 search. Regenerate that file after editing lessons with
 `python3 scripts/build_lessons_html.py`.
 
+**Start everything with one command:**
+
+```
+./start.sh          # checks the backend, serves the frontend, opens your browser
+./start.sh m3       # ...and also brings up lab m3's targets
+./start.sh --prep   # ...and pre-builds all lab images first (needs internet once)
+```
+
+`start.sh` serves the browser pages at `http://127.0.0.1:8899` and prints the
+lab commands; press Ctrl-C to stop. Prefer the pieces directly?
+
 ```
 ./labctl doctor     # check the machine is ready
 ./labctl prep       # build all lab images once (needs internet this one time)
