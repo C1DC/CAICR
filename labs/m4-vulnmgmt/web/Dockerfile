@@ -7,3 +7,6 @@ RUN sed -i 's/^#\?ServerTokens.*/ServerTokens Full/' /usr/local/apache2/conf/htt
     && echo "ServerTokens Full" >> /usr/local/apache2/conf/httpd.conf \
     && echo "ServerSignature On" >> /usr/local/apache2/conf/httpd.conf
 COPY htdocs/ /usr/local/apache2/htdocs/
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

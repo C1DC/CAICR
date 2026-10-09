@@ -8,6 +8,8 @@ services:
   finance-portal:
     build: ../m4-vulnmgmt/web
     image: caic-m4web:1.0
+    environment:
+      CAIC_ADMIN_HASH: ${CAIC_ADMIN_HASH:-5f4dcc3b5aa765d61d8327deb882cf99}
     networks: { range: { ipv4_address: 10.13.10.10 } }
     restart: unless-stopped
 
@@ -21,6 +23,8 @@ services:
   ai-assistant:
     build: ../m7-ai-security/sandbox
     image: caic-aisandbox:1.0
+    environment:
+      CAIC_RAG_ACCOUNT: ${CAIC_FRAUD_ACCOUNT:-9900778100}
     networks: { range: { ipv4_address: 10.13.10.40 } }
     restart: unless-stopped
 

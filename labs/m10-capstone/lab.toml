@@ -4,6 +4,7 @@ module = "M10"
 day = 5
 title = "Operation Cyber Resilience — CyberRange Capstone"
 tools = ["nmap", "wireshark", "jq", "email forensics", "ai-sandbox", "all"]
+generators = ["assets/generate_capture.py"]
 estimated_minutes = 270
 briefing = "briefing.md"
 objective = """
@@ -42,21 +43,21 @@ points = 1
 id = "bec_lookalike"
 type = "string_any"
 prompt = "T+00: what look-alike domain sent the payment-change email? (payment-change.eml)"
-accept = ["zennith-supplies.com"]
+accept = ["{{lookalike}}"]
 hint = "Compare Reply-To / Return-Path against the From: display domain"
 
 [[check]]
 id = "fraud_account"
 type = "string"
 prompt = "What mule bank account does the BEC email demand payment to?"
-answer = "9900778100"
+answer = "{{fraud_account}}"
 hint = "Read payment-change.eml — the new account number"
 
 [[check]]
 id = "ai_rag_account"
 type = "string"
 prompt = "Query the bank's own AI assistant (10.13.10.40 /ask) about the supplier account. What account does its POISONED knowledge base return — and what does matching it to the email tell you?"
-answer = "9900778100"
+answer = "{{fraud_account}}"
 hint = "curl http://10.13.10.40:8080/ask -d '{\"question\":\"supplier bank account\"}' — the SAME account = one campaign"
 
 [[check]]
@@ -77,14 +78,14 @@ hint = "gobuster dir -u http://10.13.10.10 -w /usr/share/wordlists/dirb/common.t
 id = "admin_cracked"
 type = "string"
 prompt = "Crack the 'admin' MD5 from that dump. What is the plaintext password?"
-answer = "password"
+answer = "{{admin_pw}}"
 hint = "hashcat -m 0 <hash> <wordlist>  (the hash is 5f4dcc3b5aa765d61d8327deb882cf99)"
 
 [[check]]
 id = "c2_domain"
 type = "string_any"
 prompt = "From capstone-capture.pcap, what C2 domain is the foothold beaconing to?"
-accept = ["cdn-sync.ddns-telemetry.net", "ddns-telemetry.net"]
+accept = ["{{c2_domain}}"]
 hint = "wireshark assets/capstone-capture.pcap  (filter: dns)"
 
 [[check]]
@@ -139,3 +140,23 @@ prompt = "T+160: the bank's own AI assistant was abused in this campaign. Name t
 accept = ["prompt injection", "rag poisoning", "rag-poisoning", "indirect prompt injection",
           "llm01", "knowledge base poisoning", "data poisoning"]
 hint = "You saw it return a fraudulent account and (if pushed) leak/exfiltrate — OWASP LLM01 / poisoning"
+
+[randomize.fraud_account]
+kind = "digits"
+length = 10
+
+[randomize.lookalike]
+kind = "choice"
+choices = ["zennith-supplies.com", "zenith-supplies-gh.com", "zenithsupplies.co", "zenith-supply.net"]
+
+[randomize.c2_domain]
+kind = "choice"
+choices = ["cdn-sync.ddns-telemetry.net", "telemetry-cdn.ddns.net", "sync-metrics.hopto.org", "update-cdn.myftp.org"]
+
+[randomize.admin_pw]
+kind = "choice"
+choices = ["password", "123456", "iloveyou", "letmein", "password1", "12345678"]
+
+[randomize.admin_hash]
+kind = "md5"
+of = "admin_pw"

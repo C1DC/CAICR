@@ -4,10 +4,11 @@ string found inside a dropper. The student decodes it in CyberChef
 (From Base64 -> URL Decode) or on the CLI. Deterministic, pure stdlib.
 """
 import base64
+import os
 import urllib.parse
 from pathlib import Path
 
-C2_URL = "http://beacon.sync-malware-c2.net/gate.php?id=FIN03"
+C2_URL = "http://" + os.environ.get("CAIC_C2_DOMAIN","beacon.sync-malware-c2.net") + "/gate.php?id=FIN03"
 
 # Layer 1: URL-encode.  Layer 2: Base64.  (student reverses: Base64 -> URL)
 layer1 = urllib.parse.quote(C2_URL, safe="")

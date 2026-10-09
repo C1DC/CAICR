@@ -4,13 +4,14 @@ beaconing to a C2 domain, plus a burst toward the exfiltration IP. Valid
 classic PCAP, pure stdlib, deterministic.
 """
 from __future__ import annotations
+import os
 import struct
 from pathlib import Path
 
 SRC = "10.13.10.66"       # attacker foothold
 RESOLVER = "10.13.10.1"
 EXFIL_IP = "185.220.101.44"
-C2_DOMAIN = "cdn-sync.ddns-telemetry.net"
+C2_DOMAIN = os.environ.get("CAIC_C2_DOMAIN","cdn-sync.ddns-telemetry.net")
 INTERVAL = 60
 
 

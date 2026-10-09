@@ -66,7 +66,7 @@ hint = "curl http://10.13.4.10/backup/   (directory listing is on)"
 id = "config_db_pass"
 type = "string"
 prompt = "A leftover config backup leaks the database password. What is it?"
-answer = "Acme#2019"
+answer = "{{db_pass}}"
 hint = "curl http://10.13.4.10/config.php.bak"
 
 # ── Part 2: crack the looted hashes ─────────────────────────────────────────
@@ -81,14 +81,14 @@ hint = "Look at the comment and the 32-hex-char values; what hashcat mode (-m 0)
 id = "admin_hash"
 type = "string"
 prompt = "What is the stored hash for the 'admin' account?"
-answer = "5f4dcc3b5aa765d61d8327deb882cf99"
+answer = "{{admin_hash}}"
 hint = "It's the pass_md5 value on the admin row"
 
 [[check]]
 id = "admin_cracked"
 type = "string"
 prompt = "Crack it. What is admin's plaintext password?"
-answer = "password"
+answer = "{{admin_pw}}"
 hint = "hashcat -m 0 -a 0 hashes.txt assets/lab-wordlist.txt   (or john --format=raw-md5)"
 
 [[check]]
@@ -140,3 +140,14 @@ type = "string_any"
 prompt = "Which MITRE ATT&CK technique covers the SSH brute force?"
 accept = ["T1110", "T1110.001", "T1110.003"]
 hint = "Credential Access → Brute Force"
+
+[randomize.admin_pw]
+kind = "choice"
+choices = ["password", "123456", "iloveyou", "letmein", "password1", "12345678", "monkey", "dragon", "sunshine"]
+
+[randomize.admin_hash]
+kind = "md5"
+of = "admin_pw"
+
+[randomize.db_pass]
+kind = "password"

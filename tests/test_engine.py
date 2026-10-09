@@ -98,21 +98,25 @@ class TestArtefacts(unittest.TestCase):
         self.assertIn(b"\x00\x01\x00\x01", data[:0] + data, "no DNS query in capture")
 
     def test_m6_image_is_fat16(self):
+        self._prepare("m6")
         img = (self.LABS / "m6-forensics/assets/evidence.img").read_bytes()
         self.assertEqual(img[510:512], b"\x55\xAA", "boot signature missing")
         self.assertIn(b"FAT16", img[0:64], "FAT16 id missing from BPB")
 
     def test_m6_hash_manifest_matches_image(self):
         import hashlib
+        self._prepare("m6")
         base = self.LABS / "m6-forensics/assets"
         img = (base / "evidence.img").read_bytes()
         recorded = (base / "evidence.sha256").read_text().split()[0]
         self.assertEqual(hashlib.sha256(img).hexdigest(), recorded)
 
     def test_m6_artifact_decodes_to_c2(self):
+        self._prepare("m6")
         txt = (self.LABS / "m6-forensics/assets/suspicious_artifact.txt").read_text().strip()
         decoded = urllib.parse.unquote(base64.b64decode(txt).decode())
-        self.assertIn("sync-malware-c2.net", decoded)
+        self.assertIn("http", decoded)
+        self.assertIn("/gate.php", decoded)
 
     def test_m5_email_has_spoof_indicators(self):
         self._prepare("m5")

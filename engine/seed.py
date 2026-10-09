@@ -61,12 +61,25 @@ def _one(rng: random.Random, spec: dict):
 
 
 def compute(lab) -> dict:
-    """Deterministic {var: value} for this student + lab (empty if not randomized)."""
+    """Deterministic {var: value} for this student + lab (empty if not randomized).
+    Two passes: primitives first, then derived values (md5/sha256 of another var)."""
+    import hashlib
     spec = getattr(lab, "randomize", None) or {}
     if not spec:
         return {}
     rng = _rng(lab.id)
-    return {var: _one(rng, spec[var]) for var in sorted(spec)}
+    vals, derived = {}, []
+    for var in sorted(spec):
+        if spec[var].get("kind") in ("md5", "sha256"):
+            derived.append(var)
+        else:
+            vals[var] = _one(rng, spec[var])
+    for var in derived:
+        s = spec[var]
+        src = str(vals.get(s.get("of", ""), ""))
+        algo = hashlib.md5 if s["kind"] == "md5" else hashlib.sha256
+        vals[var] = algo(src.encode()).hexdigest()
+    return vals
 
 
 def resolve(text, vals: dict):

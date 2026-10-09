@@ -95,13 +95,13 @@
 5. A database backup was left world-readable under /backup/. Name the file.
    → **db_dump.sql**  _(also: /backup/db_dump.sql, backup/db_dump.sql)_
 6. A leftover config backup leaks the database password. What is it?
-   → **Acme#2019**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 7. How are the passwords in db_dump.sql stored (the weakness)?
    → **md5**  _(also: raw-md5, unsalted md5, raw md5, unsalted, md5 unsalted)_
 8. What is the stored hash for the 'admin' account?
-   → **5f4dcc3b5aa765d61d8327deb882cf99**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 9. Crack it. What is admin's plaintext password?
-   → **password**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 10. Crack the 'backup' service account's hash too. What is its password?
    → **12345**
 11. Hydra: what password works for 'labuser' over SSH?
@@ -148,37 +148,35 @@
    → **T1566**  _(also: T1566.002, T1656)_
 
 ## M6 — Digital Forensics & Incident Response — Disk, Memory & Timeline
-*Day 3 · 15 checks · 15 points · tools: sha256sum, fls/icat/tsk_recover, strings, bulk_extractor, CyberChef, grep*
+*Day 3 · 14 checks · 14 points · tools: sha256sum, fls/icat/tsk_recover, strings, bulk_extractor, CyberChef, grep*
 
 1. Evidence integrity verified (sha256sum -c passes)
    → _(automatic script check — verifies live state)_
-2. What is the SHA-256 of evidence.img?
-   → **1cd9ccc112367afb21b00f3300922757862d685749a1100620e1e17ee7d4d300**
-3. What filesystem does the evidence image use?
+2. What filesystem does the evidence image use?
    → **fat16**  _(also: fat, fat 16)_
-4. Name the macro-enabled spreadsheet the user opened (the lure).
+3. Name the macro-enabled spreadsheet the user opened (the lure).
    → **q3invoic.xls**  _(also: Q3INVOIC.XLS, q3invoic)_
-5. Recover the DELETED credentials file — what is the VPN password in it?
-   → **Gh@na2026!**
-6. Decode suspicious_artifact.txt — what C2 domain does it reveal?
-   → **beacon.sync-malware-c2.net**  _(also: sync-malware-c2.net, http://beacon.sync-malware-c2.net/gate.php?id=FIN03)_
-7. Carve memory.raw — what malicious executable (masquerading as a service) is running?
+4. Recover the DELETED credentials file — what is the VPN password in it?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+5. Decode suspicious_artifact.txt — what C2 domain does it reveal?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+6. Carve memory.raw — what malicious executable (masquerading as a service) is running?
    → **svch0st.exe**  _(also: svch0st, c:\windows\temp\svch0st.exe)_
-8. What C2 host does the in-memory PowerShell stager call? (it matches the decoded dropper)
-   → **beacon.sync-malware-c2.net**  _(also: sync-malware-c2.net)_
-9. A plaintext credential sits in memory — what is the VPN admin's password?
-   → **S3cr3tVPN!2026**
-10. bulk_extractor pulls an exfiltration email address from memory. What is it?
-   → **exfil-drop@attacker-mail.ru**
-11. How does the malware persist (a scheduled task is created in memory)? Name the method or ATT&CK id.
+7. What C2 host does the in-memory PowerShell stager call? (it matches the decoded dropper)
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+8. A plaintext credential sits in memory — what is the VPN admin's password?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+9. bulk_extractor pulls an exfiltration email address from memory. What is it?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+10. How does the malware persist (a scheduled task is created in memory)? Name the method or ATT&CK id.
    → **schtasks**  _(also: scheduled task, scheduled task/job, T1053, T1053.005, cron, cron job)_
-12. From auth.log, which source IP brute-forced SSH and then succeeded?
+11. From auth.log, which source IP brute-forced SSH and then succeeded?
    → **10.13.4.66**
-13. Which account did the attacker finally log in as (Accepted password)?
+12. Which account did the attacker finally log in as (Accepted password)?
    → **labuser**
-14. By order of volatility, which evidence must be collected FIRST?
+13. By order of volatility, which evidence must be collected FIRST?
    → **memory**  _(also: ram, volatile memory, memory (ram))_
-15. Which MITRE ATT&CK technique covers the macro launching PowerShell?
+14. Which MITRE ATT&CK technique covers the macro launching PowerShell?
    → **T1059.001**  _(also: T1059, T1204.002, T1204)_
 
 ## M7 — AI Security — Prompt Injection, RAG Poisoning, Tool Exfil & Deepfakes
@@ -215,19 +213,19 @@
 1. The capstone range (web + SSH + AI) is live
    → _(automatic script check — verifies live state)_
 2. T+00: what look-alike domain sent the payment-change email? (payment-change.eml)
-   → **zennith-supplies.com**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 3. What mule bank account does the BEC email demand payment to?
-   → **9900778100**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 4. Query the bank's own AI assistant (10.13.10.40 /ask) about the supplier account. What account does its POISONED knowledge base return — and what does matching it to the email tell you?
-   → **9900778100**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 5. T+20/T+40: which internal IP is the compromised foothold (privileged login + scanning)?
    → **10.13.10.66**
 6. Recon the finance portal (10.13.10.10). What world-readable DB backup is exposed under /backup/?
    → **db_dump.sql**  _(also: /backup/db_dump.sql, backup/db_dump.sql)_
 7. Crack the 'admin' MD5 from that dump. What is the plaintext password?
-   → **password**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 8. From capstone-capture.pcap, what C2 domain is the foothold beaconing to?
-   → **cdn-sync.ddns-telemetry.net**  _(also: ddns-telemetry.net)_
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 9. T+120: what external IP is the data being exfiltrated to?
    → **185.220.101.44**
 10. What is the highest Wazuh rule level across the inject sequence?

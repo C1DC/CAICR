@@ -13,6 +13,7 @@ as a normal disk image. Deterministic output -> stable SHA-256.
 from __future__ import annotations
 
 import struct
+import os
 from pathlib import Path
 
 BPS = 512          # bytes per sector
@@ -98,7 +99,7 @@ def build() -> bytes:
          b"Workbook_Open -> cmd /c powershell -enc <base64>\r\n"
          b"This document executed a macro when the user opened it.\r\n", False),
         ("VPNKEYS.TXT",
-         b"corporate VPN\r\nuser: vpnadmin\r\npass: Gh@na2026!\r\nserver: 10.8.0.1\r\n",
+         ("corporate VPN\r\nuser: vpnadmin\r\npass: " + os.environ.get("CAIC_VPN_PASS","Gh@na2026!") + "\r\nserver: 10.8.0.1\r\n").encode(),
          True),   # deleted but recoverable
     ]
 

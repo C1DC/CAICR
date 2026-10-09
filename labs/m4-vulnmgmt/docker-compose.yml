@@ -8,6 +8,9 @@ services:
   web:
     build: ./web
     image: caic-m4web:1.0
+    environment:
+      CAIC_ADMIN_HASH: ${CAIC_ADMIN_HASH:-5f4dcc3b5aa765d61d8327deb882cf99}
+      CAIC_DB_PASS: ${CAIC_DB_PASS:-Acme#2019}
     networks: { range: { ipv4_address: 10.13.4.10 } }
     restart: unless-stopped
 

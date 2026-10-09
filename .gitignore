@@ -29,3 +29,9 @@ labs/m5-bec/assets/genuine-quote.eml
 labs/m5-bec/assets/invoice-change-request.eml
 labs/m5-bec/assets/remittance-advice.pdf
 labs/m3-network/assets/network-capture.pcap
+labs/m6-forensics/assets/evidence.img
+labs/m6-forensics/assets/evidence.sha256
+labs/m6-forensics/assets/suspicious_artifact.txt
+labs/m6-forensics/assets/memory.raw
+labs/m10-capstone/assets/payment-change.eml
+labs/m10-capstone/assets/capstone-capture.pcap
