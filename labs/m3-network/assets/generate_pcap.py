@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-"""Generate network-capture.pcap for the M3 Wireshark exercise.
+"""Generate network-capture.pcap for the M3 investigation.
 
-Produces a small, valid classic-format PCAP of DNS traffic. One internal host
-(10.13.3.30) beacons to a dynamic-DNS C2 domain every 30 seconds; a little
-benign DNS is mixed in so the student has to filter. Deterministic output —
-run it once to (re)create the capture. Pure stdlib.
+Two things to find in one capture:
+  1. DNS C2 beaconing — the infected workstation (10.13.3.30) queries a
+     dynamic-DNS C2 domain every 30 seconds.
+  2. A cleartext FTP login — an admin (10.13.3.50) logs into the fileserver
+     (10.13.3.20) over plain FTP, so the username and password are visible to
+     anyone who follows the TCP stream.
+
+Valid classic PCAP, pure stdlib, deterministic output.
 """
 from __future__ import annotations
 
@@ -12,104 +16,123 @@ import struct
 import sys
 from pathlib import Path
 
-LINKTYPE_ETHERNET = 1
-SRC_HOST = "10.13.3.30"     # infected workstation
-RESOLVER = "10.13.3.1"      # lab resolver / gateway
+LINK = 1  # Ethernet
 C2_DOMAIN = "sync-telemetry.duckdns.org"
-BEACON_INTERVAL = 30         # seconds
+INFECTED = "10.13.3.30"
+RESOLVER = "10.13.3.1"
+BEACON_INTERVAL = 30
+FTP_CLIENT = "10.13.3.50"
+FTP_SERVER = "10.13.3.20"
+FTP_USER = "backupsvc"
+FTP_PASS = "Backup#2021"
 
 
-def ip_to_bytes(ip: str) -> bytes:
-    return bytes(int(o) for o in ip.split("."))
+def ipb(ip): return bytes(int(o) for o in ip.split("."))
 
 
-def checksum16(data: bytes) -> int:
-    if len(data) % 2:
-        data += b"\x00"
-    total = 0
-    for i in range(0, len(data), 2):
-        total += (data[i] << 8) | data[i + 1]
-    total = (total >> 16) + (total & 0xFFFF)
-    total += total >> 16
-    return (~total) & 0xFFFF
+def csum(d: bytes) -> int:
+    if len(d) % 2:
+        d += b"\x00"
+    s = sum((d[i] << 8) | d[i + 1] for i in range(0, len(d), 2))
+    s = (s >> 16) + (s & 0xFFFF)
+    s += s >> 16
+    return (~s) & 0xFFFF
 
 
-def dns_query(txid: int, qname: str) -> bytes:
-    header = struct.pack(">HHHHHH", txid, 0x0100, 1, 0, 0, 0)  # standard query, RD
-    q = b"".join(bytes([len(lbl)]) + lbl.encode() for lbl in qname.split(".")) + b"\x00"
-    q += struct.pack(">HH", 1, 1)  # type A, class IN
-    return header + q
-
-
-def udp(src_port: int, dst_port: int, payload: bytes) -> bytes:
-    length = 8 + len(payload)
-    return struct.pack(">HHHH", src_port, dst_port, length, 0) + payload  # csum 0 = unused
-
-
-def ipv4(src: str, dst: str, payload: bytes, ident: int) -> bytes:
-    ver_ihl, tos = 0x45, 0
-    total = 20 + len(payload)
-    ttl, proto = 64, 17  # UDP
-    hdr = struct.pack(">BBHHHBBH4s4s", ver_ihl, tos, total, ident, 0,
-                      ttl, proto, 0, ip_to_bytes(src), ip_to_bytes(dst))
-    csum = checksum16(hdr)
-    hdr = hdr[:10] + struct.pack(">H", csum) + hdr[12:]
+def ip4(src, dst, payload, ident, proto):
+    hdr = struct.pack(">BBHHHBBH4s4s", 0x45, 0, 20 + len(payload), ident, 0, 64, proto, 0,
+                      ipb(src), ipb(dst))
+    hdr = hdr[:10] + struct.pack(">H", csum(hdr)) + hdr[12:]
     return hdr + payload
 
 
-def ethernet(payload: bytes) -> bytes:
-    dst_mac = bytes.fromhex("02420a1e0301")  # gateway-ish
-    src_mac = bytes.fromhex("0242ac1e031e")
-    return dst_mac + src_mac + struct.pack(">H", 0x0800) + payload
+def eth(payload):
+    return (bytes.fromhex("02420a0d0301") + bytes.fromhex("0242ac0d0330")
+            + struct.pack(">H", 0x0800) + payload)
 
 
-def frame(src, dst, sport, dport, dns_payload, ident) -> bytes:
-    return ethernet(ipv4(src, dst, udp(sport, dport, dns_payload), ident))
+def udp(sp, dp, pl):
+    return struct.pack(">HHHH", sp, dp, 8 + len(pl), 0) + pl
 
 
-def pcap_global_header() -> bytes:
-    return struct.pack("<IHHiIII", 0xA1B2C3D4, 2, 4, 0, 0, 65535, LINKTYPE_ETHERNET)
+def dns_q(txid, qname):
+    h = struct.pack(">HHHHHH", txid, 0x0100, 1, 0, 0, 0)
+    q = b"".join(bytes([len(x)]) + x.encode() for x in qname.split(".")) + b"\x00"
+    return h + q + struct.pack(">HH", 1, 1)
 
 
-def pcap_record(ts: float, data: bytes) -> bytes:
-    secs, usecs = int(ts), int((ts - int(ts)) * 1_000_000)
-    return struct.pack("<IIII", secs, usecs, len(data), len(data)) + data
+def tcp(src, dst, sp, dp, seq, ack, flags, payload=b""):
+    off_flags = (5 << 12) | flags
+    hdr = struct.pack(">HHIIHHHH", sp, dp, seq, ack, off_flags, 64240, 0, 0)
+    pseudo = ipb(src) + ipb(dst) + struct.pack(">BBH", 0, 6, len(hdr) + len(payload))
+    chk = csum(pseudo + hdr + payload)
+    hdr = hdr[:16] + struct.pack(">H", chk) + hdr[18:]
+    return ip4(src, dst, hdr + payload, 0, 6)
 
 
-def build() -> bytes:
-    base = 1_760_000_000  # fixed epoch so output is reproducible
-    records = []
+def rec(ts, data):
+    return struct.pack("<IIII", int(ts), int((ts % 1) * 1e6), len(data), len(data)) + data
+
+
+def build():
+    base = 1_760_000_000
+    out = []
+
+    # --- DNS C2 beacons from the infected host (every 30s) ---
     txid = 0x1000
-
-    # 5 beacons to the C2 domain, every BEACON_INTERVAL seconds
     for i in range(5):
         txid += 1
-        ts = base + i * BEACON_INTERVAL
-        pkt = frame(SRC_HOST, RESOLVER, 40000 + i, 53, dns_query(txid, C2_DOMAIN), 0x100 + i)
-        records.append(pcap_record(ts, pkt))
-
-    # benign noise interleaved (different host / normal domains)
-    for off, host, dom in [(7, "10.13.3.11", "www.google.com"),
-                           (52, "10.13.3.12", "kaiptc.com"),
-                           (95, "10.13.3.11", "update.microsoft.com")]:
+        out.append(rec(base + i * BEACON_INTERVAL,
+                       eth(ip4(INFECTED, RESOLVER, udp(40000 + i, 53, dns_q(txid, C2_DOMAIN)), 0x100 + i, 17))))
+    # a little benign DNS noise
+    for off, host, dom in [(7, "10.13.3.11", "www.google.com"), (52, "10.13.3.12", "kaiptc.com")]:
         txid += 1
-        pkt = frame(host, RESOLVER, 51000, 53, dns_query(txid, dom), 0x200 + off)
-        records.append(pcap_record(base + off, pkt))
+        out.append(rec(base + off,
+                       eth(ip4(host, RESOLVER, udp(51000, 53, dns_q(txid, dom)), 0x200 + off, 17))))
 
-    # sort by timestamp so Wireshark shows chronological order
-    records.sort(key=lambda r: struct.unpack("<I", r[:4])[0] * 1_000_000
-                 + struct.unpack("<I", r[4:8])[0])
-    return pcap_global_header() + b"".join(records)
+    # --- cleartext FTP login (handshake then USER/PASS in the clear) ---
+    c, s = FTP_CLIENT, FTP_SERVER
+    cp, sp = 51972, 21
+    t = base + 100
+    cseq, sseq = 1000, 5000
+    # 3-way handshake
+    out.append(rec(t, eth(tcp(c, s, cp, sp, cseq, 0, 0x02))))                       # SYN
+    out.append(rec(t + 0.01, eth(tcp(s, c, sp, cp, sseq, cseq + 1, 0x12))))         # SYN-ACK
+    out.append(rec(t + 0.02, eth(tcp(c, s, cp, sp, cseq + 1, sseq + 1, 0x10))))     # ACK
+    cseq += 1; sseq += 1
+    conv = [
+        (s, "220 lab-corp FTP service (vsftpd 3.0.5) ready.\r\n"),
+        (c, f"USER {FTP_USER}\r\n"),
+        (s, "331 Please specify the password.\r\n"),
+        (c, f"PASS {FTP_PASS}\r\n"),
+        (s, "230 Login successful.\r\n"),
+        (c, "SYST\r\n"),
+        (s, "215 UNIX Type: L8\r\n"),
+    ]
+    tt = t + 0.03
+    for who, msg in conv:
+        payload = msg.encode()
+        if who == c:
+            out.append(rec(tt, eth(tcp(c, s, cp, sp, cseq, sseq, 0x18, payload))))   # PSH-ACK
+            cseq += len(payload)
+        else:
+            out.append(rec(tt, eth(tcp(s, c, sp, cp, sseq, cseq, 0x18, payload))))
+            sseq += len(payload)
+        tt += 0.05
+
+    out.sort(key=lambda r: struct.unpack("<I", r[:4])[0] * 1_000_000 + struct.unpack("<I", r[4:8])[0])
+    gh = struct.pack("<IHHiIII", 0xA1B2C3D4, 2, 4, 0, 0, 65535, LINK)
+    return gh + b"".join(out)
 
 
-def main() -> int:
+def main():
     out = Path(__file__).resolve().parent / "network-capture.pcap"
     out.write_bytes(build())
     print(f"wrote {out} ({out.stat().st_size} bytes)")
-    print(f"  C2 domain : {C2_DOMAIN}")
-    print(f"  interval  : {BEACON_INTERVAL}s   infected host: {SRC_HOST}")
+    print(f"  C2 domain : {C2_DOMAIN}   beacon interval: {BEACON_INTERVAL}s   infected: {INFECTED}")
+    print(f"  FTP creds : {FTP_USER} / {FTP_PASS}  ({FTP_CLIENT} -> {FTP_SERVER})")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())

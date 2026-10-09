@@ -1,68 +1,72 @@
 # M3 — Network Compromise Investigation
 
-**Scenario.** A mid-sized Ghanaian institution suspects one of its internal
-workstations is compromised. You have been given access to an isolated copy of
-the affected subnet (`10.13.3.0/24`) and a packet capture pulled from the
-network tap. Map the network, find what shouldn't be exposed, then prove which
-host is talking to an attacker's command-and-control (C2) server.
+**Scenario.** A Ghanaian institution's SOC flagged workstation **FIN-03**
+(`10.13.3.30`) for odd outbound traffic. You have three evidence sources: the
+live subnet, a packet capture from the network tap, and a `netstat` taken on
+FIN-03 during live response. Map the network, prove the compromise, and recover
+what the attacker exposed — then design the controls.
 
-> ⚠ **CyberRange rule.** Scan and investigate **only** `10.13.3.0/24`. These
-> targets live on a private Docker network and never leave your machine. Using
-> these tools on any other network is outside the authorised lab.
+Targets: `10.13.3.10` web · `10.13.3.20` FTP · `10.13.3.30` FIN-03 (SSH) ·
+`10.13.3.40` legacy RDP. Evidence in `assets/`: `network-capture.pcap`,
+`netstat-FIN03.txt`.
 
----
-
-## Part 1 — Map the subnet with Nmap
-
-```
-$ nmap -sn 10.13.3.0/24                 # which hosts are alive?
-$ nmap -sV -p 21,22,80,443,3389 10.13.3.0/24   # what services + versions?
-$ nmap --script=http-title -p80 10.13.3.0/24   # grab web page titles
-$ nmap -oN m3_scan.txt 10.13.3.0/24            # save your evidence
-```
-
-Questions to answer (you'll submit these in `labctl verify m3`):
-- How many **target** hosts are live? (don't count the `.1` gateway — that's your own host side)
-- Which host serves an **unauthenticated** web admin panel?
-- Which host exposes a **legacy remote-access** service, and on what port?
-- Which service transmits credentials in **cleartext**?
+> ⚠ **CyberRange rule.** Scan and investigate **only** `10.13.3.0/24`.
 
 ---
 
-## Part 2 — Find the C2 beacon with Wireshark
+## Part 1 — Map & fingerprint with Nmap + NSE
 
-Open the capture that shipped with this lab:
+```
+$ nmap -sn 10.13.3.0/24                         # who is alive?
+$ nmap -sV -p 21,22,80,443,3389 10.13.3.0/24    # service + version detection
+$ nmap --script=http-title -p80 10.13.3.0/24    # find the unauth admin panel
+$ nmap --script ftp-anon -p21 10.13.3.20        # is anonymous FTP allowed?
+$ nmap -sV -p22 10.13.3.30                       # fingerprint FIN-03's SSH
+```
+
+Find: the live hosts, the unauthenticated web panel, the exposed RDP port, the
+SSH version on FIN-03, and whether the fileserver allows **anonymous FTP** (an
+NSE script tells you directly).
+
+## Part 2 — Follow the capture in Wireshark
 
 ```
 $ wireshark assets/network-capture.pcap &
 ```
 
-In Wireshark, apply the display filter `dns`. Most malware talks to its C2 over
-DNS. Look for one internal host repeating the **same lookup at a fixed
-interval** — that regular "heartbeat" is beaconing.
+Two things to recover:
 
-- What **domain** is the infected host beaconing to?
-- What is the **interval** between beacons, in seconds?
+1. **The C2 beacon** — apply the display filter `dns`. One host repeats the same
+   lookup at a fixed interval. Find the **domain**, the **interval**, and the
+   **infected host's IP**.
+2. **Cleartext credentials** — the capture also contains a plain-FTP login.
+   Right-click an FTP packet → **Follow → TCP Stream** (or
+   `tcpdump -r assets/network-capture.pcap -A`). Read the **username and
+   password** straight off the wire — the reason cleartext FTP is a finding.
 
-(CLI alternative, if you prefer tcpdump:)
+## Part 3 — Correlate the host evidence (netstat)
 
 ```
-$ tcpdump -r assets/network-capture.pcap -n 'udp port 53'
+$ cat assets/netstat-FIN03.txt
 ```
+
+Identify the **malware process** (it is masquerading as a Windows service — look
+closely at the spelling), the **backdoor port** it listens on, and the **external
+C2 IP** it is connected to. Then make the correlation that turns three artefacts
+into one story: *the beacon domain from the capture resolves to the C2 IP in the
+netstat, and both belong to the same malicious process.*
+
+## Part 4 — Conclude
+
+- Map the C2 channel to a **MITRE ATT&CK** technique.
+- In the worksheet, design four controls: network segmentation, DNS monitoring,
+  killing cleartext FTP (FTPS/SFTP), and MFA + firewalling on the exposed RDP.
 
 ---
 
-## Part 3 — Map to MITRE ATT&CK
-
-Translate the beaconing behaviour to an ATT&CK technique ID (Command and
-Control → Application Layer Protocol). Then, in your head or notes, list four
-controls that would have caught or stopped this: network segmentation, DNS
-monitoring, MFA on the exposed RDP, and a firewall rule closing 3389.
-
----
-
-## Grade yourself
+## Grade yourself, then write it up
 
 ```
 $ labctl verify m3
+$ labctl worksheet m3
 ```

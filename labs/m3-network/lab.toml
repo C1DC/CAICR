@@ -2,21 +2,22 @@
 id = "m3"
 module = "M3"
 day = 2
-title = "Network Compromise Investigation — Nmap + Wireshark"
-tools = ["nmap", "wireshark", "tcpdump"]
-estimated_minutes = 90
+title = "Network Compromise Investigation — Nmap, NSE & Wireshark"
+tools = ["nmap", "nmap NSE", "wireshark", "tcpdump", "netstat"]
+estimated_minutes = 120
 briefing = "briefing.md"
 objective = """
-Use Nmap to map a simulated enterprise subnet, find exposed services, then open \
-the provided packet capture in Wireshark to spot a compromised host beaconing to \
-an external command-and-control (C2) server. Map what you find to MITRE ATT&CK."""
+Work a live network-compromise case across three evidence sources: scan the \
+subnet with Nmap and its scripting engine to find exposed services, follow a \
+packet capture in Wireshark to recover a C2 beacon AND cleartext credentials, \
+and correlate a netstat capture from the suspect host to identify the backdoor \
+and the C2 infrastructure. Map the chain to MITRE ATT&CK and design the controls."""
 
 [network]
 name = "caic_m3_range"
 subnet = "10.13.3.0/24"
 ready = ["10.13.3.10:80", "10.13.3.20:21", "10.13.3.30:22", "10.13.3.40:3389"]
 
-# ── Targets (all confined to the private subnet above) ──────────────────────
 [[targets]]
 name = "gateway"
 ip = "10.13.3.1"
@@ -35,14 +36,14 @@ role = "Anonymous, unencrypted FTP on :21"
 [[targets]]
 name = "workstation"
 ip = "10.13.3.30"
-role = "SSH on :22 — also the infected host in the capture"
+role = "SSH on :22 — the infected host (see the capture and netstat)"
 
 [[targets]]
 name = "legacy-host"
 ip = "10.13.3.40"
 role = "Exposed legacy remote-access (RDP) on :3389"
 
-# ── Verification checks (student submits findings; engine grades) ────────────
+# ── Part 1: scan & fingerprint with Nmap + NSE ──────────────────────────────
 [[check]]
 id = "targets_live"
 type = "script"
@@ -55,7 +56,7 @@ type = "numeric"
 prompt = "How many TARGET hosts are live on 10.13.3.0/24 (exclude the .1 gateway)?"
 answer = 4
 tolerance = 0
-hint = "nmap -sn 10.13.3.0/24   — then don't count the gateway .1"
+hint = "nmap -sn 10.13.3.0/24"
 
 [[check]]
 id = "web_admin_ip"
@@ -69,21 +70,36 @@ id = "rdp_port"
 type = "numeric"
 prompt = "On which TCP port is the exposed legacy remote-access service?"
 answer = 3389
-hint = "Look at the open ports on 10.13.3.40"
+hint = "nmap -p- 10.13.3.40  — the open port"
+
+[[check]]
+id = "ssh_version"
+type = "string_any"
+prompt = "Fingerprint the SSH host (10.13.3.30). What SSH software/version does nmap report?"
+accept = ["openssh", "openssh 9.7", "9.7", "openssh 9", "openssh 9.7 (protocol 2.0)"]
+hint = "nmap -sV -p22 10.13.3.30"
+
+[[check]]
+id = "ftp_anon"
+type = "string_any"
+prompt = "Run the ftp-anon NSE script against the fileserver. Is anonymous FTP login allowed?"
+accept = ["yes", "allowed", "anonymous allowed", "anonymous ftp login allowed", "y", "230"]
+hint = "nmap --script ftp-anon -p21 10.13.3.20"
 
 [[check]]
 id = "cleartext_proto"
 type = "string_any"
-prompt = "Which protocol on the fileserver sends credentials in cleartext?"
+prompt = "Which protocol on the fileserver transmits credentials in cleartext?"
 accept = ["ftp", "ftp (21)", "file transfer protocol"]
-hint = "nmap -sV -p21 10.13.3.20"
+hint = "nmap -sV -p21 10.13.3.20  — and see the capture"
 
+# ── Part 2: follow the capture in Wireshark ─────────────────────────────────
 [[check]]
 id = "c2_domain"
 type = "string_any"
 prompt = "In network-capture.pcap, what domain is the infected host beaconing to?"
 accept = ["sync-telemetry.duckdns.org", "duckdns.org"]
-hint = "Open assets/network-capture.pcap in Wireshark; filter: dns"
+hint = "wireshark assets/network-capture.pcap ; filter: dns"
 
 [[check]]
 id = "beacon_interval"
@@ -94,8 +110,51 @@ tolerance = 3
 hint = "Compare the timestamps of the repeated DNS queries"
 
 [[check]]
+id = "infected_host"
+type = "string"
+prompt = "Which internal IP is making those beacon queries?"
+answer = "10.13.3.30"
+hint = "The source IP of the repeated DNS queries"
+
+[[check]]
+id = "ftp_user"
+type = "string_any"
+prompt = "Follow the FTP TCP stream in the capture. What USERNAME logged in?"
+accept = ["backupsvc"]
+hint = "Wireshark: right-click an FTP packet → Follow → TCP Stream (or tcpdump -A)"
+
+[[check]]
+id = "ftp_pass"
+type = "string"
+prompt = "And what PASSWORD was sent — in the clear?"
+answer = "Backup#2021"
+hint = "It's in the same FTP stream, right after USER"
+
+# ── Part 3: correlate the netstat capture from the suspect host ─────────────
+[[check]]
+id = "malware_name"
+type = "string_any"
+prompt = "In netstat-FIN03.txt, what process name is masquerading as a Windows service?"
+accept = ["svch0st", "svch0st (pid 3391)", "sv ch0st"]
+hint = "cat assets/netstat-FIN03.txt — look closely at the spelling of 'svchost'"
+
+[[check]]
+id = "backdoor_port"
+type = "numeric"
+prompt = "What TCP port is that malware LISTENING on as a backdoor?"
+answer = 4444
+hint = "The LISTEN line owned by the suspicious process"
+
+[[check]]
+id = "c2_ip"
+type = "string"
+prompt = "What external C2 IP does the malware hold an ESTABLISHED connection to? (correlates with the beacon domain)"
+answer = "185.220.101.44"
+hint = "The ESTABLISHED foreign address owned by the malware process"
+
+[[check]]
 id = "attack_technique"
 type = "string_any"
-prompt = "Which MITRE ATT&CK technique ID covers C2 over an application-layer protocol / DNS?"
+prompt = "Which MITRE ATT&CK technique covers the DNS command-and-control channel?"
 accept = ["T1071", "T1071.004"]
-hint = "ATT&CK Command and Control → Application Layer Protocol"
+hint = "Command and Control → Application Layer Protocol (DNS sub-technique)"
