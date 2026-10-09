@@ -1,0 +1,96 @@
+[lab]
+id = "m4"
+module = "M4"
+day = 2
+title = "Vulnerability Management & SOC Operations"
+tools = ["nikto", "hydra", "john", "wazuh (triage)"]
+estimated_minutes = 120
+briefing = "briefing.md"
+objective = """
+Scan a web server with Nikto and prioritise what you find, demonstrate why weak \
+passwords fall to Hydra and John, then triage a set of real-shaped Wazuh SIEM \
+alerts — correlating them into one attack story and classifying each one."""
+
+[network]
+name = "caic_m4_range"
+subnet = "10.13.4.0/24"
+ready = ["10.13.4.10:80", "10.13.4.20:22"]
+
+[[targets]]
+name = "web"
+ip = "10.13.4.10"
+role = "Leaky Apache web server — scan with Nikto"
+
+[[targets]]
+name = "ssh"
+ip = "10.13.4.20"
+role = "SSH host with a weak account — authorised Hydra demo target"
+
+# ── Checks ───────────────────────────────────────────────────────────────────
+[[check]]
+id = "web_up"
+type = "script"
+prompt = "The web target (10.13.4.10) is serving"
+points = 1
+
+[[check]]
+id = "ssh_up"
+type = "script"
+prompt = "The SSH target (10.13.4.20) is listening"
+points = 1
+
+[[check]]
+id = "admin_path"
+type = "string_any"
+prompt = "Nikto/robots.txt reveal a sensitive admin path — what is it?"
+accept = ["/admin/", "/admin", "admin", "admin/"]
+hint = "nikto -h http://10.13.4.10   (or: curl http://10.13.4.10/robots.txt)"
+
+[[check]]
+id = "backup_file"
+type = "string_any"
+prompt = "A leftover backup file exposes database credentials — name it."
+accept = ["config.php.bak", "/config.php.bak", "config.bak"]
+hint = "It's listed in robots.txt; open it with curl"
+
+[[check]]
+id = "hydra_pass"
+type = "string"
+prompt = "Hydra: what password works for user 'labuser' over SSH?"
+answer = "Password123"
+hint = "hydra -l labuser -P assets/lab-wordlist.txt ssh://10.13.4.20"
+
+[[check]]
+id = "john_admin"
+type = "string"
+prompt = "John: crack lab_hashes.txt — what is user 'admin's password?"
+answer = "iloveyou"
+hint = "john --wordlist=assets/lab-wordlist.txt assets/lab_hashes.txt ; john --show ..."
+
+[[check]]
+id = "brute_src_ip"
+type = "string"
+prompt = "In the Wazuh alerts, which source IP is behind the brute force AND the web scan?"
+answer = "10.13.4.66"
+hint = "jq '.[].data.srcip' assets/wazuh-alerts.json | sort | uniq -c"
+
+[[check]]
+id = "top_level"
+type = "numeric"
+prompt = "What is the highest Wazuh rule level (severity) firing?"
+answer = 10
+hint = "jq '[.[].rule.level] | max' assets/wazuh-alerts.json"
+
+[[check]]
+id = "got_in"
+type = "string_any"
+prompt = "Did the attacker ultimately succeed in logging in? (yes/no, or the rule id that proves it)"
+accept = ["yes", "5715", "authentication success", "successful login", "success"]
+hint = "Look for an sshd authentication SUCCESS from the same srcip, after the failures"
+
+[[check]]
+id = "attack_technique"
+type = "string_any"
+prompt = "Which MITRE ATT&CK technique covers the SSH brute force?"
+accept = ["T1110", "T1110.001", "T1110.003"]
+hint = "Credential Access → Brute Force"

@@ -1,0 +1,39 @@
+Return-Path: <billing@zenith-supplies.com>
+Delivered-To: ama.boateng@lab-institution.gov.gh
+Received: from mx.lab-institution.gov.gh (localhost [127.0.0.1])
+	by mx.lab-institution.gov.gh with LMTP id 8fA2 for <ama.boateng@lab-institution.gov.gh>;
+	Tue, 06 Oct 2026 08:42:11 +0000 (GMT)
+Received: from mail.zenith-supplies.com (unknown [45.137.112.63])
+	by mx.lab-institution.gov.gh (Postfix) with ESMTPS id 5C3A1;
+	Tue, 06 Oct 2026 08:42:09 +0000 (GMT)
+Authentication-Results: mx.lab-institution.gov.gh;
+	spf=fail (sender IP is 45.137.112.63) smtp.mailfrom=billing@zenith-supplies.com;
+	dkim=none (no signature);
+	dmarc=fail (p=none) header.from=zenith-supplies.com
+Received-SPF: fail (zenithsupplies.com.gh: 45.137.112.63 is not permitted to send)
+Message-ID: <a71f9c23-fraud@zenith-supplies.com>
+Date: Tue, 06 Oct 2026 08:42:08 +0000
+From: "Kwame Mensah | Zenith Supplies" <k.mensah@zenithsupplies.com.gh>
+Reply-To: <accounts@zenith-supplies.com>
+To: "Ama Boateng" <ama.boateng@lab-institution.gov.gh>
+Subject: URGENT: Updated bank details for Invoice ZS-20418
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+
+Dear Ama,
+
+I hope you are well. Due to an audit on our old corporate account, please
+note that all payments must now go to our NEW bank account with immediate
+effect. Kindly update your records before processing Invoice ZS-20418.
+
+    Account name:   Zenith Supplies Ltd
+    Bank:           First Atlantic Bank, Osu branch
+    Account number: 1402300087654
+
+As this invoice is already overdue, please treat it as a priority and confirm
+once the transfer has been made today. I am travelling and may be slow to
+answer calls, so email is best.
+
+Best regards,
+Kwame Mensah
+Accounts Receivable, Zenith Supplies Ltd

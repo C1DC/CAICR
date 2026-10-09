@@ -1,0 +1,39 @@
+# M3 — Network Compromise Investigation targets.
+# A small "enterprise" subnet with several intentionally exposed services.
+# Reachable from the Kali host (for scanning) but NOT published to the LAN:
+# there are deliberately no `ports:` mappings, so nothing leaves the host.
+name: caic-m3
+
+services:
+  web-admin:
+    build: ../_base
+    image: caic-target:1.0           # built once, reused by every lab
+    environment: { SERVICE: web, HOSTLABEL: web-admin, WEB_TITLE: "Acme Payroll Admin Console" }
+    networks: { range: { ipv4_address: 10.13.3.10 } }
+    restart: unless-stopped
+
+  fileserver:
+    image: caic-target:1.0
+    environment: { SERVICE: ftp, HOSTLABEL: fileserver }
+    networks: { range: { ipv4_address: 10.13.3.20 } }
+    restart: unless-stopped
+
+  workstation:
+    image: caic-target:1.0
+    environment: { SERVICE: ssh, HOSTLABEL: workstation }
+    networks: { range: { ipv4_address: 10.13.3.30 } }
+    restart: unless-stopped
+
+  legacy-host:
+    image: caic-target:1.0
+    environment: { SERVICE: rdp, HOSTLABEL: legacy-host }
+    networks: { range: { ipv4_address: 10.13.3.40 } }
+    restart: unless-stopped
+
+networks:
+  range:
+    name: caic_m3_range
+    ipam:
+      config:
+        - subnet: 10.13.3.0/24
+          gateway: 10.13.3.1

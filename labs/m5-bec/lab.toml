@@ -1,0 +1,73 @@
+[lab]
+id = "m5"
+module = "M5"
+day = 3
+title = "Business Email Compromise — Email Header Forensics"
+tools = ["terminal", "grep", "dig", "whois"]
+estimated_minutes = 90
+briefing = "briefing.md"
+objective = """
+Investigate a supplier payment-change email. Read the raw headers to prove it \
+is a Business Email Compromise: find the look-alike domain, the real source IP, \
+and the SPF/DKIM/DMARC failures — then design the control that stops the fraud."""
+
+# No [network] / docker-compose.yml — this is a file-based lab. Evidence lives
+# in assets/. Grading is answer-based.
+
+[[check]]
+id = "envelope_header"
+type = "string_any"
+prompt = "Which header reveals the true envelope sender (where bounces go)?"
+accept = ["return-path", "return path", "return-path:"]
+hint = "grep -iE '^(Return-Path|From|Reply-To)' invoice-change-request.eml"
+
+[[check]]
+id = "source_ip"
+type = "string"
+prompt = "What is the source IP of the server that actually sent this mail?"
+answer = "45.137.112.63"
+hint = "The lowest/earliest 'Received: from ... (unknown [IP])' line"
+
+[[check]]
+id = "spf_result"
+type = "string_any"
+prompt = "Did SPF pass or fail?"
+accept = ["fail", "failed", "spf fail", "spf=fail"]
+hint = "Look at the Authentication-Results / Received-SPF header"
+
+[[check]]
+id = "lookalike_domain"
+type = "string_any"
+prompt = "What look-alike domain is used in Reply-To / Return-Path?"
+accept = ["zenith-supplies.com"]
+hint = "Compare it carefully to the real supplier domain in the From: line"
+
+[[check]]
+id = "real_domain"
+type = "string_any"
+prompt = "What is the real supplier domain the attacker is impersonating?"
+accept = ["zenithsupplies.com.gh"]
+hint = "The From: display shows the genuine domain to earn trust"
+
+[[check]]
+id = "fraud_account"
+type = "string"
+prompt = "What NEW bank account number does the email ask payments to go to?"
+answer = "1402300087654"
+hint = "It's in the message body"
+
+[[check]]
+id = "stopping_control"
+type = "string_any"
+prompt = "Name the payment control that would have stopped this fraud."
+accept = ["dual control", "dual-control", "callback", "call back",
+          "out-of-band verification", "verbal verification",
+          "separation of duties", "callback verification"]
+hint = "Verify the change by calling a KNOWN number — not the one in the email"
+
+[[check]]
+id = "attack_technique"
+type = "string_any"
+prompt = "Which MITRE ATT&CK technique ID covers phishing for initial access?"
+accept = ["T1566", "T1566.002", "T1656"]
+hint = "ATT&CK Initial Access → Phishing (or Impersonation, T1656)"

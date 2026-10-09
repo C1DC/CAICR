@@ -1,0 +1,78 @@
+[lab]
+id = "m1"
+module = "M1"
+day = 1
+title = "Threat Intelligence & OSINT — DNS Recon"
+tools = ["dig", "whois", "theHarvester"]
+estimated_minutes = 90
+briefing = "briefing.md"
+objective = """
+Run the same passive reconnaissance an attacker runs before a phishing campaign: \
+enumerate a target's DNS, read its OSINT footprint, and find the missing email- \
+authentication control that leaves it wide open to spoofing."""
+
+[network]
+name = "caic_m1_range"
+subnet = "10.13.1.0/24"
+ready = ["10.13.1.10:53"]
+
+[[targets]]
+name = "labdns"
+ip = "10.13.1.10"
+role = "Authoritative DNS for lab-corp.com.gh — query it with dig"
+
+# ── Checks ───────────────────────────────────────────────────────────────────
+[[check]]
+id = "dns_up"
+type = "script"
+prompt = "The lab DNS server answers queries for lab-corp.com.gh"
+points = 1
+
+[[check]]
+id = "mx_host"
+type = "string_any"
+prompt = "What is the mail server (MX) host for lab-corp.com.gh?"
+accept = ["mail.lab-corp.com.gh", "mail.lab-corp.com.gh."]
+hint = "dig @10.13.1.10 MX lab-corp.com.gh"
+
+[[check]]
+id = "mail_ip"
+type = "string"
+prompt = "What IP does that mail server resolve to?"
+answer = "41.210.15.21"
+hint = "dig @10.13.1.10 A mail.lab-corp.com.gh +short"
+
+[[check]]
+id = "spf_qualifier"
+type = "string_any"
+prompt = "The SPF record ends in a qualifier — what is it (and what does it mean)?"
+accept = ["~all", "softfail", "soft fail", "~all softfail", "tilde all"]
+hint = "dig @10.13.1.10 TXT lab-corp.com.gh  —  -all=hard, ~all=soft"
+
+[[check]]
+id = "dmarc_present"
+type = "string_any"
+prompt = "Is a DMARC record published for lab-corp.com.gh?"
+accept = ["no", "none", "no dmarc", "absent", "not published", "nxdomain", "missing"]
+hint = "dig @10.13.1.10 TXT _dmarc.lab-corp.com.gh  — what status comes back?"
+
+[[check]]
+id = "missing_control"
+type = "string_any"
+prompt = "Which email-authentication control is missing, enabling spoofing?"
+accept = ["dmarc"]
+hint = "SPF present + DKIM + ??? — the policy layer that tells receivers to reject"
+
+[[check]]
+id = "emails_found"
+type = "numeric"
+prompt = "In the OSINT report, how many employee email addresses were found?"
+answer = 5
+hint = "cat assets/osint-report.txt"
+
+[[check]]
+id = "attack_technique"
+type = "string_any"
+prompt = "Which MITRE ATT&CK technique covers gathering victim DNS/network info?"
+accept = ["T1590", "T1590.002", "T1589", "T1598"]
+hint = "Reconnaissance → Gather Victim Network Information"

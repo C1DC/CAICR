@@ -1,0 +1,46 @@
+# Copy this folder to labs/m<N>-<slug>/ and fill in the blanks.
+# Folders starting with "_" are ignored by the engine, so this never shows up
+# as a runnable lab. See LAB_ENGINE.md section 5.
+
+[lab]
+id = "mX"                      # short id used on the CLI, e.g. "m4"
+module = "MX"                  # display label, e.g. "M4"
+day = 0                        # programme day (1-5)
+title = "Lab title here"
+tools = ["nmap"]               # Kali tools the student uses
+estimated_minutes = 90
+briefing = "briefing.md"
+objective = "One or two sentences on what the student will achieve."
+
+[network]
+name = "caic_mX_range"
+subnet = "10.13.X.0/24"        # MUST be private; third octet = module number
+
+# ── Targets ─────────────────────────────────────────────────────────────────
+[[targets]]
+name = "target-1"
+ip = "10.13.X.10"
+role = "Describe what this host is / why it's interesting"
+
+# ── Checks (this is the grading) ─────────────────────────────────────────────
+# types: numeric | string | string_any | script
+[[check]]
+id = "example_numeric"
+type = "numeric"
+prompt = "A question whose answer is a number"
+answer = 42
+tolerance = 0
+hint = "the command that reveals it"
+
+[[check]]
+id = "example_any"
+type = "string_any"
+prompt = "A question with several acceptable phrasings"
+accept = ["one", "uno", "1"]
+hint = "where to look"
+
+[[check]]
+id = "example_script"
+type = "script"
+prompt = "Something verify.sh can check automatically"
+points = 1

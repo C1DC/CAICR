@@ -1,0 +1,15 @@
+# Targets for this lab. No `ports:` mappings — targets stay off the real LAN.
+name: caic-mX
+services:
+  target-1:
+    image: caic-target:1.0          # reuse the shared image, or build your own
+    environment: { SERVICE: web, HOSTLABEL: target-1 }
+    networks: { range: { ipv4_address: 10.13.X.10 } }
+    restart: unless-stopped
+networks:
+  range:
+    name: caic_mX_range
+    ipam:
+      config:
+        - subnet: 10.13.X.0/24
+          gateway: 10.13.X.1

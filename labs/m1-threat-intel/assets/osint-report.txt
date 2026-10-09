@@ -1,0 +1,35 @@
+*******************************************************************
+*  theHarvester  (simulated offline capture for the CAIC lab)      *
+*  Target domain: lab-corp.com.gh                                  *
+*  Sources: search engines, PGP key servers, certificate logs      *
+*******************************************************************
+
+[*] Target: lab-corp.com.gh
+
+[*] Emails found: 5
+------------------
+k.mensah@lab-corp.com.gh
+ama.boateng@lab-corp.com.gh
+finance@lab-corp.com.gh
+j.owusu@lab-corp.com.gh
+helpdesk@lab-corp.com.gh
+
+[*] Hosts found: 4
+------------------
+www.lab-corp.com.gh:41.210.15.20
+mail.lab-corp.com.gh:41.210.15.21
+vpn.lab-corp.com.gh:41.210.15.30
+ns1.lab-corp.com.gh:41.210.15.5
+
+[*] IPs found: 4
+------------------
+41.210.15.5
+41.210.15.20
+41.210.15.21
+41.210.15.30
+
+[*] Notes:
+  - finance@ and helpdesk@ are role addresses — prime phishing targets.
+  - vpn.lab-corp.com.gh is internet-facing: confirm MFA is enforced.
+  - Employee names map to a predictable j.<surname>@ / <initial>.<surname>@ scheme,
+    making address guessing trivial for an attacker.

@@ -1,0 +1,1215 @@
+<title>KAIPTC CyberLab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&family=Sora:wght@700;800&display=swap">
+<style>
+/* ═══════════════════════════════════════════════════
+   KAIPTC CYBERLAB LEARNING ENVIRONMENT
+   Palette: Kali Purple · Navy · Gold · Terminal Green
+   Layout: Sidebar nav + content panel, fullscreen app
+   ═══════════════════════════════════════════════════ */
+:root {
+  --bg:       #0D0F1A;
+  --surface:  #141726;
+  --surface2: #1C2036;
+  --border:   #252A45;
+  --navy:     #0A1F5C;
+  --kali:     #3B0764;
+  --kali-mid: #6D28D9;
+  --kali-lt:  #A78BFA;
+  --gold:     #C8922A;
+  --gold-lt:  #F5C842;
+  --teal:     #0F766E;
+  --green:    #00FF41;
+  --green-dk: #00C431;
+  --red:      #EF4444;
+  --amber:    #F59E0B;
+  --fg:       #E8EBF5;
+  --fg-mid:   #9AA0C4;
+  --fg-dim:   #5A607A;
+  --radius:   8px;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg:       #F0F2FA;
+    --surface:  #FFFFFF;
+    --surface2: #EEF0FC;
+    --border:   #D4D8F0;
+    --fg:       #0D0F1A;
+    --fg-mid:   #4A5080;
+    --fg-dim:   #8890B0;
+    --green:    #16A34A;
+    --green-dk: #15803D;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #F0F2FA; --surface: #FFFFFF; --surface2: #EEF0FC;
+  --border: #D4D8F0; --fg: #0D0F1A; --fg-mid: #4A5080;
+  --fg-dim: #8890B0; --green: #16A34A; --green-dk: #15803D;
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--fg); font-size: 14px; }
+
+/* ── LAYOUT ─────────────────────────────────────── */
+#app { display: flex; height: 100%; }
+
+/* SIDEBAR */
+#sidebar {
+  width: 260px; min-width: 260px; background: var(--surface);
+  border-right: 1px solid var(--border); display: flex; flex-direction: column;
+  overflow: hidden; transition: width .3s;
+}
+#sidebar.collapsed { width: 56px; min-width: 56px; }
+#sidebar-header {
+  padding: 16px 14px 12px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.logo-mark {
+  width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--kali) 0%, var(--kali-mid) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.logo-text { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 800;
+  color: var(--fg); white-space: nowrap; overflow: hidden; line-height: 1.2; }
+.logo-text span { color: var(--kali-lt); }
+#collapse-btn {
+  margin-left: auto; background: none; border: none; color: var(--fg-dim);
+  cursor: pointer; padding: 4px; border-radius: 4px; flex-shrink: 0;
+  font-size: 16px; line-height: 1;
+}
+#collapse-btn:hover { color: var(--fg); background: var(--surface2); }
+
+/* Progress overview */
+#progress-bar-wrap {
+  padding: 12px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.prog-label { font-size: 11px; color: var(--fg-dim); margin-bottom: 6px; display: flex; justify-content: space-between; }
+.prog-track { height: 4px; background: var(--border); border-radius: 2px; }
+.prog-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--kali-mid), var(--kali-lt)); transition: width .4s; }
+
+/* Day nav */
+#day-nav { flex: 1; overflow-y: auto; padding: 8px 0; }
+.day-group { margin-bottom: 4px; }
+.day-btn {
+  width: 100%; background: none; border: none; cursor: pointer;
+  padding: 8px 14px; display: flex; align-items: center; gap: 10px;
+  color: var(--fg-mid); font-size: 12px; font-weight: 600; text-align: left;
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.day-btn:hover { color: var(--fg); }
+.day-btn.active { color: var(--kali-lt); }
+.day-dot {
+  width: 24px; height: 24px; border-radius: 50%; background: var(--surface2);
+  border: 1.5px solid var(--border); display: flex; align-items: center;
+  justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+}
+.day-btn.active .day-dot { background: var(--kali); border-color: var(--kali-mid); color: var(--kali-lt); }
+.day-btn.done .day-dot { background: var(--teal); border-color: var(--teal); color: #fff; }
+.day-text { overflow: hidden; white-space: nowrap; }
+
+.mod-list { padding-left: 0; }
+.mod-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 14px 6px 48px; cursor: pointer; border-radius: 0;
+  color: var(--fg-dim); font-size: 12.5px; transition: all .15s;
+}
+.mod-item:hover { color: var(--fg); background: var(--surface2); }
+.mod-item.active { color: var(--kali-lt); background: rgba(109,40,217,.12); }
+.mod-item.done { color: var(--green); }
+.mod-check { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid currentColor;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 9px; }
+.mod-item.done .mod-check { background: var(--green); border-color: var(--green); color: #000; }
+.mod-item.active .mod-check { border-color: var(--kali-lt); }
+
+/* Sidebar footer */
+#sidebar-footer {
+  padding: 10px 14px; border-top: 1px solid var(--border);
+  display: flex; gap: 8px; flex-shrink: 0;
+}
+.sf-btn {
+  flex: 1; padding: 7px; border-radius: var(--radius); border: 1px solid var(--border);
+  background: var(--surface2); color: var(--fg-mid); font-size: 11px; font-weight: 600;
+  cursor: pointer; text-align: center; transition: all .15s;
+}
+.sf-btn:hover { color: var(--fg); border-color: var(--kali-mid); }
+.sf-btn.active-view { background: var(--kali); border-color: var(--kali-mid); color: var(--kali-lt); }
+
+/* ── MAIN PANEL ──────────────────────────────────── */
+#main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+/* Top bar */
+#topbar {
+  height: 52px; border-bottom: 1px solid var(--border); background: var(--surface);
+  display: flex; align-items: center; padding: 0 20px; gap: 12px; flex-shrink: 0;
+}
+#topbar-title { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 800; flex: 1; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tb-badge {
+  padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  background: var(--kali); color: var(--kali-lt); white-space: nowrap;
+}
+.tb-badge.kali { background: rgba(59,7,100,.6); border: 1px solid var(--kali-mid); }
+.tb-badge.gold { background: rgba(200,146,42,.2); color: var(--gold-lt); border: 1px solid var(--gold); }
+#theme-toggle {
+  background: none; border: 1px solid var(--border); color: var(--fg-mid);
+  padding: 5px 9px; border-radius: 6px; cursor: pointer; font-size: 13px;
+}
+#theme-toggle:hover { color: var(--fg); border-color: var(--kali-mid); }
+
+/* ── VIEWS ───────────────────────────────────────── */
+#content { flex: 1; overflow-y: auto; overflow-x: hidden; }
+.view { display: none; padding: 24px 20px; }
+.view.active { display: block; }
+
+/* Module player */
+.module-hero {
+  background: linear-gradient(135deg, var(--kali) 0%, #1A0535 50%, var(--navy) 100%);
+  border-radius: var(--radius); padding: 24px 28px; margin-bottom: 20px;
+  border: 1px solid var(--kali-mid);
+}
+.hero-eyebrow { font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--kali-lt); margin-bottom: 8px; }
+.hero-title { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 800;
+  color: #fff; margin-bottom: 6px; text-wrap: balance; }
+.hero-sub { font-size: 13px; color: #B0B8D8; line-height: 1.5; }
+.hero-meta { display: flex; gap: 16px; margin-top: 14px; flex-wrap: wrap; }
+.hero-tag {
+  display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--kali-lt);
+  background: rgba(109,40,217,.25); padding: 4px 10px; border-radius: 20px;
+}
+
+/* Section blocks */
+.section-block { margin-bottom: 20px; }
+.section-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--fg-dim); margin-bottom: 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.section-label.kali-label { color: var(--kali-lt); border-color: var(--kali-mid); }
+.section-label.gold-label { color: var(--gold); border-color: var(--gold); }
+
+/* Theory cards */
+.theory-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px 18px; margin-bottom: 10px;
+}
+.theory-card h3 { font-size: 13px; font-weight: 700; color: var(--fg); margin-bottom: 6px; }
+.theory-card p { font-size: 13px; color: var(--fg-mid); line-height: 1.65; }
+.theory-card ul { padding-left: 16px; margin-top: 6px; }
+.theory-card li { font-size: 13px; color: var(--fg-mid); line-height: 1.7; }
+
+/* Concept highlight */
+.concept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+.concept-pill {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.concept-pill .cp-icon { font-size: 20px; margin-bottom: 6px; }
+.concept-pill .cp-title { font-size: 12px; font-weight: 700; color: var(--fg); margin-bottom: 3px; }
+.concept-pill .cp-desc { font-size: 11px; color: var(--fg-dim); line-height: 1.5; }
+
+/* Terminal block */
+.terminal {
+  background: #0A0C14; border: 1px solid var(--kali-mid); border-radius: var(--radius);
+  margin-bottom: 12px; overflow: hidden; font-family: 'JetBrains Mono', monospace;
+}
+.term-header {
+  background: var(--kali); padding: 8px 14px; display: flex; align-items: center; gap: 8px;
+}
+.term-dots { display: flex; gap: 5px; }
+.term-dot { width: 10px; height: 10px; border-radius: 50%; }
+.term-dot.r { background: #FF5F57; } .term-dot.y { background: #FFBD2E; } .term-dot.g { background: #27C93F; }
+.term-title { font-size: 11px; color: #CCC; margin-left: 6px; }
+.term-body { padding: 14px 16px; }
+.term-line { display: flex; gap: 8px; margin-bottom: 6px; font-size: 12.5px; line-height: 1.5; }
+.term-line:last-child { margin-bottom: 0; }
+.term-prompt { color: var(--kali-lt); flex-shrink: 0; }
+.term-cmd { color: var(--green); }
+.term-output { color: #8892B0; padding-left: 24px; font-size: 12px; display: block; }
+.term-comment { color: #5A6280; font-style: italic; }
+.copy-btn {
+  float: right; margin-top: -2px; background: rgba(109,40,217,.3); border: 1px solid var(--kali-mid);
+  color: var(--kali-lt); padding: 2px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;
+  font-family: 'Inter', sans-serif; font-weight: 600;
+}
+.copy-btn:hover { background: var(--kali); }
+
+/* Lab mission */
+.lab-mission {
+  background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--kali-mid);
+  border-radius: var(--radius); padding: 16px 18px; margin-bottom: 12px;
+}
+.lab-mission .lm-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.lab-mission .lm-badge {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  padding: 3px 8px; border-radius: 20px; background: var(--kali); color: var(--kali-lt);
+}
+.lab-mission .lm-title { font-size: 13px; font-weight: 700; color: var(--fg); }
+.lab-mission .lm-steps { counter-reset: step; padding: 0; }
+.lab-mission .lm-step {
+  counter-increment: step; display: flex; gap: 10px; margin-bottom: 10px;
+  font-size: 12.5px; color: var(--fg-mid); line-height: 1.6;
+}
+.lab-mission .lm-step::before {
+  content: counter(step); min-width: 20px; height: 20px; border-radius: 50%;
+  background: var(--kali-mid); color: #fff; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
+}
+.lab-mission .lm-check {
+  display: flex; align-items: center; gap: 8px; margin-top: 12px;
+  padding: 8px 12px; background: rgba(0,255,65,.06); border: 1px solid rgba(0,255,65,.2);
+  border-radius: 6px; font-size: 12px; color: var(--green);
+}
+
+/* Callout boxes */
+.callout {
+  display: flex; gap: 12px; padding: 13px 16px; border-radius: var(--radius);
+  margin-bottom: 10px; font-size: 12.5px; line-height: 1.6;
+}
+.callout.warn { background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3); color: var(--fg-mid); }
+.callout.info { background: rgba(109,40,217,.1); border: 1px solid rgba(109,40,217,.3); color: var(--fg-mid); }
+.callout.success { background: rgba(0,255,65,.07); border: 1px solid rgba(0,255,65,.2); color: var(--fg-mid); }
+.callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.callout strong { color: var(--fg); }
+
+/* Progress buttons */
+.nav-buttons { display: flex; gap: 10px; justify-content: space-between; padding-top: 20px; border-top: 1px solid var(--border); margin-top: 24px; }
+.btn {
+  padding: 9px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none; transition: all .15s;
+}
+.btn-ghost { background: var(--surface2); border: 1px solid var(--border); color: var(--fg-mid); }
+.btn-ghost:hover { color: var(--fg); border-color: var(--kali-mid); }
+.btn-primary { background: linear-gradient(135deg, var(--kali), var(--kali-mid)); color: #fff; }
+.btn-primary:hover { opacity: .9; transform: translateY(-1px); }
+.btn-complete { background: linear-gradient(135deg, var(--teal), #0D9488); color: #fff; }
+.btn-complete:hover { opacity: .9; }
+
+/* ── DASHBOARD VIEW ──────────────────────────────── */
+#view-dashboard .dash-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px; text-align: center;
+}
+.stat-big { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 600;
+  color: var(--kali-lt); line-height: 1; margin-bottom: 4px; }
+.stat-label { font-size: 11px; color: var(--fg-dim); text-transform: uppercase; letter-spacing: .06em; }
+.day-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px 18px; margin-bottom: 10px; cursor: pointer; transition: all .15s;
+  display: flex; align-items: center; gap: 14px;
+}
+.day-card:hover { border-color: var(--kali-mid); background: var(--surface2); }
+.day-card .dc-num {
+  width: 40px; height: 40px; border-radius: 8px; background: var(--kali);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600;
+  color: var(--kali-lt); flex-shrink: 0;
+}
+.day-card .dc-info { flex: 1; min-width: 0; }
+.day-card .dc-title { font-size: 13px; font-weight: 700; color: var(--fg); margin-bottom: 2px; }
+.day-card .dc-sub { font-size: 12px; color: var(--fg-dim); }
+.day-card .dc-prog { margin-top: 8px; }
+.day-card .dc-prog-bar { height: 3px; background: var(--border); border-radius: 2px; }
+.day-card .dc-prog-fill { height: 100%; background: var(--kali-mid); border-radius: 2px; transition: width .4s; }
+
+/* ── TOOLS REFERENCE ─────────────────────────────── */
+.tool-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 16px; margin-bottom: 10px;
+}
+.tool-card .tc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.tool-card .tc-name { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; color: var(--kali-lt); }
+.tool-card .tc-day { font-size: 10px; background: var(--kali); color: var(--kali-lt); padding: 2px 8px; border-radius: 20px; }
+.tool-card .tc-desc { font-size: 12.5px; color: var(--fg-mid); line-height: 1.6; margin-bottom: 8px; }
+
+/* ── QUIZ VIEW ───────────────────────────────────── */
+.quiz-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;
+}
+.quiz-q { font-size: 14px; font-weight: 600; color: var(--fg); margin-bottom: 14px; line-height: 1.5; }
+.quiz-options { display: flex; flex-direction: column; gap: 8px; }
+.quiz-opt {
+  padding: 10px 14px; border-radius: var(--radius); border: 1.5px solid var(--border);
+  background: var(--surface2); color: var(--fg-mid); cursor: pointer; font-size: 13px;
+  transition: all .15s; text-align: left;
+}
+.quiz-opt:hover { border-color: var(--kali-mid); color: var(--fg); }
+.quiz-opt.correct { border-color: var(--green); background: rgba(0,255,65,.08); color: var(--green); }
+.quiz-opt.wrong { border-color: var(--red); background: rgba(239,68,68,.08); color: var(--red); }
+.quiz-feedback { margin-top: 14px; padding: 12px 16px; border-radius: var(--radius); font-size: 13px; line-height: 1.6; display: none; }
+.quiz-feedback.show { display: block; }
+.quiz-feedback.correct { background: rgba(0,255,65,.08); border: 1px solid rgba(0,255,65,.3); color: var(--green); }
+.quiz-feedback.wrong { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.3); color: #F87171; }
+
+/* ── GLOSSARY ────────────────────────────────────── */
+.gloss-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.gloss-term { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 600;
+  color: var(--kali-lt); min-width: 140px; flex-shrink: 0; }
+.gloss-def { font-size: 12.5px; color: var(--fg-mid); line-height: 1.6; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--kali-mid); }
+
+/* Mobile */
+@media (max-width: 650px) {
+  #sidebar { position: fixed; z-index: 100; height: 100%; transform: translateX(-100%); transition: transform .3s; }
+  #sidebar.mobile-open { transform: translateX(0); }
+  #mobile-toggle { display: flex; }
+}
+#mobile-toggle { display: none; background: none; border: none; color: var(--fg-mid); font-size: 20px; cursor: pointer; }
+
+/* Completion overlay */
+#complete-toast {
+  position: fixed; bottom: 24px; right: 24px; background: var(--teal); color: #fff;
+  padding: 12px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,.4); transform: translateY(100px);
+  transition: transform .4s; z-index: 200;
+}
+#complete-toast.show { transform: translateY(0); }
+
+/* Collapsed sidebar hides text */
+#sidebar.collapsed .logo-text,
+#sidebar.collapsed .day-text,
+#sidebar.collapsed .mod-list,
+#sidebar.collapsed #progress-bar-wrap,
+#sidebar.collapsed #sidebar-footer .sf-btn span,
+#sidebar.collapsed .day-btn > *:not(.day-dot) { display: none; }
+#sidebar.collapsed #sidebar-footer { flex-direction: column; }
+#sidebar.collapsed .sf-btn { padding: 7px 0; font-size: 16px; }
+</style>
+
+<div id="app">
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div id="sidebar-header">
+      <div class="logo-mark">🐉</div>
+      <div class="logo-text">KAIPTC <span>CyberLab</span></div>
+      <button id="collapse-btn" title="Collapse sidebar">‹</button>
+    </div>
+    <div id="progress-bar-wrap">
+      <div class="prog-label"><span>OVERALL PROGRESS</span><span id="prog-pct">0%</span></div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div id="day-nav"></div>
+    <div id="sidebar-footer">
+      <button class="sf-btn active-view" data-view="module" id="btn-view-module">📖 <span>Learn</span></button>
+      <button class="sf-btn" data-view="tools" id="btn-view-tools">🔧 <span>Tools</span></button>
+      <button class="sf-btn" data-view="quiz" id="btn-view-quiz">🧠 <span>Quiz</span></button>
+      <button class="sf-btn" data-view="dashboard" id="btn-view-dash">📊 <span>Progress</span></button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div id="main">
+    <div id="topbar">
+      <button id="mobile-toggle">☰</button>
+      <div id="topbar-title">Module 1 — Cybersecurity Foundations & Kali Linux</div>
+      <div class="tb-badge kali">🐉 Kali Lab</div>
+      <div class="tb-badge gold">Day 1</div>
+      <button id="theme-toggle" title="Toggle theme">◑</button>
+    </div>
+
+    <div id="content">
+
+      <!-- ═══ LEARN VIEW ═══ -->
+      <div class="view active" id="view-module">
+        <div id="module-content"></div>
+      </div>
+
+      <!-- ═══ TOOLS VIEW ═══ -->
+      <div class="view" id="view-tools">
+        <div class="section-label kali-label">🔧 KALI LINUX TOOL REFERENCE — ALL 13 TOOLS</div>
+        <div id="tools-list"></div>
+      </div>
+
+      <!-- ═══ QUIZ VIEW ═══ -->
+      <div class="view" id="view-quiz">
+        <div class="section-label kali-label">🧠 KNOWLEDGE CHECK</div>
+        <div id="quiz-container"></div>
+      </div>
+
+      <!-- ═══ DASHBOARD VIEW ═══ -->
+      <div class="view" id="view-dashboard">
+        <div class="section-label">📊 YOUR PROGRESS</div>
+        <div class="dash-grid" id="dash-stats"></div>
+        <div class="section-label" style="margin-top:16px">COURSE DAYS</div>
+        <div id="dash-days"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="complete-toast">✅ Module complete! Great work.</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+//  COURSE DATA
+// ═══════════════════════════════════════════════════════════════════════════
+const COURSE = {
+  days: [
+    {
+      num: 1, title: "Cybersecurity Foundations & Kali Linux",
+      sub: "theHarvester · dig · whois · Wireshark intro",
+      modules: [
+        {
+          id: "m1", title: "Cybersecurity Fundamentals", time: "9:00–10:30",
+          kali: true, tools: ["theHarvester","dig","whois"],
+          overview: "Understand the CIA Triad, threat landscape, and Ghana's legal cybersecurity framework. Then immediately apply it in Kali Linux.",
+          theory: [
+            { title: "The CIA Triad", body: "Every cybersecurity decision revolves around three properties: Confidentiality (only authorised people see the data), Integrity (data has not been tampered with), and Availability (systems are up when needed). An attack on any one of these is a security incident." },
+            { title: "Types of Threat Actors", body: "Nation-state hackers operate with large budgets and long-term patience. Organised crime groups use ransomware for profit. Hacktivists deface websites to make political statements. Insider threats come from employees — intentional or accidental. Script kiddies use pre-built tools without understanding them. Understanding who is targeting you shapes your defence." },
+            { title: "Ghana's Legal Framework", body: "Two laws govern cybersecurity in Ghana: the Cybersecurity Act 2020 (Act 1038) establishes the Cyber Security Authority (CSA), mandates cybersecurity standards, and criminalises computer offences. The Data Protection Act 2012 (Act 843) requires organisations to register with the DPA and protect personal data." },
+            { title: "Why Kali Linux?", body: "Kali Linux is a Debian-based distribution maintained by Offensive Security. It ships with 600+ pre-installed security tools. In this course every lab uses Kali so you learn both the concept AND the industry-standard tool in the same session. All labs run inside an isolated CyberRange VM — never on live networks." },
+          ],
+          concepts: [
+            { icon:"🔒", title:"Confidentiality", desc:"Only authorised access" },
+            { icon:"✅", title:"Integrity", desc:"Data remains unaltered" },
+            { icon:"⚡", title:"Availability", desc:"Systems stay operational" },
+            { icon:"🎯", title:"Threat Actor", desc:"Who is attacking & why" },
+            { icon:"📜", title:"Act 1038", desc:"Ghana Cybersecurity Act" },
+            { icon:"🛡️", title:"CSA", desc:"Cyber Security Authority" },
+          ],
+          labs: [
+            {
+              title: "Lab 1A — Open-Source Intelligence with theHarvester",
+              badge: "OSINT",
+              steps: [
+                "Open a terminal in Kali Linux (right-click desktop → Open Terminal)",
+                "Run theHarvester against the example domain to collect emails and subdomains",
+                "Run a DNS lookup with dig to verify domain records",
+                "Use whois to identify domain ownership and registration dates",
+                "Document your findings: What did you find? What does this tell an attacker?",
+              ],
+              terminals: [
+                { title: "theHarvester — Harvest emails & subdomains", cmds: [
+                  { cmd: "theHarvester -d example.com -b google,bing,yahoo -l 100", out: "[-] Starting theHarvester...\n[*] Emails found: 3\n    admin@example.com\n    support@example.com\n[*] Hosts found: 5\n    mail.example.com\n    vpn.example.com" },
+                ]},
+                { title: "dig — Query DNS records", cmds: [
+                  { cmd: "dig example.com A", out: ";; ANSWER SECTION:\nexample.com.  300  IN  A  93.184.216.34" },
+                  { cmd: "dig example.com MX", out: ";; ANSWER SECTION:\nexample.com.  300  IN  MX  0 mail.example.com." },
+                ]},
+                { title: "whois — Domain registration intel", cmds: [
+                  { cmd: "whois example.com | grep -E 'Registrar|Created|Expires'", out: "Registrar: Example Registrar\nCreation Date: 1995-08-14\nExpiry Date: 2026-08-13" },
+                ]},
+              ],
+              check: "You should have: a list of emails, at least one subdomain, DNS records (A, MX), and whois ownership data. If you found any of these — you just did OSINT like a professional threat analyst.",
+            }
+          ],
+          quiz: [
+            { q:"Which law in Ghana criminalises computer offences and established the Cyber Security Authority?", opts:["Data Protection Act 2012","Cybersecurity Act 2020 (Act 1038)","Electronic Communications Act","National Information Technology Act"], ans:1, explain:"The Cybersecurity Act 2020 (Act 1038) established the CSA, set cybersecurity standards and criminalised offences. The Data Protection Act governs personal data." },
+            { q:"A hospital's patient records system goes offline during surgery. Which CIA property is violated?", opts:["Confidentiality","Integrity","Availability","Authentication"], ans:2, explain:"Availability means systems are accessible when needed. The hospital system being offline is an availability failure — the most critical type in healthcare." },
+            { q:"What does theHarvester do?", opts:["Scans for open ports on a network","Collects emails and subdomains from public sources","Cracks password hashes","Captures network packets"], ans:1, explain:"theHarvester is an OSINT tool that collects emails, subdomains, IPs and names from public sources like Google, Bing, and certificate transparency logs." },
+          ]
+        },
+        {
+          id: "m2", title: "AI in Cybersecurity", time: "11:00–12:30",
+          kali: false, tools: [],
+          overview: "How AI is reshaping both attacks and defences. Understand AI threat models, prompt injection, and the NIST AI Risk Management Framework.",
+          theory: [
+            { title: "AI as Attacker and Defender", body: "Attackers use AI to craft more convincing phishing emails, automate vulnerability scanning, and generate malware variants. Defenders use AI for anomaly detection in logs, automated incident triage, and predictive threat intelligence. The same technology arms both sides." },
+            { title: "Prompt Injection Attacks", body: "Large Language Models (like ChatGPT) can be manipulated by carefully crafted inputs. A prompt injection attack embeds hidden instructions in content that an AI reads, causing it to ignore its original instructions. Example: a malicious email telling an AI assistant to forward all emails to an attacker." },
+            { title: "NIST AI Risk Management Framework", body: "NIST AI RMF has four functions: GOVERN (establish accountability), MAP (identify context and risks), MEASURE (analyse and assess risks), MANAGE (prioritise and treat risks). Every AI deployment in government or corporate Ghana should be assessed against this framework." },
+            { title: "Deepfakes & Social Engineering", body: "AI-generated video and audio (deepfakes) enable new forms of CEO fraud. A voice clone of a CFO instructing a finance officer to transfer funds has already cost organisations millions. Detection tools analyse facial inconsistencies, audio artefacts, and metadata." },
+          ],
+          concepts: [
+            { icon:"🤖", title:"LLM Attack", desc:"AI model manipulation" },
+            { icon:"💉", title:"Prompt Injection", desc:"Hidden AI instructions" },
+            { icon:"🎭", title:"Deepfake", desc:"Synthetic media fraud" },
+            { icon:"🗺️", title:"NIST AI RMF", desc:"Gov·Map·Measure·Manage" },
+            { icon:"🔍", title:"AI Anomaly", desc:"ML-based detection" },
+            { icon:"⚖️", title:"AI Governance", desc:"Accountability & policy" },
+          ],
+          labs: [],
+          quiz: [
+            { q:"Which NIST AI RMF function focuses on identifying the context and potential impacts of an AI system?", opts:["GOVERN","MAP","MEASURE","MANAGE"], ans:1, explain:"MAP identifies the context, use cases, and potential harms of an AI system before deployment. It is the second function after GOVERN." },
+            { q:"A prompt injection attack targets:", opts:["Network routers","AI language models","Database servers","Email gateways"], ans:1, explain:"Prompt injection embeds hidden instructions in content that an AI reads, causing it to ignore its original instructions and follow the attacker's instead." },
+          ]
+        }
+      ]
+    },
+    {
+      num: 2, title: "Network Security & Traffic Analysis",
+      sub: "Nmap · Wireshark · tcpdump",
+      modules: [
+        {
+          id: "m3", title: "Network Security & Traffic Analysis", time: "9:00–10:30",
+          kali: true, tools: ["nmap","wireshark","tcpdump"],
+          overview: "Map networks, understand protocols, and capture live traffic. These are the core skills of both network defenders and penetration testers.",
+          theory: [
+            { title: "TCP/IP Protocol Stack", body: "Data travels through four layers: Application (HTTP, SMTP, DNS), Transport (TCP/UDP), Network (IP), and Link (Ethernet). Understanding which layer an attack targets tells you which control prevents it. Firewalls operate at the Network layer; WAFs at the Application layer." },
+            { title: "Network Scanning with Nmap", body: "Nmap (Network Mapper) discovers hosts, open ports, services, and OS types on a network. A defender uses Nmap to audit their own network. An attacker uses it for reconnaissance. Understanding Nmap output lets you see exactly what an adversary sees when they scan your network." },
+            { title: "Packet Analysis with Wireshark", body: "Wireshark captures every packet on a network interface and lets you examine each one. You can see usernames and passwords sent in plaintext (HTTP, FTP, Telnet), DNS queries revealing what sites users visit, and malware command-and-control traffic patterns." },
+          ],
+          concepts: [
+            { icon:"🌐", title:"TCP/IP Stack", desc:"4 layers, 4 defences" },
+            { icon:"🗺️", title:"Port Scanning", desc:"What's open & listening" },
+            { icon:"📦", title:"Packet Capture", desc:"Every byte on the wire" },
+            { icon:"🔥", title:"Firewall Rules", desc:"Allow/deny at network" },
+            { icon:"🕵️", title:"Traffic Analysis", desc:"Find anomalies in data" },
+            { icon:"📡", title:"Wireshark Filters", desc:"BPF display filters" },
+          ],
+          labs: [
+            {
+              title: "Lab 3A — Network Discovery with Nmap",
+              badge: "RECON",
+              steps: [
+                "Open Kali terminal. Your CyberRange lab network is 10.0.0.0/24",
+                "Run a host discovery scan to find which IPs are online",
+                "Run a version scan on a target host to identify services",
+                "Run an OS detection scan",
+                "Export results to a text file for your security report",
+              ],
+              terminals: [
+                { title: "Nmap — Host Discovery", cmds: [
+                  { cmd: "nmap -sn 10.0.0.0/24", out: "Starting Nmap 7.94\nHost: 10.0.0.1  Status: Up\nHost: 10.0.0.10 Status: Up\nHost: 10.0.0.20 Status: Up\nNmap done: 256 IPs scanned in 2.40s" },
+                ]},
+                { title: "Nmap — Service & Version Detection", cmds: [
+                  { cmd: "nmap -sV -sC 10.0.0.10", out: "PORT    STATE  SERVICE  VERSION\n22/tcp  open   ssh      OpenSSH 8.4\n80/tcp  open   http     Apache 2.4.51\n3306/tcp open  mysql    MySQL 5.7" },
+                ]},
+                { title: "tcpdump — Capture packets live", cmds: [
+                  { cmd: "tcpdump -i eth0 -n -c 50 -w capture.pcap", out: "tcpdump: listening on eth0\n50 packets captured\n50 packets received by filter" },
+                  { cmd: "tcpdump -r capture.pcap port 80", out: "10.0.0.5 > 10.0.0.10: HTTP GET /login HTTP/1.1\nAuthorization: Basic dXNlcjpwYXNz..." },
+                ]},
+              ],
+              check: "You found live hosts, identified running services and versions, captured 50 packets, and found cleartext credentials in HTTP traffic. This is exactly what a penetration tester documents in a report.",
+            }
+          ],
+          quiz: [
+            { q:"An Nmap scan shows port 443 is open. What does this indicate?", opts:["FTP server running","HTTPS web server","SSH access","Database server"], ans:1, explain:"Port 443 is the standard port for HTTPS (secure HTTP). An open 443 indicates a web server with TLS/SSL configured." },
+            { q:"You capture a packet in Wireshark and see 'Authorization: Basic dXNlcjpwYXNz'. What has occurred?", opts:["Encrypted authentication","Cleartext password transmission","Failed login attempt","Multi-factor authentication"], ans:1, explain:"HTTP Basic Auth encodes credentials in Base64 (not encryption). The string decodes to 'user:pass' — completely readable to anyone on the network." },
+          ]
+        }
+      ]
+    },
+    {
+      num: 3, title: "Vulnerability Assessment & Incident Response",
+      sub: "Nikto · Wazuh SIEM · Hydra (demo) · John",
+      modules: [
+        {
+          id: "m4", title: "Vulnerability Management & SIEM", time: "9:00–12:30",
+          kali: true, tools: ["nikto","hydra","john","wazuh"],
+          overview: "Scan web applications for vulnerabilities, triage alerts in a SIEM, and understand the NIST incident response lifecycle.",
+          theory: [
+            { title: "OWASP Top 10", body: "The Open Web Application Security Project maintains a list of the 10 most critical web vulnerabilities: Broken Access Control, Cryptographic Failures, Injection (SQL, XSS), Insecure Design, Security Misconfiguration, Vulnerable Components, Authentication Failures, Software Integrity Failures, Logging Failures, and SSRF. Every web developer and security tester must know these." },
+            { title: "NIST SP 800-61 Rev.3 Incident Response", body: "NIST defines four phases: PREPARATION (policies, teams, tools ready before an incident), DETECTION & ANALYSIS (identify and confirm incident, determine scope), CONTAINMENT, ERADICATION & RECOVERY (stop spread, remove threat, restore), POST-INCIDENT ACTIVITY (lessons learned, report). In Ghana, serious incidents must also be reported to the CSA within 72 hours." },
+            { title: "SIEM Alert Triage", body: "A Security Information and Event Management (SIEM) system like Wazuh aggregates logs from all devices and correlates them into alerts. Your job as an analyst is to triage: Is this a true positive, false positive, or benign? Look at the rule that fired, the source IP, the time pattern, and related events to make that determination." },
+          ],
+          concepts: [
+            { icon:"🕷️", title:"Web Scanning", desc:"Nikto finds misconfigs" },
+            { icon:"🚨", title:"SIEM Triage", desc:"True vs false positive" },
+            { icon:"🔑", title:"Credential Test", desc:"Hydra brute-force demo" },
+            { icon:"📋", title:"NIST IR", desc:"4-phase response cycle" },
+            { icon:"🌐", title:"OWASP Top 10", desc:"Critical web vulns" },
+            { icon:"📊", title:"Log Analysis", desc:"Correlate events" },
+          ],
+          labs: [
+            {
+              title: "Lab 4A — Web Vulnerability Scan with Nikto",
+              badge: "WEB SCAN",
+              steps: [
+                "Start the vulnerable web target in your CyberRange (it's at http://10.0.0.20)",
+                "Run Nikto to scan for common vulnerabilities and misconfigurations",
+                "Review the output — identify at least 3 findings",
+                "Map each finding to the OWASP Top 10 category",
+                "Write a one-paragraph remediation recommendation for the most critical finding",
+              ],
+              terminals: [
+                { title: "Nikto — Web vulnerability scanner", cmds: [
+                  { cmd: "nikto -h http://10.0.0.20 -o scan.txt", out: "- Nikto v2.1.6\n+ Target: 10.0.0.20:80\n+ OSVDB-3092: /admin/: This might be interesting\n+ OSVDB-5765: /phpmyadmin/: phpMyAdmin is for administering MySQL\n+ Cookie session created without HttpOnly flag\n+ X-Frame-Options header missing\n+ Server: Apache/2.4.51 — OUTDATED VERSION\n+ 5 items reported" },
+                ]},
+                { title: "Wazuh SIEM — Review brute-force alert", cmds: [
+                  { cmd: "cat /var/ossec/logs/alerts/alerts.log | grep 'authentication_failed' | tail -5", out: "Rule 5710: Multiple auth failures\nSrc IP: 10.0.0.99  User: admin\nRule 5711: Possible brute-force attack\n5 failed logins in 30 seconds" },
+                ]},
+              ],
+              check: "You identified real vulnerabilities a real attacker would exploit: a missing HttpOnly cookie flag, exposed admin panel, outdated Apache, and phpMyAdmin. The SIEM showed you the brute-force trail they'd leave.",
+            }
+          ],
+          quiz: [
+            { q:"During NIST IR Phase 2 (Detection & Analysis), your SIEM fires 200 alerts. Your first action should be:", opts:["Block all source IPs immediately","Triage alerts to separate true positives from false positives","Call law enforcement","Shut down the affected servers"], ans:1, explain:"Triage determines which alerts warrant escalation. Acting on all 200 would overwhelm your team and disrupt operations. Prioritise: confirmed true positives first, then escalate by severity." },
+          ]
+        }
+      ]
+    },
+    {
+      num: 4, title: "Digital Forensics & Email Fraud",
+      sub: "Email headers · sha256sum · Autopsy · CyberChef",
+      modules: [
+        {
+          id: "m5", title: "Business Email Compromise & Email Forensics", time: "9:00–10:30",
+          kali: true, tools: ["curl","dig"],
+          overview: "Investigate a real Business Email Compromise attack. Trace the full attack chain from spoofed domain to wire transfer using email header analysis.",
+          theory: [
+            { title: "BEC Attack Chain", body: "Business Email Compromise (BEC) follows a pattern: (1) Attacker registers a lookalike domain (e.g. kaiptc-gh.com instead of kaiptc.org), (2) Sends spoofed email from 'legitimate' address, (3) Impersonates a senior executive instructing finance to transfer funds, (4) Provides attacker-controlled bank account. Ghana's financial sector has lost millions GHS to BEC attacks." },
+            { title: "Email Authentication: SPF, DKIM, DMARC", body: "SPF (Sender Policy Framework) lists which mail servers can send email for a domain. DKIM (DomainKeys Identified Mail) adds a cryptographic signature to every email. DMARC tells receiving servers what to do when SPF/DKIM fail (none, quarantine, reject). A domain without DMARC can be spoofed trivially. A domain with DMARC:reject cannot." },
+            { title: "Reading Email Headers", body: "Email headers reveal the full routing path of an email. The 'Received:' chain (read bottom-up) shows every server the email passed through. The 'Authentication-Results:' header shows whether SPF, DKIM, and DMARC passed or failed. A failed DMARC check on an email claiming to be from your CEO is a strong BEC indicator." },
+          ],
+          concepts: [
+            { icon:"📧", title:"BEC Attack", desc:"CEO fraud via email" },
+            { icon:"🔐", title:"SPF Record", desc:"Authorised mail servers" },
+            { icon:"✍️", title:"DKIM Signing", desc:"Cryptographic email auth" },
+            { icon:"📋", title:"DMARC Policy", desc:"reject|quarantine|none" },
+            { icon:"🔍", title:"Header Analysis", desc:"Trace email origin" },
+            { icon:"🌐", title:"Lookalike Domain", desc:"Typosquatting attack" },
+          ],
+          labs: [
+            {
+              title: "Lab 5A — Investigate a BEC Email",
+              badge: "FORENSICS",
+              steps: [
+                "You have received a suspicious email. Open the header file in your CyberRange",
+                "Find the 'Received:' chain — what server actually sent this email?",
+                "Check the Authentication-Results — did SPF, DKIM, DMARC pass or fail?",
+                "Use dig to check if the claimed sender domain has a valid SPF record",
+                "Write an incident summary: Is this a BEC attempt? What evidence supports your conclusion?",
+              ],
+              terminals: [
+                { title: "dig — Check SPF record of suspected domain", cmds: [
+                  { cmd: "dig TXT kaiptc-gh.com", out: ";; ANSWER SECTION:\nkaiptc-gh.com. 300 IN TXT \"v=spf1 include:mailgun.org ~all\"\n;; Note: This is a LOOKALIKE domain — not the real kaiptc.org!" },
+                  { cmd: "dig TXT kaiptc.org", out: ";; ANSWER SECTION:\nkaiptc.org. 300 IN TXT \"v=spf1 ip4:196.201.210.0/24 -all\"\nkaiptc.org. 300 IN TXT \"v=DMARC1; p=reject; rua=mailto:dmarc@kaiptc.org\"" },
+                ]},
+              ],
+              check: "You identified a lookalike domain (kaiptc-gh.com vs kaiptc.org), confirmed SPF failed, found no DMARC on the attacker domain, and traced the email origin to a mail relay outside Ghana. This is textbook BEC forensics.",
+            }
+          ],
+          quiz: [
+            { q:"An email from 'ceo@kaiptc-gh.com' passes SPF but the real CEO domain is kaiptc.org. This is best described as:", opts:["A legitimate email","A domain spoofing / lookalike attack","A DKIM failure","A DMARC quarantine result"], ans:1, explain:"The email passes SPF for kaiptc-gh.com (the attacker controls that domain), but the real organisation is kaiptc.org. This is a lookalike domain / typosquatting BEC attack." },
+          ]
+        },
+        {
+          id: "m6", title: "Digital Forensics", time: "11:00–12:30",
+          kali: true, tools: ["sha256sum","autopsy","cyberchef"],
+          overview: "Preserve evidence with cryptographic integrity, conduct disk forensics with Autopsy, and decode encoded artefacts with CyberChef.",
+          theory: [
+            { title: "Chain of Custody", body: "Chain of custody is the documented, unbroken trail of who had custody of evidence, when, and why. In court, defence lawyers challenge the chain of custody to get evidence excluded. Digital evidence is also challenged on integrity grounds — was the file modified after seizure? SHA-256 hashing proves the bit-exact copy was unchanged." },
+            { title: "Disk Forensics Workflow", body: "The standard workflow: (1) Acquire a forensic image (bit-for-bit copy) using dcfldd or FTK Imager, (2) Hash the original and the copy — they must match, (3) Mount the image read-only, (4) Use Autopsy or Sleuth Kit to examine file system artefacts — deleted files, browser history, recently opened documents, USB device history." },
+          ],
+          concepts: [
+            { icon:"🔗", title:"Chain of Custody", desc:"Documented evidence trail" },
+            { icon:"#️⃣", title:"SHA-256 Hash", desc:"Bit-exact integrity proof" },
+            { icon:"💾", title:"Disk Image", desc:"Forensic bit-for-bit copy" },
+            { icon:"🔬", title:"Autopsy", desc:"GUI forensics platform" },
+            { icon:"🍳", title:"CyberChef", desc:"Decode any artefact" },
+            { icon:"🗑️", title:"File Recovery", desc:"Undelete with Sleuth Kit" },
+          ],
+          labs: [
+            {
+              title: "Lab 6A — Hash Evidence & Analyse with Autopsy",
+              badge: "FORENSICS",
+              steps: [
+                "Hash the provided disk image to establish its integrity baseline",
+                "Open Autopsy, create a new case, and add the disk image as a data source",
+                "Browse to 'Deleted Files' — find and recover the deleted document",
+                "Check 'Web History' — what sites did the suspect visit?",
+                "Use CyberChef to decode a Base64-encoded string found in a recovered file",
+              ],
+              terminals: [
+                { title: "sha256sum — Hash the evidence", cmds: [
+                  { cmd: "sha256sum suspect_disk.img", out: "a3f8c2e1d4b56789...  suspect_disk.img\n# Record this hash BEFORE analysis — it proves nothing was changed" },
+                  { cmd: "sha256sum suspect_disk.img > evidence_hash.txt && cat evidence_hash.txt", out: "a3f8c2e1d4b56789...  suspect_disk.img\n# Hash recorded in evidence_hash.txt — part of your chain of custody" },
+                ]},
+                { title: "CyberChef — Decode Base64 artefact", cmds: [
+                  { cmd: "echo 'dHJhbnNmZXIgZnVuZHMgdG8gYWNjb3VudA==' | base64 -d", out: "transfer funds to account\n# This hidden instruction was encoded to evade basic keyword detection" },
+                ]},
+              ],
+              check: "You have a SHA-256 hash proving evidence integrity, recovered deleted files, and decoded a hidden instruction. This evidence package would support a criminal prosecution.",
+            }
+          ],
+          quiz: [
+            { q:"Why do you hash a disk image BEFORE starting forensic analysis?", opts:["To compress the image","To prove the copy is identical to the original and was not altered during analysis","To speed up Autopsy","To encrypt the evidence"], ans:1, explain:"Hashing before and after analysis proves the evidence has not been modified. This is critical for chain of custody — without it, a defence lawyer can argue the evidence was tampered with." },
+          ]
+        }
+      ]
+    },
+    {
+      num: 5, title: "NIST CSF 2.0, AI Governance & CyberRange Capstone",
+      sub: "Full 8-inject CyberRange · All tools · Capstone",
+      modules: [
+        {
+          id: "m10", title: "CyberRange Capstone Exercise", time: "All day",
+          kali: true, tools: ["theHarvester","nmap","wireshark","nikto","wazuh","autopsy","cyberchef","sha256sum"],
+          overview: "Eight-inject scenario simulating a real attack on a fictional Ghanaian organisation. You play both attacker (reconnaissance) and defender (detection, response, forensics).",
+          theory: [
+            { title: "Scenario: GhanaFinServ Attack Chain", body: "GhanaFinServ Ltd has been targeted. Over 5 days the attacker: (1) Harvested employee emails via OSINT, (2) Sent a spear-phishing email with a malicious attachment, (3) Established a foothold on the internal network, (4) Moved laterally to the finance workstation, (5) Exfiltrated customer data, (6) Deployed ransomware. Your team must detect, respond, and produce a forensic report." },
+            { title: "NIST CSF 2.0 Response Mapping", body: "Every action you take maps to a NIST CSF 2.0 function: IDENTIFY (scope the incident, affected assets), PROTECT (patch the initial vulnerability, update firewall rules), DETECT (tune SIEM rules to catch this TTPs), RESPOND (contain, eradicate, communicate), RECOVER (restore backups, validate clean state), GOVERN (update policy, train staff, report to CSA)." },
+          ],
+          concepts: [
+            { icon:"🎯", title:"8-Inject Scenario", desc:"Full attack simulation" },
+            { icon:"🏛️", title:"NIST CSF 2.0", desc:"6 functions mapped" },
+            { icon:"⚔️", title:"Red/Blue Team", desc:"Attack & defend" },
+            { icon:"📝", title:"Incident Report", desc:"Court-ready document" },
+            { icon:"🔄", title:"MITRE ATT&CK", desc:"TTP mapping" },
+            { icon:"🏆", title:"Capstone Grade", desc:"35% of your mark" },
+          ],
+          labs: [
+            {
+              title: "Capstone Inject 1 — OSINT Reconnaissance",
+              badge: "INJECT 1/8",
+              steps: [
+                "Target: ghanafinserv-lab.local (isolated CyberRange — NOT the real internet)",
+                "Use theHarvester to collect all employee emails from the simulated OSINT sources",
+                "Use dig to enumerate all subdomains of ghanafinserv-lab.local",
+                "Document findings in your incident timeline (who, what, when, where)",
+                "Identify the CEO and CFO emails — these are BEC targets",
+              ],
+              terminals: [
+                { title: "Capstone — OSINT Phase", cmds: [
+                  { cmd: "theHarvester -d ghanafinserv-lab.local -b google -l 200", out: "[*] Emails found: 8\n    ceo@ghanafinserv-lab.local\n    cfo@ghanafinserv-lab.local\n    admin@ghanafinserv-lab.local\n[*] Subdomains: mail, vpn, intranet" },
+                  { cmd: "nmap -sV --script=vuln 10.0.0.0/24 -oN capstone_recon.txt", out: "Scanning 256 hosts...\n10.0.0.5: 22/open, 80/open, 443/open\n10.0.0.10: MS17-010 VULNERABLE (EternalBlue!)\n10.0.0.20: Nikto findings: 7 vulnerabilities" },
+                ]},
+              ],
+              check: "Inject 1 complete. You have the attack surface: 8 employee emails, 3 subdomains, a vulnerable host (EternalBlue). This is what the attacker sees. Now switch to defender mode for Inject 2.",
+            }
+          ],
+          quiz: [
+            { q:"In NIST CSF 2.0, which function was added in version 2.0 that did not exist in version 1.1?", opts:["IDENTIFY","PROTECT","GOVERN","RECOVER"], ans:2, explain:"GOVERN is new in CSF 2.0. It sits across all other functions and addresses cybersecurity strategy, policy, roles, and oversight — recognising that governance enables everything else." },
+            { q:"Your SIEM shows 300 alerts/minute during a ransomware incident. Your first action is:", opts:["Call the CEO","Isolate affected systems from the network","Restore from backup","Run Nikto on all servers"], ans:1, explain:"Containment (isolate) is the first action in the Respond phase. This stops lateral movement and further encryption. You escalate, notify, and recover after containing." },
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  TOOLS REFERENCE DATA
+// ═══════════════════════════════════════════════════════════════════════════
+const TOOLS = [
+  { name:"theHarvester", day:"Day 1", category:"OSINT", desc:"Collects emails, subdomains, IPs, and names from public sources (Google, Bing, certificate logs, LinkedIn). Core tool for passive reconnaissance.", cmd:"theHarvester -d target.com -b google,bing -l 100" },
+  { name:"dig", day:"Day 1 & 4", category:"DNS", desc:"Domain Information Groper. Queries DNS records (A, MX, TXT, NS, CNAME). Reveals mail servers, SPF records, DMARC policies, and subdomains.", cmd:"dig target.com TXT\ndig target.com MX\ndig +short ANY target.com" },
+  { name:"whois", day:"Day 1", category:"OSINT", desc:"Queries domain registration databases. Reveals registrar, registration date, expiry, name servers, and sometimes registrant contact info.", cmd:"whois target.com | grep -E 'Registrar|Created|Expires'" },
+  { name:"nmap", day:"Day 2", category:"Network", desc:"Network Mapper. Discovers hosts, open ports, running services, software versions, and operating systems. The most important tool in a penetration tester's toolkit.", cmd:"nmap -sV -sC -O 10.0.0.0/24\nnmap -p- --open 10.0.0.10\nnmap --script=vuln 10.0.0.10" },
+  { name:"wireshark", day:"Day 2", category:"Network", desc:"GUI packet analyser. Captures and dissects every packet on a network interface. Use display filters to isolate traffic of interest. Finds cleartext credentials, malware C2 beacons.", cmd:"# Launch GUI: wireshark\n# CLI capture: wireshark -i eth0 -w capture.pcap\n# Filter syntax: http.request.method == 'POST'" },
+  { name:"tcpdump", day:"Day 2", category:"Network", desc:"CLI packet capture. Faster and scriptable. Use when Wireshark GUI is unavailable (e.g., on a server). Captures in pcap format for later analysis in Wireshark.", cmd:"tcpdump -i eth0 -n -w capture.pcap\ntcpdump -r capture.pcap port 80\ntcpdump -r capture.pcap 'tcp[13] & 2 != 0'" },
+  { name:"nikto", day:"Day 3", category:"Web", desc:"Web server scanner. Tests for 6700+ known vulnerabilities: missing security headers, default files, outdated software, misconfigurations, exposed admin panels.", cmd:"nikto -h http://target.com\nnikto -h https://target.com -ssl\nnikto -h http://target.com -o report.txt" },
+  { name:"hydra", day:"Day 3 (demo)", category:"Auth Testing", desc:"Network login cracker. Tests credential combinations against services: SSH, HTTP, FTP, SMTP, RDP, MySQL. DEMO ONLY — never use against systems you don't own.", cmd:"# DEMO ONLY — Lab use only\nhydra -l admin -P /usr/share/wordlists/rockyou.txt ssh://10.0.0.10\nhydra -l admin -P passwords.txt http-post-form '/login:user=^USER^&pass=^PASS^:Invalid'" },
+  { name:"john", day:"Day 3 (demo)", category:"Password", desc:"John the Ripper — password hash cracker. Supports MD5, SHA-1, bcrypt, NTLM, and hundreds more. Used to test password strength. DEMO ONLY.", cmd:"# DEMO ONLY\njohn --wordlist=/usr/share/wordlists/rockyou.txt hashes.txt\njohn --show hashes.txt" },
+  { name:"wazuh", day:"Day 3", category:"SIEM", desc:"Open-source SIEM and XDR platform. Aggregates logs, detects threats, monitors file integrity, and provides compliance reporting. Deployed in many Ghanaian government agencies.", cmd:"# Review alerts\ncat /var/ossec/logs/alerts/alerts.log | grep 'level=\"12\"'\n# Check rules\n/var/ossec/bin/ossec-logtest" },
+  { name:"sha256sum", day:"Day 4", category:"Forensics", desc:"Computes SHA-256 cryptographic hash of a file. Used to verify evidence integrity before and after forensic analysis. A changed hash proves tampering.", cmd:"sha256sum evidence.img\nsha256sum evidence.img > hash.txt\n# After analysis: sha256sum evidence.img && diff hash.txt -" },
+  { name:"autopsy", day:"Day 4", category:"Forensics", desc:"GUI digital forensics platform. Analyses disk images, recovers deleted files, extracts browser history, email, call logs. Built on The Sleuth Kit framework.", cmd:"# Launch GUI\nautopsy\n# OR CLI Sleuth Kit\nmmls disk.img\nfls -r disk.img" },
+  { name:"cyberchef", day:"Day 4", category:"Analysis", desc:"The GCHQ Cyber Swiss Army Knife. Decode Base64, XOR, hex, ROT13. Extract URLs, emails, IPs from text. Decompress, decrypt, analyse. Available at gchq.github.io/CyberChef.", cmd:"# CLI equivalent for Base64\necho 'dHJhbnNmZXI=' | base64 -d\n# Hex decode\necho '74726164652066756e6473' | xxd -r -p" },
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════════════════
+let state = { currentDay: 0, currentMod: 0, completedMods: new Set(), view: 'module', theme: 'auto' };
+
+function loadState() {
+  try {
+    const s = JSON.parse(localStorage.getItem('cyberlab_state') || '{}');
+    if (s.completedMods) state.completedMods = new Set(s.completedMods);
+    if (s.currentDay !== undefined) state.currentDay = s.currentDay;
+    if (s.currentMod !== undefined) state.currentMod = s.currentMod;
+    if (s.theme) { state.theme = s.theme; applyTheme(s.theme); }
+  } catch(e) {}
+}
+function saveState() {
+  try {
+    localStorage.setItem('cyberlab_state', JSON.stringify({
+      completedMods: [...state.completedMods],
+      currentDay: state.currentDay,
+      currentMod: state.currentMod,
+      theme: state.theme,
+    }));
+  } catch(e) {}
+}
+
+function applyTheme(t) {
+  if (t === 'light') document.documentElement.setAttribute('data-theme','light');
+  else if (t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+  else document.documentElement.removeAttribute('data-theme');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  SIDEBAR BUILDER
+// ═══════════════════════════════════════════════════════════════════════════
+function buildSidebar() {
+  const nav = document.getElementById('day-nav');
+  nav.innerHTML = '';
+  COURSE.days.forEach((day, di) => {
+    const allMods = day.modules;
+    const doneMods = allMods.filter(m => state.completedMods.has(m.id)).length;
+    const allDone = doneMods === allMods.length;
+    const isActive = di === state.currentDay;
+
+    const grp = document.createElement('div');
+    grp.className = 'day-group';
+
+    const btn = document.createElement('button');
+    btn.className = 'day-btn' + (isActive ? ' active' : '') + (allDone ? ' done' : '');
+    btn.innerHTML = `<div class="day-dot">${allDone ? '✓' : (di+1)}</div><div class="day-text">Day ${di+1} — ${day.title.split(' ')[0]} ${day.title.split(' ')[1]||''}</div>`;
+    btn.onclick = () => { state.currentDay = di; state.currentMod = 0; navigateMod(); buildSidebar(); };
+    grp.appendChild(btn);
+
+    if (isActive) {
+      const ml = document.createElement('div');
+      ml.className = 'mod-list';
+      day.modules.forEach((mod, mi) => {
+        const done = state.completedMods.has(mod.id);
+        const active = mi === state.currentMod;
+        const item = document.createElement('div');
+        item.className = 'mod-item' + (active ? ' active' : '') + (done ? ' done' : '');
+        item.innerHTML = `<div class="mod-check">${done ? '✓' : ''}</div>${mod.title.substring(0,32)}`;
+        item.onclick = (e) => { e.stopPropagation(); state.currentMod = mi; navigateMod(); buildSidebar(); };
+        ml.appendChild(item);
+      });
+      grp.appendChild(ml);
+    }
+
+    nav.appendChild(grp);
+  });
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = COURSE.days.reduce((a, d) => a + d.modules.length, 0);
+  const done = state.completedMods.size;
+  const pct = Math.round(done / total * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  MODULE CONTENT RENDERER
+// ═══════════════════════════════════════════════════════════════════════════
+function navigateMod() {
+  const day = COURSE.days[state.currentDay];
+  const mod = day.modules[state.currentMod];
+  const topTitle = document.getElementById('topbar-title');
+  topTitle.textContent = `Module ${allMods().indexOf(mod)+1} — ${mod.title}`;
+
+  // Badges
+  document.querySelectorAll('.tb-badge.kali').forEach(b => b.style.display = mod.kali ? '' : 'none');
+  document.querySelectorAll('.tb-badge.gold').forEach(b => b.textContent = `Day ${state.currentDay+1}`);
+
+  switchView('module');
+  renderModule(mod, day);
+  saveState();
+}
+
+function allMods() {
+  return COURSE.days.flatMap(d => d.modules);
+}
+
+function renderModule(mod, day) {
+  const el = document.getElementById('module-content');
+  let html = '';
+
+  // Hero
+  html += `<div class="module-hero">
+    <div class="hero-eyebrow">DAY ${state.currentDay+1} · ${mod.time}</div>
+    <div class="hero-title">${mod.title}</div>
+    <div class="hero-sub">${mod.overview}</div>
+    <div class="hero-meta">
+      ${mod.kali ? '<span class="hero-tag">🐉 Kali Linux Lab</span>' : ''}
+      ${mod.tools.map(t=>`<span class="hero-tag">⚙️ ${t}</span>`).join('')}
+      <span class="hero-tag">⏱️ ${mod.time}</span>
+    </div>
+  </div>`;
+
+  // Theory
+  if (mod.theory.length) {
+    html += `<div class="section-block"><div class="section-label">📖 THEORY & CONCEPTS</div>`;
+    mod.theory.forEach(t => {
+      html += `<div class="theory-card"><h3>${t.title}</h3><p>${t.body}</p></div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Concept grid
+  if (mod.concepts.length) {
+    html += `<div class="section-block"><div class="section-label">🧩 KEY CONCEPTS</div><div class="concept-grid">`;
+    mod.concepts.forEach(c => {
+      html += `<div class="concept-pill"><div class="cp-icon">${c.icon}</div><div class="cp-title">${c.title}</div><div class="cp-desc">${c.desc}</div></div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // Labs
+  if (mod.labs.length) {
+    html += `<div class="section-block"><div class="section-label kali-label">🐉 KALI LINUX LABS</div>`;
+    mod.labs.forEach(lab => {
+      html += `<div class="lab-mission">
+        <div class="lm-header"><span class="lm-badge">${lab.badge}</span><span class="lm-title">${lab.title}</span></div>
+        <ol class="lm-steps">
+          ${lab.steps.map(s=>`<li class="lm-step">${s}</li>`).join('')}
+        </ol>`;
+
+      // Terminals
+      if (lab.terminals) {
+        lab.terminals.forEach(term => {
+          html += `<div class="terminal" style="margin-top:12px">
+            <div class="term-header"><div class="term-dots"><div class="term-dot r"></div><div class="term-dot y"></div><div class="term-dot g"></div></div><span class="term-title">${term.title}</span></div>
+            <div class="term-body">`;
+          term.cmds.forEach(c => {
+            html += `<div class="term-line"><span class="term-prompt">┌──(kali㉿cyberrange)─[~]<br>└─$</span><span class="term-cmd"> ${escHtml(c.cmd)}</span></div>`;
+            if (c.out) {
+              c.out.split('\n').forEach(ol => {
+                html += `<span class="term-output">${escHtml(ol)}</span>`;
+              });
+            }
+          });
+          html += `</div></div>`;
+        });
+      }
+
+      html += `<div class="lm-check">✅ ${lab.check}</div></div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Safety
+  if (mod.kali) {
+    html += `<div class="callout warn"><div class="callout-icon">⚠️</div><div><strong>CyberRange Safety:</strong> All labs run inside isolated VMs with no internet access from the lab network. Never run these commands against real systems, real websites, or real networks without written authorisation. Unauthorised scanning is illegal under Ghana's Cybersecurity Act 2020.</div></div>`;
+  }
+
+  // Knowledge check teaser
+  if (mod.quiz.length) {
+    html += `<div class="callout info" style="cursor:pointer" onclick="switchView('quiz');buildQuiz()"><div class="callout-icon">🧠</div><div><strong>Knowledge Check available</strong> — ${mod.quiz.length} question${mod.quiz.length>1?'s':''} for this module. Click to test yourself, or continue to the next module.</div></div>`;
+  }
+
+  // Nav
+  const mods = allMods();
+  const idx = mods.indexOf(mod);
+  const hasPrev = idx > 0;
+  const hasNext = idx < mods.length - 1;
+  const done = state.completedMods.has(mod.id);
+
+  html += `<div class="nav-buttons">
+    <button class="btn btn-ghost" onclick="prevMod()" ${hasPrev?'':'disabled style="visibility:hidden"'}>← Previous</button>
+    <button class="btn ${done?'btn-ghost':'btn-complete'}" onclick="markComplete('${mod.id}')">
+      ${done ? '✅ Completed' : '✓ Mark Complete'}
+    </button>
+    <button class="btn btn-primary" onclick="nextMod()" ${hasNext?'':'disabled style="visibility:hidden"'}>Next →</button>
+  </div>`;
+
+  el.innerHTML = html;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function markComplete(modId) {
+  state.completedMods.add(modId);
+  saveState();
+  buildSidebar();
+  navigateMod();
+  showToast('✅ Module complete! Great work.');
+  setTimeout(() => nextMod(), 600);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('complete-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function prevMod() {
+  const mods = allMods();
+  const mod = COURSE.days[state.currentDay].modules[state.currentMod];
+  const idx = mods.indexOf(mod);
+  if (idx > 0) goToModIdx(idx - 1);
+}
+function nextMod() {
+  const mods = allMods();
+  const mod = COURSE.days[state.currentDay].modules[state.currentMod];
+  const idx = mods.indexOf(mod);
+  if (idx < mods.length - 1) goToModIdx(idx + 1);
+}
+function goToModIdx(idx) {
+  let count = 0;
+  for (let di = 0; di < COURSE.days.length; di++) {
+    for (let mi = 0; mi < COURSE.days[di].modules.length; mi++) {
+      if (count === idx) {
+        state.currentDay = di;
+        state.currentMod = mi;
+        navigateMod();
+        buildSidebar();
+        document.getElementById('content').scrollTop = 0;
+        return;
+      }
+      count++;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  QUIZ
+// ═══════════════════════════════════════════════════════════════════════════
+let quizIdx = 0;
+let quizQuestions = [];
+
+function buildQuiz() {
+  const mod = COURSE.days[state.currentDay].modules[state.currentMod];
+  quizQuestions = mod.quiz || [];
+  if (!quizQuestions.length) {
+    // collect all quiz questions from all modules
+    quizQuestions = allMods().flatMap(m => m.quiz || []);
+  }
+  quizIdx = 0;
+  renderQuiz();
+}
+
+function renderQuiz() {
+  if (!quizQuestions.length) {
+    document.getElementById('quiz-container').innerHTML = '<p style="color:var(--fg-mid);padding:20px">No quiz questions for this module yet.</p>';
+    return;
+  }
+  const q = quizQuestions[quizIdx];
+  const el = document.getElementById('quiz-container');
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:12px;color:var(--fg-dim)">Question ${quizIdx+1} of ${quizQuestions.length}</div>
+      <div style="display:flex;gap:4px">${quizQuestions.map((_,i)=>`<div style="width:8px;height:8px;border-radius:50%;background:${i===quizIdx?'var(--kali-lt)':'var(--border)'}"></div>`).join('')}</div>
+    </div>
+    <div class="quiz-card">
+      <div class="quiz-q">${q.q}</div>
+      <div class="quiz-options">
+        ${q.opts.map((o,i)=>`<button class="quiz-opt" data-idx="${i}" onclick="answerQuiz(this,${i},${q.ans},'${escHtml(q.explain)}')">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="qfb"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:14px;gap:10px">
+      ${quizIdx > 0 ? `<button class="btn btn-ghost" onclick="quizIdx--;renderQuiz()">← Back</button>` : ''}
+      ${quizIdx < quizQuestions.length-1 ? `<button class="btn btn-primary" id="quiz-next" style="display:none" onclick="quizIdx++;renderQuiz()">Next →</button>` : ''}
+    </div>`;
+}
+
+function answerQuiz(btn, chosen, correct, explain) {
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach(o => { o.disabled = true; o.onclick = null; });
+  opts[correct].classList.add('correct');
+  if (chosen !== correct) opts[chosen].classList.add('wrong');
+
+  const fb = document.getElementById('qfb');
+  fb.className = 'quiz-feedback show ' + (chosen === correct ? 'correct' : 'wrong');
+  fb.innerHTML = (chosen === correct ? '✅ Correct! ' : '❌ Not quite. ') + explain;
+
+  const nxt = document.getElementById('quiz-next');
+  if (nxt) nxt.style.display = '';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  TOOLS VIEW
+// ═══════════════════════════════════════════════════════════════════════════
+function buildTools() {
+  const el = document.getElementById('tools-list');
+  el.innerHTML = TOOLS.map(t => `
+    <div class="tool-card">
+      <div class="tc-head">
+        <div class="tc-name">${t.name}</div>
+        <div class="tc-day">${t.day}</div>
+        <div style="font-size:10px;color:var(--fg-dim);margin-left:auto">${t.category}</div>
+      </div>
+      <div class="tc-desc">${t.desc}</div>
+      <div class="terminal">
+        <div class="term-header"><div class="term-dots"><div class="term-dot r"></div><div class="term-dot y"></div><div class="term-dot g"></div></div><span class="term-title">${t.name} — quick reference</span></div>
+        <div class="term-body">
+          ${t.cmd.split('\n').map(c => c.startsWith('#')
+            ? `<div class="term-line"><span class="term-comment">${escHtml(c)}</span></div>`
+            : `<div class="term-line"><span class="term-prompt">$</span><span class="term-cmd"> ${escHtml(c)}</span></div>`
+          ).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════════════════════════════════════
+function buildDashboard() {
+  const total = allMods().length;
+  const done = state.completedMods.size;
+  const pct = Math.round(done/total*100);
+
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-big">${pct}%</div><div class="stat-label">Complete</div></div>
+    <div class="stat-card"><div class="stat-big" style="color:var(--green)">${done}</div><div class="stat-label">Modules Done</div></div>
+    <div class="stat-card"><div class="stat-big" style="color:var(--gold-lt)">${total-done}</div><div class="stat-label">Remaining</div></div>
+    <div class="stat-card"><div class="stat-big" style="color:var(--kali-lt)">13</div><div class="stat-label">Kali Tools</div></div>
+  `;
+
+  document.getElementById('dash-days').innerHTML = COURSE.days.map((day, di) => {
+    const mods = day.modules;
+    const doneMods = mods.filter(m => state.completedMods.has(m.id)).length;
+    const pct = Math.round(doneMods/mods.length*100);
+    return `<div class="day-card" onclick="state.currentDay=${di};state.currentMod=0;switchView('module');navigateMod();buildSidebar()">
+      <div class="dc-num">${di+1}</div>
+      <div class="dc-info">
+        <div class="dc-title">Day ${di+1}: ${day.title}</div>
+        <div class="dc-sub">${day.sub}</div>
+        <div class="dc-prog">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--fg-dim);margin-bottom:4px">
+            <span>${doneMods}/${mods.length} modules</span><span>${pct}%</span>
+          </div>
+          <div class="dc-prog-bar"><div class="dc-prog-fill" style="width:${pct}%"></div></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  VIEW SWITCHER
+// ═══════════════════════════════════════════════════════════════════════════
+function switchView(v) {
+  state.view = v;
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('#sidebar-footer .sf-btn').forEach(b => {
+    b.classList.toggle('active-view', b.dataset.view === v);
+  });
+  if (v === 'tools') buildTools();
+  if (v === 'quiz') { buildQuiz(); }
+  if (v === 'dashboard') buildDashboard();
+  document.getElementById('content').scrollTop = 0;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+  buildSidebar();
+  navigateMod();
+
+  // Collapse sidebar
+  document.getElementById('collapse-btn').onclick = () => {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+    document.getElementById('collapse-btn').textContent = document.getElementById('sidebar').classList.contains('collapsed') ? '›' : '‹';
+  };
+
+  // Mobile toggle
+  document.getElementById('mobile-toggle').onclick = () => {
+    document.getElementById('sidebar').classList.toggle('mobile-open');
+  };
+
+  // View buttons
+  document.querySelectorAll('[data-view]').forEach(btn => {
+    btn.onclick = () => switchView(btn.dataset.view);
+  });
+
+  // Theme toggle
+  let themes = ['auto','dark','light'];
+  document.getElementById('theme-toggle').onclick = () => {
+    const idx = (themes.indexOf(state.theme) + 1) % themes.length;
+    state.theme = themes[idx];
+    applyTheme(state.theme);
+    saveState();
+  };
+});
+</script>

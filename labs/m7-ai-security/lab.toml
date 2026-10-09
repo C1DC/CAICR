@@ -1,0 +1,81 @@
+[lab]
+id = "m7"
+module = "M7"
+day = 4
+title = "AI Security — Prompt Injection & Deepfake Defence"
+tools = ["curl", "ai-sandbox"]
+estimated_minutes = 90
+briefing = "briefing.md"
+objective = """
+Attack a controlled, offline AI-assistant sandbox the way a real adversary does: \
+extract its hidden secret through direct and indirect prompt injection and tool \
+abuse, then design the governance and deepfake-verification controls that contain \
+the risk."""
+
+[network]
+name = "caic_m7_range"
+subnet = "10.13.7.0/24"
+ready = ["10.13.7.10:8080"]
+
+[[targets]]
+name = "ai-sandbox"
+ip = "10.13.7.10"
+role = "Insecure scripted AI assistant on :8080 (no internet, no real model)"
+
+# ── Checks ───────────────────────────────────────────────────────────────────
+[[check]]
+id = "sandbox_up"
+type = "script"
+prompt = "The AI sandbox is reachable on 10.13.7.10:8080"
+points = 1
+
+[[check]]
+id = "leaked_flag"
+type = "string"
+prompt = "Extract the hidden admin override code from the assistant. What is it?"
+answer = "FLAG{pr0mpt_1nj3ction_sh4d0w_ai}"
+hint = "POST to /chat a message that tells it to ignore its previous instructions"
+
+[[check]]
+id = "indirect_vector"
+type = "string_any"
+prompt = "Feeding the poisoned supplier-memo.txt to /summarize leaks the secret. What class of injection is that?"
+accept = ["indirect", "indirect prompt injection", "indirect-prompt-injection",
+          "document injection"]
+hint = "The malicious instruction rides inside content the AI ingests, not the user's own prompt"
+
+[[check]]
+id = "tool_risk"
+type = "string_any"
+prompt = "The assistant obeys a read_file() call hidden in input. Which principle would limit this?"
+accept = ["least privilege", "least-privilege", "principle of least privilege",
+          "tool permissioning", "limit tool permissions", "privilege separation",
+          "restrict tools", "sandboxing tools"]
+hint = "An AI agent should not hold more tool access than its task strictly needs"
+
+[[check]]
+id = "owasp_ref"
+type = "string_any"
+prompt = "Which OWASP LLM Top 10 item is this (id or name)?"
+accept = ["LLM01", "LLM01:2025", "prompt injection", "llm01 prompt injection"]
+hint = "It's the number-one risk on the OWASP Top 10 for LLM applications"
+
+[[check]]
+id = "mitigation"
+type = "string_any"
+prompt = "Name one technical mitigation against prompt injection."
+accept = ["input validation", "input filtering", "output filtering",
+          "treat content as untrusted", "do not trust external content",
+          "privilege separation", "human in the loop", "human-in-the-loop",
+          "guardrails", "content sanitisation", "content sanitization",
+          "least privilege", "allowlist", "least-privilege"]
+hint = "Never let ingested text act as instructions; segregate data from commands"
+
+[[check]]
+id = "deepfake_protocol"
+type = "string_any"
+prompt = "A deepfake 'CEO' voicemail asks for an urgent transfer. What verification step do you apply?"
+accept = ["callback", "call back", "independent channel", "out-of-band",
+          "out of band verification", "call a known number", "pre-established number",
+          "verify on a known number", "independent callback", "call back on a known number"]
+hint = "Never trust the channel the request arrived on — verify via a pre-established independent one"

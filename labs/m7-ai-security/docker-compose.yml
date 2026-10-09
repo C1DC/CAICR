@@ -1,0 +1,18 @@
+# M7 — AI security sandbox. A single scripted assistant service.
+# No ports published to the host LAN; reachable only on the private range.
+name: caic-m7
+
+services:
+  ai-sandbox:
+    build: ./sandbox
+    image: caic-aisandbox:1.0
+    networks: { range: { ipv4_address: 10.13.7.10 } }
+    restart: unless-stopped
+
+networks:
+  range:
+    name: caic_m7_range
+    ipam:
+      config:
+        - subnet: 10.13.7.0/24
+          gateway: 10.13.7.1

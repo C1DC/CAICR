@@ -1,0 +1,101 @@
+[lab]
+id = "m3"
+module = "M3"
+day = 2
+title = "Network Compromise Investigation — Nmap + Wireshark"
+tools = ["nmap", "wireshark", "tcpdump"]
+estimated_minutes = 90
+briefing = "briefing.md"
+objective = """
+Use Nmap to map a simulated enterprise subnet, find exposed services, then open \
+the provided packet capture in Wireshark to spot a compromised host beaconing to \
+an external command-and-control (C2) server. Map what you find to MITRE ATT&CK."""
+
+[network]
+name = "caic_m3_range"
+subnet = "10.13.3.0/24"
+ready = ["10.13.3.10:80", "10.13.3.20:21", "10.13.3.30:22", "10.13.3.40:3389"]
+
+# ── Targets (all confined to the private subnet above) ──────────────────────
+[[targets]]
+name = "gateway"
+ip = "10.13.3.1"
+role = "Lab network gateway (your host side — not a target to report)"
+
+[[targets]]
+name = "web-admin"
+ip = "10.13.3.10"
+role = "Web server — unauthenticated admin console on :80"
+
+[[targets]]
+name = "fileserver"
+ip = "10.13.3.20"
+role = "Anonymous, unencrypted FTP on :21"
+
+[[targets]]
+name = "workstation"
+ip = "10.13.3.30"
+role = "SSH on :22 — also the infected host in the capture"
+
+[[targets]]
+name = "legacy-host"
+ip = "10.13.3.40"
+role = "Exposed legacy remote-access (RDP) on :3389"
+
+# ── Verification checks (student submits findings; engine grades) ────────────
+[[check]]
+id = "targets_live"
+type = "script"
+prompt = "All four lab targets are reachable on the range"
+points = 1
+
+[[check]]
+id = "hosts_found"
+type = "numeric"
+prompt = "How many TARGET hosts are live on 10.13.3.0/24 (exclude the .1 gateway)?"
+answer = 4
+tolerance = 0
+hint = "nmap -sn 10.13.3.0/24   — then don't count the gateway .1"
+
+[[check]]
+id = "web_admin_ip"
+type = "string_any"
+prompt = "Which host serves an unauthenticated web admin panel? Give its IP."
+accept = ["10.13.3.10"]
+hint = "nmap --script=http-title -p80 10.13.3.0/24"
+
+[[check]]
+id = "rdp_port"
+type = "numeric"
+prompt = "On which TCP port is the exposed legacy remote-access service?"
+answer = 3389
+hint = "Look at the open ports on 10.13.3.40"
+
+[[check]]
+id = "cleartext_proto"
+type = "string_any"
+prompt = "Which protocol on the fileserver sends credentials in cleartext?"
+accept = ["ftp", "ftp (21)", "file transfer protocol"]
+hint = "nmap -sV -p21 10.13.3.20"
+
+[[check]]
+id = "c2_domain"
+type = "string_any"
+prompt = "In network-capture.pcap, what domain is the infected host beaconing to?"
+accept = ["sync-telemetry.duckdns.org", "duckdns.org"]
+hint = "Open assets/network-capture.pcap in Wireshark; filter: dns"
+
+[[check]]
+id = "beacon_interval"
+type = "numeric"
+prompt = "What is the beaconing interval, in seconds?"
+answer = 30
+tolerance = 3
+hint = "Compare the timestamps of the repeated DNS queries"
+
+[[check]]
+id = "attack_technique"
+type = "string_any"
+prompt = "Which MITRE ATT&CK technique ID covers C2 over an application-layer protocol / DNS?"
+accept = ["T1071", "T1071.004"]
+hint = "ATT&CK Command and Control → Application Layer Protocol"

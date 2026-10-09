@@ -1,0 +1,71 @@
+[lab]
+id = "m6"
+module = "M6"
+day = 3
+title = "Digital Forensics — Autopsy, Sleuthkit & CyberChef"
+tools = ["sha256sum", "autopsy", "fls", "icat", "tsk_recover", "cyberchef"]
+estimated_minutes = 90
+briefing = "briefing.md"
+objective = """
+Work a prepared disk image like a real case: prove its integrity by hashing, \
+list and recover files (including a deleted credentials file), reconstruct what \
+the user ran, and decode an obfuscated C2 artefact — maintaining chain of custody."""
+
+# File-based lab: evidence in assets/, no containers.
+
+[[check]]
+id = "integrity"
+type = "script"
+prompt = "Evidence integrity verified (sha256sum -c passes)"
+points = 1
+
+[[check]]
+id = "image_hash"
+type = "string"
+prompt = "What is the SHA-256 of evidence.img?"
+answer = "1cd9ccc112367afb21b00f3300922757862d685749a1100620e1e17ee7d4d300"
+hint = "sha256sum assets/evidence.img"
+
+[[check]]
+id = "fs_type"
+type = "string_any"
+prompt = "What filesystem does the evidence image use?"
+accept = ["fat16", "fat", "fat 16"]
+hint = "fsstat assets/evidence.img   (or Autopsy image details)"
+
+[[check]]
+id = "lure_file"
+type = "string_any"
+prompt = "Name the macro-enabled spreadsheet the user opened."
+accept = ["q3invoic.xls", "Q3INVOIC.XLS", "q3invoic"]
+hint = "fls evidence.img  — list the files in the root directory"
+
+[[check]]
+id = "recovered_pass"
+type = "string"
+prompt = "Recover the DELETED credentials file — what is the VPN password?"
+answer = "Gh@na2026!"
+hint = "The deleted entry is inode 6:  icat evidence.img 6   (or tsk_recover)"
+
+[[check]]
+id = "c2_domain"
+type = "string_any"
+prompt = "Decode suspicious_artifact.txt — what C2 domain does it call out to?"
+accept = ["beacon.sync-malware-c2.net",
+          "http://beacon.sync-malware-c2.net/gate.php?id=FIN03",
+          "sync-malware-c2.net"]
+hint = "CyberChef: From Base64 -> URL Decode"
+
+[[check]]
+id = "volatility_first"
+type = "string_any"
+prompt = "By order of volatility, which evidence must you collect FIRST?"
+accept = ["memory", "ram", "volatile memory", "memory (ram)"]
+hint = "RAM -> swap -> network state -> disk"
+
+[[check]]
+id = "attack_technique"
+type = "string_any"
+prompt = "Which MITRE ATT&CK technique covers the macro running PowerShell?"
+accept = ["T1059.001", "T1059", "T1204.002", "T1204"]
+hint = "Execution -> Command/Scripting Interpreter: PowerShell (or User Execution)"

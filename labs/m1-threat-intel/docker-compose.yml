@@ -1,0 +1,19 @@
+# M1 — OSINT lab. A single authoritative DNS server for the lab zone.
+# No ports published to the host LAN; reachable only on the private range.
+name: caic-m1
+
+services:
+  labdns:
+    build: ./dns
+    image: caic-labdns:1.0
+    environment: { HOSTLABEL: labdns }
+    networks: { range: { ipv4_address: 10.13.1.10 } }
+    restart: unless-stopped
+
+networks:
+  range:
+    name: caic_m1_range
+    ipam:
+      config:
+        - subnet: 10.13.1.0/24
+          gateway: 10.13.1.1

@@ -1,0 +1,4 @@
+<?php
+// BACKUP - DO NOT DEPLOY
+$db_host="10.13.4.50"; $db_user="root"; $db_pass="Acme#2019"; $db_name="portal";
+?>

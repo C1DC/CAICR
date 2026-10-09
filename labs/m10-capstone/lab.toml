@@ -1,0 +1,105 @@
+[lab]
+id = "m10"
+module = "M10"
+day = 5
+title = "Operation Cyber Resilience — CyberRange Capstone"
+tools = ["nmap", "wireshark", "jq", "email forensics", "ai-sandbox", "all"]
+estimated_minutes = 270
+briefing = "briefing.md"
+objective = """
+One simulated crisis against a fictional Ghanaian institution, eight injects, \
+every tool from the week. Investigate the live range and the evidence package, \
+reconstruct the multi-vector attack end to end, and drive the response."""
+
+[network]
+name = "caic_m10_range"
+subnet = "10.13.10.0/24"
+ready = ["10.13.10.10:80", "10.13.10.20:22", "10.13.10.40:8080"]
+
+[[targets]]
+name = "finance-portal"
+ip = "10.13.10.10"
+role = "Public finance portal (web)"
+
+[[targets]]
+name = "records-host"
+ip = "10.13.10.20"
+role = "Records platform (SSH) — the compromised foothold's neighbour"
+
+[[targets]]
+name = "ai-assistant"
+ip = "10.13.10.40"
+role = "Internal AI assistant (:8080)"
+
+# ── Checks — one per inject plus response decisions ──────────────────────────
+[[check]]
+id = "range_up"
+type = "script"
+prompt = "The capstone range (web + SSH + AI) is live"
+points = 1
+
+[[check]]
+id = "bec_lookalike"
+type = "string_any"
+prompt = "T+00: what look-alike domain sent the payment-change email? (payment-change.eml)"
+accept = ["zennith-supplies.com"]
+hint = "Compare Reply-To / Return-Path against the From: display domain"
+
+[[check]]
+id = "foothold_ip"
+type = "string"
+prompt = "T+20/T+40: which internal IP is the compromised foothold (privileged login + scanning)?"
+answer = "10.13.10.66"
+hint = "jq -r '.[].data.srcip // empty' assets/capstone-alerts.json | sort | uniq -c"
+
+[[check]]
+id = "c2_domain"
+type = "string_any"
+prompt = "From capstone-capture.pcap, what C2 domain is the foothold beaconing to?"
+accept = ["cdn-sync.ddns-telemetry.net", "ddns-telemetry.net"]
+hint = "wireshark assets/capstone-capture.pcap  (filter: dns)"
+
+[[check]]
+id = "exfil_ip"
+type = "string"
+prompt = "T+120: what external IP is the data being exfiltrated to?"
+answer = "185.220.101.44"
+hint = "The exfil alert's dstip, and the large UDP burst in the pcap"
+
+[[check]]
+id = "top_level"
+type = "numeric"
+prompt = "What is the highest Wazuh rule level across the inject sequence?"
+answer = 12
+hint = "jq '[.[].rule.level] | max' assets/capstone-alerts.json"
+
+[[check]]
+id = "deepfake_action"
+type = "string_any"
+prompt = "T+90: a synthetic executive voicemail orders a wire transfer. What do you do?"
+accept = ["callback", "call back", "independent channel", "out-of-band",
+          "out of band", "verify on a known number", "pre-established number",
+          "independent callback", "refuse and verify"]
+hint = "Never action a payment from an out-of-band voice request without independent verification"
+
+[[check]]
+id = "containment_first"
+type = "string_any"
+prompt = "First containment action for the foothold 10.13.10.66?"
+accept = ["isolate", "isolate the host", "contain", "quarantine",
+          "network isolation", "disconnect", "segment off", "isolate host"]
+hint = "Stop the bleeding without destroying evidence — do NOT power it off"
+
+[[check]]
+id = "exfil_technique"
+type = "string_any"
+prompt = "Which MITRE ATT&CK technique covers the data exfiltration?"
+accept = ["T1041", "T1567", "T1048"]
+hint = "Exfiltration → Exfiltration Over C2 Channel"
+
+[[check]]
+id = "ransomware_technique"
+type = "string_any"
+prompt = "T+145: the database is offline (ransomware). Which ATT&CK technique?"
+accept = ["T1486", "data encrypted for impact"]
+hint = "Impact → Data Encrypted for Impact"
