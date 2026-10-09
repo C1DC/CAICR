@@ -140,5 +140,24 @@ class TestLessons(unittest.TestCase):
                 self.assertIn(heading, text, f"m{n} missing '{heading}'")
 
 
+class TestWorksheets(unittest.TestCase):
+    WS = ROOT / "worksheets"
+
+    def test_worksheets_exist_for_every_module(self):
+        for n in range(1, 11):
+            found = list(self.WS.glob(f"m{n}-*.md"))
+            self.assertTrue(found, f"no worksheet for m{n}")
+
+    def test_worksheets_render_without_error(self):
+        import io
+        import contextlib
+        from engine import mdrender
+        for p in self.WS.glob("m*.md"):
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                mdrender.render(p.read_text(encoding="utf-8"))
+            self.assertGreater(len(buf.getvalue()), 200, f"{p.name} rendered too short")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

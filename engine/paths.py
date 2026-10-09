@@ -9,12 +9,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 LABS_DIR = ROOT / "labs"
 LESSONS_DIR = ROOT / "lessons"
+WORKSHEETS_DIR = ROOT / "worksheets"
 
-# Per-student mutable state (progress, which labs are running).
-# Kept out of the (possibly read-only, root-owned) install tree.
+# Per-student mutable state and work, kept out of the (possibly read-only,
+# shared) install tree.
 _XDG = os.environ.get("XDG_DATA_HOME")
 STATE_DIR = Path(_XDG) / "caic-lab" if _XDG else Path.home() / ".local" / "share" / "caic-lab"
 STATE_FILE = STATE_DIR / "state.json"
+
+# Where a student's own filled-in worksheet copies go.
+WORK_DIR = (STATE_DIR / "coursework" if _XDG else Path.home() / "caic-coursework")
 
 
 def ensure_state_dir() -> None:

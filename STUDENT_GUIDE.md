@@ -29,6 +29,19 @@ explanation, a real Ghana example, common mistakes, and a self-check quiz:
 
 Read the lesson first, then launch the matching lab and do it for real.
 
+### Produce the deliverable
+
+Each module has a professional template — a risk register, a chain-of-custody
+form, a board memo, an incident dossier. Get your own copy to fill in:
+
+```
+./labctl worksheet          # which modules have templates
+./labctl worksheet m2       # copy module 2's templates into your work folder
+```
+
+Your copies go to `~/caic-coursework/` and are never overwritten, so your edits
+are safe. Fill in the `[...]` placeholders in any editor.
+
 ### A lab, start to finish
 
 ```

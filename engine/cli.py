@@ -288,11 +288,14 @@ def cmd_learn(args) -> int:
         for mid, day, title, has_lab in COURSE_MAP:
             lesson = paths.LESSONS_DIR / f"{mid}.md"
             avail = f"{ui.GREEN}✔{ui.RESET}" if lesson.is_file() else f"{ui.GREY}—{ui.RESET}"
-            lab = f"{ui.CYAN}labctl start {mid}{ui.RESET}" if has_lab else f"{ui.GREY}(no lab){ui.RESET}"
-            rows.append([f"{ui.BOLD}{mid}{ui.RESET}", f"D{day}", title, avail, lab])
-        ui.table(rows, ["MOD", "DAY", "TITLE", "LESSON", "HANDS-ON"])
+            lab = f"{ui.CYAN}start {mid}{ui.RESET}" if has_lab else f"{ui.GREY}—{ui.RESET}"
+            has_ws = any(paths.WORKSHEETS_DIR.glob(f"{mid}-*.md"))
+            ws = f"{ui.GREEN}✔{ui.RESET}" if has_ws else f"{ui.GREY}—{ui.RESET}"
+            rows.append([f"{ui.BOLD}{mid}{ui.RESET}", f"D{day}", title, avail, lab, ws])
+        ui.table(rows, ["MOD", "DAY", "TITLE", "LESSON", "LAB", "DELIV."])
         print()
-        ui.dim("  labctl learn m1     read a module's full lesson")
+        ui.dim("  labctl learn m1       read a module's full lesson")
+        ui.dim("  labctl worksheet m2   get a module's deliverable template")
         return 0
     mid = args.module.lower()
     lesson = paths.LESSONS_DIR / f"{mid}.md"
@@ -304,6 +307,51 @@ def cmd_learn(args) -> int:
     has_lab = next((hl for m, _, _, hl in COURSE_MAP if m == mid), False)
     if has_lab:
         ui.info(f"Now do it for real:  {ui.cmd('labctl start ' + mid)}")
+    return 0
+
+
+def cmd_worksheet(args) -> int:
+    """List deliverable templates, or copy a module's templates into the
+    student's own working folder so they can fill them in."""
+    import shutil
+    from . import paths
+    wd = paths.WORKSHEETS_DIR
+    if not wd.is_dir():
+        ui.error("no worksheets/ directory found")
+        return 1
+    all_sheets = sorted(wd.glob("m*.md"))
+    if not args.module:
+        ui.banner("CAIC CyberLab — deliverable templates")
+        by_mod: dict[str, list[str]] = {}
+        for p in all_sheets:
+            mid = p.name.split("-", 1)[0]
+            by_mod.setdefault(mid, []).append(p.name)
+        rows = [[f"{ui.BOLD}{m}{ui.RESET}", ", ".join(n)] for m, n in
+                sorted(by_mod.items(), key=lambda kv: int(kv[0][1:]))]
+        ui.table(rows, ["MODULE", "TEMPLATES"])
+        print()
+        ui.dim("  labctl worksheet m2   copy a module's templates to your work folder")
+        return 0
+    mid = args.module.lower()
+    sheets = [p for p in all_sheets if p.name.split("-", 1)[0] == mid]
+    if not sheets:
+        ui.error(f"no worksheet for '{mid}' (try: labctl worksheet)")
+        return 1
+    try:
+        paths.WORK_DIR.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        ui.error(f"cannot create work folder: {exc}")
+        return 2
+    ui.header(f"Templates for {mid.upper()} → {paths.WORK_DIR}")
+    for src in sheets:
+        dest = paths.WORK_DIR / src.name
+        if dest.exists():
+            ui.warn(f"{src.name} already in your work folder — left as-is (your edits kept)")
+        else:
+            shutil.copy2(src, dest)
+            ui.ok(f"copied {src.name}")
+    ui.info("Open them in any editor and fill in the [...] placeholders.")
+    print(f"  {ui.cmd('cd ' + str(paths.WORK_DIR))}")
     return 0
 
 
@@ -407,6 +455,8 @@ def build_parser() -> argparse.ArgumentParser:
     add("list", cmd_list, "list all labs and their status", lab="none")
     learn = add("learn", cmd_learn, "read a module's full teaching lesson", lab="none")
     learn.add_argument("module", nargs="?", help="module id, e.g. m1 (omit to list)")
+    ws = add("worksheet", cmd_worksheet, "get a module's deliverable template(s)", lab="none")
+    ws.add_argument("module", nargs="?", help="module id, e.g. m2 (omit to list)")
     add("info", cmd_info, "show a lab's briefing and targets", lab="required")
     add("start", cmd_start, "bring up a lab's isolated targets", lab="required")
     add("status", cmd_status, "show which lab targets are running")
