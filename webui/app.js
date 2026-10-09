@@ -37,11 +37,14 @@ function paletteItems() {
     { t: "Live Terminal", s: "Real Kali shell", ic: "▶_", go: () => location.hash = "terminal" },
     { t: "Tools & Materials", s: "Reference", ic: "◉", go: () => location.hash = "materials" },
     { t: "Commands", s: "Cheat-sheet", ic: "⌨", go: () => location.hash = "commands" },
+    { t: "Assessment", s: "Quizzes, exam & grade", ic: "✓", go: () => location.hash = "assessment" },
+    { t: "Final exam", s: "Counts for 25%", ic: "✓", k: "exam", go: () => location.hash = "assessment/final" },
     { t: "Progress", s: "Your scores", ic: "▤", go: () => location.hash = "progress" },
   ];
   BOOT.modules.forEach(m => {
     items.push({ t: m.id.toUpperCase() + " — " + m.title, s: "Lesson · Day " + m.day, ic: "◈", k: "lesson", go: () => location.hash = "course/" + m.id });
     if (m.hasLab) items.push({ t: "Lab " + m.id.toUpperCase() + " — " + m.title, s: "Launch & verify", ic: "⌘", k: "lab", go: () => location.hash = "labs/" + m.id });
+    items.push({ t: "Quiz " + m.id.toUpperCase(), s: "Knowledge check", ic: "✓", k: "quiz", go: () => location.hash = "assessment/" + m.id });
   });
   (BOOT.tools || []).forEach(t => items.push({
     t: t.name, s: t.cat + " · tool", ic: "◉", k: "tool",
@@ -146,6 +149,11 @@ function vDashboard() {
     <a onclick="location.hash='materials'"><span class="ic">◉</span> Tools reference</a>
   </div>
 
+  ${BOOT.grade ? `<div class="section-title">Your course grade</div>
+  <div class="card gauge-card click" id="gradeCard">${gradeGauge(BOOT.grade, false)}
+    <div class="dim" style="margin-top:6px;font-size:12.5px">Labs 50% · Quizzes 25% · Exam 25% — open Assessment to take quizzes and the exam →</div>
+  </div>` : ""}
+
   <div class="section-title">Your five days</div>
   <div class="card">
     ${days.map(d => {
@@ -167,6 +175,7 @@ function vDashboard() {
   $("#nameSave").onclick = saveName;
   $("#nameIn").addEventListener("keydown", e => { if (e.key === "Enter") saveName(); });
   $("#qResume").onclick = () => { location.hash = (next.hasLab ? "labs/" : "course/") + next.id; };
+  if ($("#gradeCard")) $("#gradeCard").onclick = () => { location.hash = "assessment"; };
   view.querySelectorAll("[data-day]").forEach(c => c.onclick = () => { location.hash = "course"; });
 }
 async function saveName() {
@@ -550,6 +559,119 @@ function vProgress() {
     </tbody></table></div>`;
 }
 
+/* ---------- assessment ---------- */
+function gradeGauge(g, big) {
+  const pass = g.passed, p = g.overall, mark = g.passMark;
+  const comp = c => `<div class="gc-row"><span>${c.label}</span>
+    <span class="gc-bar"><i style="width:${c.pct}%"></i><em style="left:${mark}%"></em></span>
+    <b>${c.pct}%</b><span class="dim gc-raw">${c.raw}</span><span class="gc-w">${Math.round(c.weight*100)}%</span></div>`;
+  const rows = [
+    { label: "Hands-on labs", pct: g.components.labs.pct, weight: g.components.labs.weight, raw: g.components.labs.got + "/" + g.components.labs.total },
+    { label: "Module quizzes", pct: g.components.quizzes.pct, weight: g.components.quizzes.weight, raw: g.components.quizzes.got + "/" + g.components.quizzes.total },
+    { label: "Final exam", pct: g.components.exam.pct, weight: g.components.exam.weight, raw: g.components.exam.got + "/" + g.components.exam.total },
+  ];
+  return `<div class="gauge ${pass ? "pass" : ""}">
+    <div class="ring ${big ? "big" : ""}" style="--p:${p};--rc:${pass ? "var(--green)" : "var(--brand)"}">
+      <div class="hole"><div style="text-align:center"><b>${p}%</b><br><span>overall</span></div></div></div>
+    <div class="gc">
+      ${rows.map(comp).join("")}
+      <div class="gc-foot">${pass
+        ? `<span class="badge b-done">✓ Passed — ${p}% ≥ ${mark}%</span>`
+        : `<span class="dim">Pass mark ${mark}% — <span class="gauge-left">${mark - p > 0 ? (mark - p) + " points to go" : "almost there"}</span></span>`}</div>
+    </div></div>`;
+}
+
+async function vAssessment(arg) {
+  setActive("assessment");
+  if (arg) return vQuiz(arg);
+  crumb([{ t: "Assessment" }]);
+  view.innerHTML = `<div class="loading">Loading assessment…</div>`;
+  let a; try { a = await api("/api/assessment"); } catch (e) { view.innerHTML = `<div class="card">${esc(e.message)}</div>`; return; }
+  BOOT.grade = a.grade;
+  const card = (q, kind) => {
+    if (!q) return "";
+    const done = q.attempted;
+    const cls = !q.graded ? "b-file" : (q.best === q.questions && q.questions ? "b-done" : done ? "b-busy" : "b-stop");
+    const lbl = !q.graded ? "diagnostic" : (q.best === q.questions && q.questions ? "✓ " + q.best + "/" + q.questions : done ? q.best + "/" + q.questions : "not taken");
+    return `<div class="card click" data-quiz="${q.id}">
+      <div class="row" style="justify-content:space-between;align-items:flex-start">
+        <div><strong>${esc(q.title)}</strong><div class="dim" style="font-size:12.5px;margin-top:3px">${q.questions} question${q.questions === 1 ? "" : "s"}${kind ? " · " + kind : ""}</div></div>
+        <span class="badge ${cls}">${lbl}</span></div>
+      ${q.graded && done ? `<div class="bar" style="margin-top:10px"><i style="width:${q.pct}%"></i></div>` : ""}
+    </div>`;
+  };
+  view.innerHTML = `
+  <p class="muted">Your grade combines three things — hands-on labs (50%), the module quizzes (25%) and the final exam (25%). You need <strong>${a.grade.passMark}%</strong> overall to earn the certificate.</p>
+  <div class="card gauge-card">${gradeGauge(a.grade, true)}</div>
+
+  ${a.baseline ? `<div class="section-title">Before you begin</div>
+  <div class="grid cards-3">${card(a.baseline, "self-check, not graded")}</div>` : ""}
+
+  <div class="section-title">Module quizzes <span class="dim" style="font-weight:400;font-size:12.5px">— one per module, options reshuffled for you</span></div>
+  <div class="grid cards-3">${a.quizzes.map(q => card(q)).join("")}</div>
+
+  <div class="section-title">Final exam</div>
+  <div class="grid cards-3">${card(a.exam, "counts for 25%")}</div>`;
+  view.querySelectorAll("[data-quiz]").forEach(c => c.onclick = () => { location.hash = "assessment/" + c.dataset.quiz; });
+}
+
+async function vQuiz(qid) {
+  crumb([{ t: "Assessment", href: "#assessment" }, { t: qid.toUpperCase() }]);
+  view.innerHTML = `<div class="loading">Loading…</div>`;
+  let q; try { q = await api("/api/quiz/" + qid); } catch (e) { view.innerHTML = `<div class="card">${esc(e.message)}</div>`; return; }
+  const chosen = new Array(q.questions.length).fill(-1);
+  view.innerHTML = `
+  <div class="quizwrap">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <h2 style="margin:0">${esc(q.title)}</h2>
+      ${q.graded ? `<span class="dim">${q.questions.length} questions · counts toward your grade</span>` : `<span class="badge b-file">not graded — for your own placement</span>`}
+    </div>
+    <div id="quizQs">${q.questions.map((it, qi) => `
+      <div class="qcard" id="q-${qi}">
+        <div class="q">${qi + 1}. ${esc(it.q)}</div>
+        <div class="opts">${it.options.map((o, oi) => `
+          <label class="opt" data-q="${qi}" data-o="${oi}"><span class="dot"></span><span>${esc(o)}</span></label>`).join("")}</div>
+      </div>`).join("")}</div>
+    <div class="row" style="justify-content:space-between;align-items:center;margin-top:16px">
+      <span class="dim" id="quizCount">0 of ${q.questions.length} answered</span>
+      <button class="btn" id="quizSubmit" disabled>Submit ${q.graded ? "& grade" : "answers"}</button>
+    </div>
+  </div>`;
+  const update = () => {
+    const n = chosen.filter(c => c >= 0).length;
+    $("#quizCount").textContent = n + " of " + q.questions.length + " answered";
+    $("#quizSubmit").disabled = n < q.questions.length;
+  };
+  view.querySelectorAll(".opt").forEach(l => l.onclick = () => {
+    const qi = +l.dataset.q, oi = +l.dataset.o;
+    chosen[qi] = oi;
+    $("#q-" + qi).querySelectorAll(".opt").forEach(x => x.classList.toggle("sel", +x.dataset.o === oi));
+    update();
+  });
+  $("#quizSubmit").onclick = async () => {
+    const btn = $("#quizSubmit"); btn.disabled = true; btn.textContent = "Submitting…";
+    let r; try { r = await api("/api/quiz/" + qid, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ answers: chosen }) }); }
+    catch (e) { toast(e.message); btn.disabled = false; btn.textContent = "Submit"; return; }
+    BOOT.grade = r.grade;
+    r.results.forEach((res, qi) => {
+      const card = $("#q-" + qi); card.classList.add(res.correct ? "correct" : "wrong");
+      card.querySelectorAll(".opt").forEach(l => l.style.pointerEvents = "none");
+      const fb = document.createElement("div"); fb.className = "qfb " + (res.correct ? "ok" : "no");
+      fb.innerHTML = (res.correct ? "✓ Correct. " : "✗ Correct answer: <strong>" + esc(res.correctOption) + "</strong>. ") + (res.explain ? esc(res.explain) : "");
+      card.appendChild(fb);
+    });
+    const pct = r.total ? Math.round(100 * r.score / r.total) : 0;
+    const head = document.createElement("div");
+    head.className = "card quiz-result " + (pct >= 70 ? "good" : "");
+    head.innerHTML = `<strong style="font-size:17px">${r.graded ? "Score: " + r.score + "/" + r.total + " (" + pct + "%)" : "Diagnostic complete"}</strong>
+      ${r.graded ? `<div class="dim" style="margin-top:4px">Recorded. Overall course grade now <strong>${r.grade.overall}%</strong> (pass ${r.grade.passMark}%).</div>` : `<div class="dim" style="margin-top:4px">Not graded — use it to see which modules to focus on.</div>`}
+      <div class="row" style="margin-top:10px"><a class="btn sec" href="#assessment">← Back to assessment</a></div>`;
+    $("#quizQs").parentElement.insertBefore(head, $("#quizQs"));
+    head.scrollIntoView({ block: "center" });
+    btn.style.display = "none"; $("#quizCount").style.display = "none";
+  };
+}
+
 /* ---------- refresh summary after grading ---------- */
 function refreshSummary() {
   BOOT.summary.labsComplete = BOOT.modules.filter(m => m.complete).length;
@@ -569,6 +691,7 @@ async function route() {
     if (v === "terminal") return vTerminal();
     if (v === "materials") return vMaterials();
     if (v === "commands") return vCommands();
+    if (v === "assessment") return vAssessment(arg);
     if (v === "progress") return vProgress();
     vDashboard();
   } catch (e) { view.innerHTML = `<div class="card">${esc(e.message)}</div>`; }

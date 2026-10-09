@@ -97,6 +97,22 @@ def lab_status(lab_id: str) -> dict:
     return _load()["labs"].get(lab_id, {})
 
 
+def record_quiz(quiz_id: str, score: int, total: int) -> None:
+    """Persist a quiz/exam result, keeping the best score."""
+    data = _load()
+    qs = data.setdefault("quizzes", {})
+    entry = qs.setdefault(quiz_id, {"best": 0, "total": total})
+    entry["total"] = total
+    entry["last"] = _now()
+    if score >= entry.get("best", 0):
+        entry["best"] = score
+    _save(data)
+
+
+def quiz_status(quiz_id: str) -> dict:
+    return _load().get("quizzes", {}).get(quiz_id, {})
+
+
 def is_complete(lab_id: str, max_points: int) -> bool:
     entry = lab_status(lab_id)
     return max_points > 0 and entry.get("best_score", 0) >= max_points

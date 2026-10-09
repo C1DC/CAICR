@@ -240,3 +240,202 @@
    → **T1486**  _(also: data encrypted for impact)_
 15. T+160: the bank's own AI assistant was abused in this campaign. Name the technique/class.
    → **prompt injection**  _(also: rag poisoning, rag-poisoning, indirect prompt injection, llm01, knowledge base poisoning, data poisoning)_
+
+---
+
+# Assessment answer key (quizzes & final exam)
+
+> Options are **shuffled per student**, so answers are given by text, not letter.
+> The baseline diagnostic is self-placement and is not graded.
+
+## Baseline Diagnostic (ungraded — self-placement)  _(`baseline` · 6 questions)_
+
+1. What does the 'C' in the CIA triad stand for?
+   → **Confidentiality**
+   _Confidentiality — only authorised parties can read the data._
+2. MFA stands for:
+   → **Multi-Factor Authentication**
+   _An extra factor beyond the password._
+3. Phishing is primarily an attack on:
+   → **People (social engineering)**
+   _It manipulates people into acting._
+4. A 'patch' is:
+   → **A software fix for a vulnerability**
+   _Patches close known vulnerabilities._
+5. Ransomware typically:
+   → **Encrypts your files and demands payment**
+   _It denies availability and extorts payment._
+6. Which is a strong authentication practice?
+   → **Using MFA and unique passwords**
+   _Unique passwords + MFA._
+
+## Orientation & the Linux command line  _(`m0` · 3 questions)_
+
+1. Which one-liner lists the most frequent source IPs in a log's first column?
+   → **awk '{print $1}' access.log | sort | uniq -c | sort -rn**
+   _sort | uniq -c | sort -rn is the analyst's 'what's most common?' pattern._
+2. A private SSH key shows permissions -rw------- (600). Is that correct?
+   → **Yes — a private key must be readable only by its owner**
+   _SSH refuses a private key other users can read; 600 (owner-only) is required._
+3. A colleague asks you to 'quickly scan' a partner company's website. The correct response is:
+   → **Refuse without the partner's written authorisation**
+   _Scanning a third party without written authorisation is an offence under Act 1038._
+
+## Threat Landscape & Cyber Threat Intelligence  _(`m1` · 3 questions)_
+
+1. A domain publishes SPF ending in ~all and has no DMARC record. It is:
+   → **Highly exposed to spoofing**
+   _~all soft-fails forged mail (still delivered) and no DMARC means no policy/alignment — spoofable._
+2. On the Pyramid of Pain, which indicator hurts the attacker MOST when you block it?
+   → **The attacker's TTPs**
+   _TTPs are hardest to change; hashes/IPs are trivially rotated._
+3. Which is PASSIVE reconnaissance?
+   → **dig MX against the target's domain**
+   _dig reads public DNS and never touches the target's systems; the others are active._
+
+## Institutional Cyber Risk & Resilience  _(`m2` · 3 questions)_
+
+1. You buy cyber insurance for a risk. Which treatment is that?
+   → **Transfer**
+   _Insurance transfers financial cost (not the operational/reputational harm)._
+2. What makes a risk-register entry's acceptance defensible rather than negligent?
+   → **A named owner and a review date**
+   _Acceptance without a named owner and review date is negligence._
+3. Which NIST CSF 2.0 function was added in 2.0 and signals board accountability?
+   → **Govern**
+   _GOVERN makes cybersecurity a board-level duty._
+
+## Network, Endpoint & Identity Security  _(`m3` · 3 questions)_
+
+1. A host contacts the same external domain every 60 seconds all night. This is characteristic of:
+   → **C2 beaconing**
+   _Fixed-interval regularity is the beaconing tell; real traffic is bursty._
+2. Target 2013's catastrophe spread because of which architectural failure?
+   → **A flat network (no segmentation)**
+   _The vendor segment could reach the payment systems — segmentation would have contained it._
+3. Why is SMS-based MFA weaker than a FIDO2 security key?
+   → **It's defeated by SIM-swap and phishing**
+   _SIM-swap/phishing defeat SMS OTP; FIDO2 is phishing-resistant._
+
+## Vulnerability Management & SOC Operations  _(`m4` · 3 questions)_
+
+1. Which do you remediate first?
+   → **CVSS 6.8 on your public payment portal, listed in CISA KEV**
+   _Internet-facing + critical asset + actively exploited (KEV) beats raw score._
+2. Hydra vs John the Ripper — the core difference is:
+   → **Hydra guesses against a live service; John cracks stolen hashes offline**
+   _Online guessing (Hydra) vs offline hash cracking (John); John has no lockout._
+3. Failed logins, a port scan and a successful login — all from one IP. How many incidents?
+   → **One — correlate by source IP**
+   _Correlation turns scattered alerts into one intrusion._
+
+## Cyber Fraud, BEC & Mobile Money  _(`m5` · 3 questions)_
+
+1. The single control that most reliably stops BEC payment fraud is:
+   → **Dual control + out-of-band callback on a KNOWN number**
+   _Verify any bank-detail change via an independently known channel; never the email's number._
+2. An email's From: shows your real supplier, but Reply-To is a different hyphenated domain. This is:
+   → **A spoof routing replies to the attacker**
+   _Display forged for trust; replies silently go to the look-alike domain._
+3. Why doesn't an SMS OTP protect a MoMo wallet against SIM-swap?
+   → **The attacker has taken over the number itself**
+   _SIM-swap hijacks the number, so the OTP is delivered to the attacker._
+
+## Digital Forensics & Incident Response  _(`m6` · 3 questions)_
+
+1. You reach a compromised server still running. The right first move is to:
+   → **Isolate it from the network and capture memory first**
+   _Powering off destroys volatile memory evidence; isolate, then collect by order of volatility._
+2. Matching SHA-256 hashes before and after analysis prove:
+   → **The evidence was not altered (integrity)**
+   _A matching hash is mathematical proof of integrity — the basis of chain of custody._
+3. The 3-2-1 backup rule means:
+   → **3 copies, 2 media types, 1 offsite/offline**
+   _One offline/offsite copy is what survives ransomware that encrypts online backups._
+
+## AI Security, Deepfakes & Emerging Threats  _(`m7` · 3 questions)_
+
+1. A document you ask an AI to summarise makes it email data to an attacker. This is:
+   → **Indirect prompt injection + excessive agency**
+   _The instruction rode inside ingested content and the AI used a tool it shouldn't have._
+2. Against a deepfake 'CEO' voicemail demanding an urgent transfer, the reliable defence is:
+   → **Out-of-band callback on a pre-established number**
+   _Detectors are unreliable; verify via an independent known channel._
+3. Which OWASP list ranks prompt injection as its top risk (LLM01)?
+   → **OWASP LLM Top 10**
+   _Prompt injection is LLM01 in the OWASP Top 10 for LLM applications._
+
+## Data Protection, Privacy & Compliance  _(`m8` · 3 questions)_
+
+1. A cloud vendor misconfigures storage and leaks your customers' data. Who is accountable under Act 843?
+   → **You — the data controller**
+   _Outsourcing processing does not outsource accountability; you remain the controller._
+2. In the first 72 hours of a breach, the first action is to:
+   → **Contain active access (while preserving evidence)**
+   _Contain first, investigate second, then triage notification with counsel._
+3. The GDPR breach-notification norm Ghanaian institutions are increasingly expected to meet is:
+   → **72 hours to the regulator once aware**
+   _72 hours to the regulator is the benchmark expectation._
+
+## Cyber Governance & Business Continuity  _(`m9` · 3 questions)_
+
+1. Approving the cybersecurity budget and risk appetite is a function of:
+   → **Governance (the board)**
+   _Governance sets direction and demands assurance; management executes._
+2. Why is the backup RESTORE test more important than the backup itself?
+   → **A backup you've never restored may not work — only a verified restore proves DR**
+   _An untested backup is a hope; the verified restore is the real control._
+3. RTO and RPO are, respectively:
+   → **Max acceptable downtime; max acceptable data loss**
+   _RTO = how fast you must be back; RPO = how much data you can afford to lose._
+
+## Operation Cyber Resilience (Capstone)  _(`m10` · 3 questions)_
+
+1. Several injects all involve one internal IP. What does that tell you?
+   → **It's one campaign — correlate by the shared foothold IP**
+   _A shared indicator ties scattered events into a single intrusion._
+2. You contain the compromised foothold host. You should:
+   → **Isolate it from the network (preserve evidence)**
+   _Isolate to stop spread without destroying volatile evidence._
+3. A mid-incident voice note 'from the CEO' orders an urgent transfer. You:
+   → **Verify out-of-band on a known number first**
+   _Likely a deepfake; verify out-of-band before any payment._
+
+## Final Exam — whole programme  _(`final` · 12 questions)_
+
+1. No DMARC record on a domain means:
+   → **It is effectively spoofable**
+   _No policy/alignment to reject forged mail._
+2. The highest-value indicator to detect on the Pyramid of Pain is:
+   → **TTPs**
+   _TTPs cost the attacker the most to change._
+3. Target 2013 spread because the network was:
+   → **Flat / unsegmented**
+   _Segmentation would have contained the vendor-account foothold._
+4. Prioritise remediation by:
+   → **CVSS + KEV + exposure + asset criticality**
+   _Context and active exploitation beat raw score._
+5. The control that stops BEC payment fraud:
+   → **Dual control + out-of-band callback**
+   _Verify changes via an independently known channel._
+6. First move on a running compromised host:
+   → **Isolate + capture memory**
+   _Order of volatility — memory first; never power off._
+7. Under Act 843, if your processor leaks data, who is accountable?
+   → **You, the controller**
+   _Accountability stays with the controller._
+8. Prompt injection is which OWASP LLM risk?
+   → **LLM01**
+   _LLM01 — the top risk._
+9. Governance vs management: setting risk appetite is:
+   → **Governance**
+   _The board governs; teams manage._
+10. RPO measures:
+   → **Max acceptable data loss**
+   _RTO is downtime; RPO is data loss._
+11. The 3-2-1 rule requires at least one copy that is:
+   → **Offline/offsite**
+   _An offline copy survives ransomware._
+12. A deepfake voicemail ordering a transfer is defeated by:
+   → **Out-of-band callback verification**
+   _Verify via a pre-established independent channel._

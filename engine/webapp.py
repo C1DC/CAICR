@@ -15,7 +15,7 @@ import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
-from . import __version__, dockerctl, paths, state, verify
+from . import __version__, dockerctl, grade as grading, paths, quiz, state, verify
 from .course import COMMANDS, COURSE_MAP, DAY_TITLES, LINUX_COMMANDS, TOOLS
 from .manifest import ManifestError, discover_labs, load_one
 from .mdhtml import md_to_html
@@ -105,6 +105,33 @@ def _lab_runtime(lab) -> dict:
     }
 
 
+def _assessment() -> dict:
+    """Quiz/exam/diagnostic availability + the student's best scores, plus the
+    composite grade. Correct answers are never included."""
+    bank = quiz.load()
+    module_ids = [m for m, _, _, _ in COURSE_MAP if m in bank]
+
+    def _card(qid):
+        q = bank.get(qid, {})
+        st = state.quiz_status(qid)
+        n = len(q.get("questions", []))
+        best = min(st.get("best", 0), n)
+        return {
+            "id": qid, "title": q.get("title", qid),
+            "questions": n, "best": best,
+            "pct": round(100 * best / n) if n else 0,
+            "attempted": bool(st),
+            "graded": qid != "baseline",
+        }
+
+    return {
+        "quizzes": [_card(m) for m in module_ids],
+        "exam": _card("final") if "final" in bank else None,
+        "baseline": _card("baseline") if "baseline" in bank else None,
+        "grade": grading.compute(),
+    }
+
+
 def _bootstrap() -> dict:
     mods = _module_rows()
     gradable = [m for m in mods if m["maxPoints"] > 0]
@@ -117,6 +144,7 @@ def _bootstrap() -> dict:
         "tools": TOOLS,
         "commands": [{"group": g, "cmd": c, "desc": d} for g, c, d in COMMANDS],
         "linux": [{"group": g, "cmd": c, "desc": d} for g, c, d in LINUX_COMMANDS],
+        "grade": grading.compute(),
         "summary": {"labsComplete": done, "totalLabs": len(gradable),
                     "totalModules": len(mods),
                     "dockerOk": dockerctl.preflight().ok,
@@ -268,6 +296,22 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(detail)
             if p == "/api/progress":
                 return self._json({"modules": _module_rows(), "student": state.get_student()})
+            if p == "/api/assessment":
+                return self._json(_assessment())
+            if p == "/api/grade":
+                return self._json(grading.compute())
+            if p.startswith("/api/quiz/"):
+                qid = p.rsplit("/", 1)[-1]
+                items = quiz.present(qid)
+                if not items:
+                    return self._err("no such quiz", 404)
+                # strip the server-side permutation — the browser only sees options
+                for it in items:
+                    it.pop("_order", None)
+                    it.pop("explain", None)
+                meta = quiz.load().get(qid, {})
+                return self._json({"id": qid, "title": meta.get("title", qid),
+                                   "graded": qid != "baseline", "questions": items})
             if p.startswith("/api/"):
                 return self._err("unknown endpoint", 404)
             return self._static(p)
@@ -283,6 +327,16 @@ class Handler(BaseHTTPRequestHandler):
                 name = str(self._body().get("name", "")).strip()
                 state.set_student(name)
                 return self._json({"student": state.get_student()})
+            if p.startswith("/api/quiz/"):
+                qid = p.rsplit("/", 1)[-1]
+                answers = self._body().get("answers", [])
+                if not isinstance(answers, list):
+                    return self._err("answers must be a list", 400)
+                res = quiz.grade(qid, [int(a) if a is not None else -1 for a in answers])
+                if not res["total"]:
+                    return self._err("no such quiz", 404)
+                res["grade"] = grading.compute()
+                return self._json(res)
             if p.startswith("/api/lab/"):
                 parts = p.split("/")
                 lab_id, action = parts[3], parts[4] if len(parts) > 4 else ""

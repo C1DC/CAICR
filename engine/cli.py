@@ -247,6 +247,18 @@ def cmd_progress(_args) -> int:
     total = len(labs)
     pct = round(100 * done / total) if total else 0
     ui.info(f"{done}/{total} labs complete ({pct}%).")
+    # Composite course grade (labs + quizzes + exam).
+    try:
+        from . import grade as grading
+        g = grading.compute()
+        c = g["components"]
+        print()
+        ui.dim(f"  Course grade: labs {c['labs']['pct']}% · "
+               f"quizzes {c['quizzes']['pct']}% · exam {c['exam']['pct']}% "
+               f"→ overall {g['overall']}% (pass {g['passMark']}%)")
+        ui.dim("  Full breakdown: labctl grade")
+    except Exception:
+        pass
     return 0
 
 
@@ -392,6 +404,61 @@ def cmd_serve(args) -> int:
     return 0
 
 
+def cmd_quiz(args) -> int:
+    from . import quiz
+    bank = quiz.load()
+    if not args.module:
+        ui.banner("Knowledge-check quizzes")
+        rows = []
+        for mid, day, title, _ in COURSE_MAP:
+            if mid not in bank:
+                continue
+            st = state.quiz_status(mid)
+            n = len(bank[mid].get("questions", []))
+            score = f"{st.get('best', 0)}/{n}" if st else f"{ui.GREY}—{ui.RESET}"
+            rows.append([f"{ui.BOLD}{mid}{ui.RESET}", f"D{day}", bank[mid].get("title", title), score])
+        ui.table(rows, ["QUIZ", "DAY", "TITLE", "BEST"])
+        print()
+        ui.dim("  labctl quiz m1    take a module quiz")
+        ui.dim("  labctl exam       the final exam    ·    labctl diagnostic   baseline")
+        return 0
+    quiz.interactive(args.module.lower())
+    return 0
+
+
+def cmd_exam(_args) -> int:
+    from . import quiz
+    quiz.interactive("final")
+    return 0
+
+
+def cmd_diagnostic(_args) -> int:
+    from . import quiz
+    quiz.interactive("baseline")
+    return 0
+
+
+def cmd_grade(_args) -> int:
+    from . import grade
+    g = grade.compute()
+    ui.banner(f"Course grade — {g['student'] or '(unnamed)'}")
+    rows = []
+    for name, c in g["components"].items():
+        rows.append([name.capitalize(), f"{int(c['weight']*100)}%",
+                     f"{c['got']}/{c['total']}", f"{c['pct']}%"])
+    ui.table(rows, ["COMPONENT", "WEIGHT", "RAW", "SCORE"])
+    print()
+    pct = g["overall"]
+    bar = ui.GREEN + "█" * int(pct / 5) + ui.GREY + "░" * (20 - int(pct / 5)) + ui.RESET
+    tone = ui.GREEN if g["passed"] else ui.YELLOW
+    print(f"  Overall: {bar} {tone}{pct}%{ui.RESET}  (pass mark {g['passMark']}%)")
+    if g["passed"]:
+        ui.ok("PASS — you have met the certification threshold.")
+    else:
+        ui.info("Keep going — complete more labs, quizzes and the final exam.")
+    return 0
+
+
 def cmd_prep(args) -> int:
     """Build every lab image up front, so later launches work fully offline.
     Run this ONCE on each machine while internet is available."""
@@ -494,6 +561,11 @@ def build_parser() -> argparse.ArgumentParser:
     learn.add_argument("module", nargs="?", help="module id, e.g. m1 (omit to list)")
     ws = add("worksheet", cmd_worksheet, "get a module's deliverable template(s)", lab="none")
     ws.add_argument("module", nargs="?", help="module id, e.g. m2 (omit to list)")
+    qz = add("quiz", cmd_quiz, "take a module knowledge-check quiz", lab="none")
+    qz.add_argument("module", nargs="?", help="module id, e.g. m1 (omit to list)")
+    add("exam", cmd_exam, "sit the final exam", lab="none")
+    add("diagnostic", cmd_diagnostic, "take the (ungraded) baseline diagnostic", lab="none")
+    add("grade", cmd_grade, "show your composite course grade + pass status", lab="none")
     add("info", cmd_info, "show a lab's briefing and targets", lab="required")
     add("start", cmd_start, "bring up a lab's isolated targets", lab="required")
     add("status", cmd_status, "show which lab targets are running")

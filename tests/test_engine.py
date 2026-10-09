@@ -297,5 +297,47 @@ class TestTerminal(unittest.TestCase):
         self.assertEqual(got, payload)
 
 
+class TestAssessment(unittest.TestCase):
+    def setUp(self):
+        # Redirect per-student state to a throwaway file so grading these
+        # quizzes never pollutes a real student's recorded progress.
+        from engine import paths
+        self._tmp = tempfile.TemporaryDirectory()
+        self._orig = paths.STATE_FILE
+        paths.STATE_FILE = Path(self._tmp.name) / "state.json"
+
+    def tearDown(self):
+        from engine import paths
+        paths.STATE_FILE = self._orig
+        self._tmp.cleanup()
+
+    def test_bank_loads(self):
+        from engine import quiz
+        bank = quiz.load()
+        for qid in ("m1", "m10", "final", "baseline"):
+            self.assertIn(qid, bank)
+            self.assertTrue(bank[qid].get("questions"))
+
+    def test_every_question_self_grades(self):
+        """Answering each quiz with the correct (shuffled) options scores 100%."""
+        from engine import quiz
+        bank = quiz.load()
+        for qid, q in bank.items():
+            items = quiz.present(qid)
+            answers = []
+            for i, it in enumerate(items):
+                correct_orig = q["questions"][i]["answer"]
+                answers.append(it["_order"].index(correct_orig))
+            res = quiz.grade(qid, answers)
+            self.assertEqual(res["score"], res["total"], f"{qid} did not self-grade 100%")
+
+    def test_grade_structure(self):
+        from engine import grade
+        g = grade.compute()
+        self.assertEqual(set(g["components"]), {"labs", "quizzes", "exam"})
+        self.assertIn("passed", g)
+        self.assertEqual(sum(c["weight"] for c in g["components"].values()), 1.0)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

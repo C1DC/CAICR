@@ -1,0 +1,327 @@
+# CAIC CyberLab — assessment question bank.
+# Per-module knowledge checks (m0..m10), a final exam, and an (ungraded)
+# baseline diagnostic. `answer` is the 0-based index of the correct option.
+# Options are shuffled per student at runtime (the seed), so answer position
+# can't be shared.
+
+[m0]
+title = "Orientation & the Linux command line"
+[[m0.questions]]
+q = "Which one-liner lists the most frequent source IPs in a log's first column?"
+options = ["grep -c ip access.log", "awk '{print $1}' access.log | sort | uniq -c | sort -rn",
+           "cat access.log | wc -l", "find . -name access.log"]
+answer = 1
+explain = "sort | uniq -c | sort -rn is the analyst's 'what's most common?' pattern."
+[[m0.questions]]
+q = "A private SSH key shows permissions -rw------- (600). Is that correct?"
+options = ["No, it should be world-readable", "Yes — a private key must be readable only by its owner",
+           "No, it should be 777", "It doesn't matter"]
+answer = 1
+explain = "SSH refuses a private key other users can read; 600 (owner-only) is required."
+[[m0.questions]]
+q = "A colleague asks you to 'quickly scan' a partner company's website. The correct response is:"
+options = ["Run a fast nmap scan", "Only scan the homepage",
+           "Refuse without the partner's written authorisation", "Use a VPN so it's anonymous"]
+answer = 2
+explain = "Scanning a third party without written authorisation is an offence under Act 1038."
+
+[m1]
+title = "Threat Landscape & Cyber Threat Intelligence"
+[[m1.questions]]
+q = "A domain publishes SPF ending in ~all and has no DMARC record. It is:"
+options = ["Fully protected against spoofing", "Highly exposed to spoofing",
+           "Only exposed if DKIM is also missing", "Protected because SPF exists"]
+answer = 1
+explain = "~all soft-fails forged mail (still delivered) and no DMARC means no policy/alignment — spoofable."
+[[m1.questions]]
+q = "On the Pyramid of Pain, which indicator hurts the attacker MOST when you block it?"
+options = ["A file hash", "An IP address", "A domain name", "The attacker's TTPs"]
+answer = 3
+explain = "TTPs are hardest to change; hashes/IPs are trivially rotated."
+[[m1.questions]]
+q = "Which is PASSIVE reconnaissance?"
+options = ["nmap -sV against the target", "dig MX against the target's domain",
+           "Brute-forcing the target's login", "A SYN scan of the target"]
+answer = 1
+explain = "dig reads public DNS and never touches the target's systems; the others are active."
+
+[m2]
+title = "Institutional Cyber Risk & Resilience"
+[[m2.questions]]
+q = "You buy cyber insurance for a risk. Which treatment is that?"
+options = ["Mitigate", "Transfer", "Avoid", "Accept"]
+answer = 1
+explain = "Insurance transfers financial cost (not the operational/reputational harm)."
+[[m2.questions]]
+q = "What makes a risk-register entry's acceptance defensible rather than negligent?"
+options = ["A high CVSS score", "A named owner and a review date",
+           "That it's written in red", "Board minutes alone"]
+answer = 1
+explain = "Acceptance without a named owner and review date is negligence."
+[[m2.questions]]
+q = "Which NIST CSF 2.0 function was added in 2.0 and signals board accountability?"
+options = ["Protect", "Detect", "Govern", "Recover"]
+answer = 2
+explain = "GOVERN makes cybersecurity a board-level duty."
+
+[m3]
+title = "Network, Endpoint & Identity Security"
+[[m3.questions]]
+q = "A host contacts the same external domain every 60 seconds all night. This is characteristic of:"
+options = ["Normal web browsing", "C2 beaconing", "A software update", "DNS caching"]
+answer = 1
+explain = "Fixed-interval regularity is the beaconing tell; real traffic is bursty."
+[[m3.questions]]
+q = "Target 2013's catastrophe spread because of which architectural failure?"
+options = ["Weak encryption", "A flat network (no segmentation)",
+           "An unpatched kernel", "A phishing email"]
+answer = 1
+explain = "The vendor segment could reach the payment systems — segmentation would have contained it."
+[[m3.questions]]
+q = "Why is SMS-based MFA weaker than a FIDO2 security key?"
+options = ["It's slower", "It's defeated by SIM-swap and phishing",
+           "It needs internet", "It only works on Android"]
+answer = 1
+explain = "SIM-swap/phishing defeat SMS OTP; FIDO2 is phishing-resistant."
+
+[m4]
+title = "Vulnerability Management & SOC Operations"
+[[m4.questions]]
+q = "Which do you remediate first?"
+options = ["CVSS 9.1 on an internal test box, not exploited",
+           "CVSS 6.8 on your public payment portal, listed in CISA KEV",
+           "Any 10.0 regardless of exposure", "The oldest CVE"]
+answer = 1
+explain = "Internet-facing + critical asset + actively exploited (KEV) beats raw score."
+[[m4.questions]]
+q = "Hydra vs John the Ripper — the core difference is:"
+options = ["Hydra is offline, John is online", "Hydra guesses against a live service; John cracks stolen hashes offline",
+           "They are identical", "John only works on Windows"]
+answer = 1
+explain = "Online guessing (Hydra) vs offline hash cracking (John); John has no lockout."
+[[m4.questions]]
+q = "Failed logins, a port scan and a successful login — all from one IP. How many incidents?"
+options = ["Three", "One — correlate by source IP", "Zero", "Two"]
+answer = 1
+explain = "Correlation turns scattered alerts into one intrusion."
+
+[m5]
+title = "Cyber Fraud, BEC & Mobile Money"
+[[m5.questions]]
+q = "The single control that most reliably stops BEC payment fraud is:"
+options = ["A spam filter", "Antivirus",
+           "Dual control + out-of-band callback on a KNOWN number", "A stronger email password"]
+answer = 2
+explain = "Verify any bank-detail change via an independently known channel; never the email's number."
+[[m5.questions]]
+q = "An email's From: shows your real supplier, but Reply-To is a different hyphenated domain. This is:"
+options = ["Normal", "A spoof routing replies to the attacker", "A mail server error", "Spam you can ignore"]
+answer = 1
+explain = "Display forged for trust; replies silently go to the look-alike domain."
+[[m5.questions]]
+q = "Why doesn't an SMS OTP protect a MoMo wallet against SIM-swap?"
+options = ["OTPs expire too fast", "The attacker has taken over the number itself",
+           "OTPs are encrypted", "The bank disables it"]
+answer = 1
+explain = "SIM-swap hijacks the number, so the OTP is delivered to the attacker."
+
+[m6]
+title = "Digital Forensics & Incident Response"
+[[m6.questions]]
+q = "You reach a compromised server still running. The right first move is to:"
+options = ["Power it off immediately", "Reboot it",
+           "Isolate it from the network and capture memory first", "Delete the malware"]
+answer = 2
+explain = "Powering off destroys volatile memory evidence; isolate, then collect by order of volatility."
+[[m6.questions]]
+q = "Matching SHA-256 hashes before and after analysis prove:"
+options = ["The file is malware", "The evidence was not altered (integrity)",
+           "The disk is encrypted", "The attacker is caught"]
+answer = 1
+explain = "A matching hash is mathematical proof of integrity — the basis of chain of custody."
+[[m6.questions]]
+q = "The 3-2-1 backup rule means:"
+options = ["3 passwords, 2 admins, 1 server", "3 copies, 2 media types, 1 offsite/offline",
+           "Back up 3 times a day", "3 drives in RAID"]
+answer = 1
+explain = "One offline/offsite copy is what survives ransomware that encrypts online backups."
+
+[m7]
+title = "AI Security, Deepfakes & Emerging Threats"
+[[m7.questions]]
+q = "A document you ask an AI to summarise makes it email data to an attacker. This is:"
+options = ["A hardware fault", "Indirect prompt injection + excessive agency",
+           "A network outage", "A false positive"]
+answer = 1
+explain = "The instruction rode inside ingested content and the AI used a tool it shouldn't have."
+[[m7.questions]]
+q = "Against a deepfake 'CEO' voicemail demanding an urgent transfer, the reliable defence is:"
+options = ["A deepfake detector", "Out-of-band callback on a pre-established number",
+           "Checking the caller ID", "Replying by email"]
+answer = 1
+explain = "Detectors are unreliable; verify via an independent known channel."
+[[m7.questions]]
+q = "Which OWASP list ranks prompt injection as its top risk (LLM01)?"
+options = ["OWASP Web Top 10", "OWASP LLM Top 10", "OWASP Mobile Top 10", "OWASP API Top 10"]
+answer = 1
+explain = "Prompt injection is LLM01 in the OWASP Top 10 for LLM applications."
+
+[m8]
+title = "Data Protection, Privacy & Compliance"
+[[m8.questions]]
+q = "A cloud vendor misconfigures storage and leaks your customers' data. Who is accountable under Act 843?"
+options = ["The cloud vendor only", "You — the data controller",
+           "No one", "The customers"]
+answer = 1
+explain = "Outsourcing processing does not outsource accountability; you remain the controller."
+[[m8.questions]]
+q = "In the first 72 hours of a breach, the first action is to:"
+options = ["Tell the press", "Investigate fully before doing anything",
+           "Contain active access (while preserving evidence)", "Pay any ransom"]
+answer = 2
+explain = "Contain first, investigate second, then triage notification with counsel."
+[[m8.questions]]
+q = "The GDPR breach-notification norm Ghanaian institutions are increasingly expected to meet is:"
+options = ["30 days", "72 hours to the regulator once aware", "Immediately to the public", "No requirement"]
+answer = 1
+explain = "72 hours to the regulator is the benchmark expectation."
+
+[m9]
+title = "Cyber Governance & Business Continuity"
+[[m9.questions]]
+q = "Approving the cybersecurity budget and risk appetite is a function of:"
+options = ["Management", "Governance (the board)", "The SOC", "The vendor"]
+answer = 1
+explain = "Governance sets direction and demands assurance; management executes."
+[[m9.questions]]
+q = "Why is the backup RESTORE test more important than the backup itself?"
+options = ["It's faster", "A backup you've never restored may not work — only a verified restore proves DR",
+           "Regulators require daily restores", "It saves disk space"]
+answer = 1
+explain = "An untested backup is a hope; the verified restore is the real control."
+[[m9.questions]]
+q = "RTO and RPO are, respectively:"
+options = ["Two encryption standards", "Max acceptable downtime; max acceptable data loss",
+           "Router settings", "Audit report types"]
+answer = 1
+explain = "RTO = how fast you must be back; RPO = how much data you can afford to lose."
+
+[m10]
+title = "Operation Cyber Resilience (Capstone)"
+[[m10.questions]]
+q = "Several injects all involve one internal IP. What does that tell you?"
+options = ["They are unrelated", "It's one campaign — correlate by the shared foothold IP",
+           "The IP is a false positive", "Nothing"]
+answer = 1
+explain = "A shared indicator ties scattered events into a single intrusion."
+[[m10.questions]]
+q = "You contain the compromised foothold host. You should:"
+options = ["Power it off", "Isolate it from the network (preserve evidence)",
+           "Reimage it immediately", "Leave it running normally"]
+answer = 1
+explain = "Isolate to stop spread without destroying volatile evidence."
+[[m10.questions]]
+q = "A mid-incident voice note 'from the CEO' orders an urgent transfer. You:"
+options = ["Action it — it's urgent", "Verify out-of-band on a known number first",
+           "Forward it to staff", "Ignore the incident"]
+answer = 1
+explain = "Likely a deepfake; verify out-of-band before any payment."
+
+[final]
+title = "Final Exam — whole programme"
+[[final.questions]]
+q = "No DMARC record on a domain means:"
+options = ["It can't send email", "It is effectively spoofable", "It has strong security", "SPF is irrelevant"]
+answer = 1
+explain = "No policy/alignment to reject forged mail."
+[[final.questions]]
+q = "The highest-value indicator to detect on the Pyramid of Pain is:"
+options = ["Hashes", "IPs", "Domains", "TTPs"]
+answer = 3
+explain = "TTPs cost the attacker the most to change."
+[[final.questions]]
+q = "Target 2013 spread because the network was:"
+options = ["Encrypted", "Flat / unsegmented", "Air-gapped", "Cloud-hosted"]
+answer = 1
+explain = "Segmentation would have contained the vendor-account foothold."
+[[final.questions]]
+q = "Prioritise remediation by:"
+options = ["CVSS only", "CVSS + KEV + exposure + asset criticality", "Alphabetical order", "CVE age"]
+answer = 1
+explain = "Context and active exploitation beat raw score."
+[[final.questions]]
+q = "The control that stops BEC payment fraud:"
+options = ["Antivirus", "Dual control + out-of-band callback", "A spam filter", "Longer passwords"]
+answer = 1
+explain = "Verify changes via an independently known channel."
+[[final.questions]]
+q = "First move on a running compromised host:"
+options = ["Power off", "Isolate + capture memory", "Reboot", "Delete files"]
+answer = 1
+explain = "Order of volatility — memory first; never power off."
+[[final.questions]]
+q = "Under Act 843, if your processor leaks data, who is accountable?"
+options = ["The processor", "You, the controller", "No one", "The regulator"]
+answer = 1
+explain = "Accountability stays with the controller."
+[[final.questions]]
+q = "Prompt injection is which OWASP LLM risk?"
+options = ["LLM10", "LLM01", "LLM05", "None"]
+answer = 1
+explain = "LLM01 — the top risk."
+[[final.questions]]
+q = "Governance vs management: setting risk appetite is:"
+options = ["Management", "Governance", "Operations", "Audit only"]
+answer = 1
+explain = "The board governs; teams manage."
+[[final.questions]]
+q = "RPO measures:"
+options = ["Max downtime", "Max acceptable data loss", "Patch rate", "Alert volume"]
+answer = 1
+explain = "RTO is downtime; RPO is data loss."
+[[final.questions]]
+q = "The 3-2-1 rule requires at least one copy that is:"
+options = ["In RAID", "Offline/offsite", "Encrypted", "On the same server"]
+answer = 1
+explain = "An offline copy survives ransomware."
+[[final.questions]]
+q = "A deepfake voicemail ordering a transfer is defeated by:"
+options = ["A detector", "Out-of-band callback verification", "Caller ID", "Antivirus"]
+answer = 1
+explain = "Verify via a pre-established independent channel."
+
+[baseline]
+title = "Baseline Diagnostic (ungraded — self-placement)"
+[[baseline.questions]]
+q = "What does the 'C' in the CIA triad stand for?"
+options = ["Control", "Confidentiality", "Compliance", "Continuity"]
+answer = 1
+explain = "Confidentiality — only authorised parties can read the data."
+[[baseline.questions]]
+q = "MFA stands for:"
+options = ["Multi-Factor Authentication", "Managed Firewall Appliance",
+           "Multi-File Archive", "Mandatory Facial Access"]
+answer = 0
+explain = "An extra factor beyond the password."
+[[baseline.questions]]
+q = "Phishing is primarily an attack on:"
+options = ["Hardware", "People (social engineering)", "Cables", "Printers"]
+answer = 1
+explain = "It manipulates people into acting."
+[[baseline.questions]]
+q = "A 'patch' is:"
+options = ["A network cable", "A software fix for a vulnerability", "A type of malware", "A backup"]
+answer = 1
+explain = "Patches close known vulnerabilities."
+[[baseline.questions]]
+q = "Ransomware typically:"
+options = ["Speeds up your PC", "Encrypts your files and demands payment",
+           "Improves security", "Backs up data"]
+answer = 1
+explain = "It denies availability and extorts payment."
+[[baseline.questions]]
+q = "Which is a strong authentication practice?"
+options = ["Reusing one password everywhere", "Writing passwords on a sticky note",
+           "Using MFA and unique passwords", "Sharing your password with IT"]
+answer = 2
+explain = "Unique passwords + MFA."
