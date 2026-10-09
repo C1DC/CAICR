@@ -19,11 +19,14 @@
     </div>
     <nav class="rail-nav">
       <a data-view="dashboard"><span class="ic">▣</span> Dashboard</a>
+      <div class="navlabel">Learn</div>
       <a data-view="course"><span class="ic">◈</span> Course</a>
-      <a data-view="labs"><span class="ic">⌘</span> Labs</a>
-      <a data-view="terminal"><span class="ic">▶_</span> Terminal</a>
       <a data-view="materials"><span class="ic">◉</span> Tools &amp; Materials</a>
       <a data-view="commands"><span class="ic">⌨</span> Commands</a>
+      <div class="navlabel">Practise</div>
+      <a data-view="labs"><span class="ic">⌘</span> Labs</a>
+      <a data-view="terminal"><span class="ic">▶_</span> Terminal</a>
+      <div class="navlabel">Track</div>
       <a data-view="progress"><span class="ic">▤</span> Progress</a>
     </nav>
     <div class="rail-foot">
@@ -37,6 +40,7 @@
       <button class="ghost menu" id="menuBtn">☰</button>
       <div class="crumb" id="crumb">Dashboard</div>
       <div class="spacer"></div>
+      <button class="searchbtn" id="searchBtn"><span>🔍</span><span class="lbl">Search everything</span><span class="kbd">Ctrl K</span></button>
       <span class="pill" id="dockerPill">Docker: …</span>
     </header>
     <main id="view"><div class="loading">Loading…</div></main>

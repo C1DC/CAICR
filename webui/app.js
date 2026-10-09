@@ -28,6 +28,68 @@ $("#menuBtn").onclick = () => $("#app").classList.toggle("nav-open");
 $("#who").onclick = () => { location.hash = "dashboard"; };
 document.querySelectorAll(".rail-nav a").forEach(a => a.onclick = () => { location.hash = a.dataset.view; });
 
+/* ---------- command palette (Ctrl-K) ---------- */
+let PAL = null, PAL_SEL = 0, PAL_FILTERED = [];
+function paletteItems() {
+  const items = [
+    { t: "Dashboard", s: "Home", ic: "▣", go: () => location.hash = "dashboard" },
+    { t: "All Labs", s: "Hands-on", ic: "⌘", go: () => location.hash = "labs" },
+    { t: "Live Terminal", s: "Real Kali shell", ic: "▶_", go: () => location.hash = "terminal" },
+    { t: "Tools & Materials", s: "Reference", ic: "◉", go: () => location.hash = "materials" },
+    { t: "Commands", s: "Cheat-sheet", ic: "⌨", go: () => location.hash = "commands" },
+    { t: "Progress", s: "Your scores", ic: "▤", go: () => location.hash = "progress" },
+  ];
+  BOOT.modules.forEach(m => {
+    items.push({ t: m.id.toUpperCase() + " — " + m.title, s: "Lesson · Day " + m.day, ic: "◈", k: "lesson", go: () => location.hash = "course/" + m.id });
+    if (m.hasLab) items.push({ t: "Lab " + m.id.toUpperCase() + " — " + m.title, s: "Launch & verify", ic: "⌘", k: "lab", go: () => location.hash = "labs/" + m.id });
+  });
+  (BOOT.tools || []).forEach(t => items.push({
+    t: t.name, s: t.cat + " · tool", ic: "◉", k: "tool",
+    go: () => { location.hash = "materials"; setTimeout(() => { const el = [...document.querySelectorAll(".toolrow summary")].find(s => s.textContent.trim().startsWith(t.name)); if (el) { el.parentElement.open = true; el.scrollIntoView({ block: "center" }); } }, 140); }
+  }));
+  (BOOT.commands || []).forEach(c => items.push({ t: c.cmd, s: c.desc, ic: "⌨", k: "copy", go: () => copy(c.cmd) }));
+  return items;
+}
+function openPalette() {
+  if (PAL) return;
+  const all = paletteItems();
+  const back = document.createElement("div");
+  back.className = "pal-back";
+  back.innerHTML = `<div class="pal"><input placeholder="Search modules, labs, tools, commands…" autocomplete="off" spellcheck="false"><div class="pal-list"></div></div>`;
+  document.body.appendChild(back); PAL = back;
+  const input = back.querySelector("input"), list = back.querySelector(".pal-list");
+  const render = q => {
+    q = q.trim().toLowerCase();
+    PAL_FILTERED = (q ? all.filter(i => (i.t + " " + i.s).toLowerCase().includes(q)) : all).slice(0, 60);
+    PAL_SEL = 0;
+    list.innerHTML = PAL_FILTERED.length
+      ? PAL_FILTERED.map((i, idx) => `<div class="pal-item ${idx === 0 ? "sel" : ""}" data-i="${idx}"><div class="pi-ic">${i.ic}</div><div style="min-width:0"><div class="pi-t">${esc(i.t)}</div><div class="pi-s">${esc(i.s)}</div></div>${i.k ? `<div class="pi-k">${i.k}</div>` : ""}</div>`).join("")
+      : `<div class="pal-empty">No matches</div>`;
+    list.querySelectorAll(".pal-item").forEach(el => { el.onmouseenter = () => select(+el.dataset.i); el.onclick = () => run(+el.dataset.i); });
+  };
+  const select = i => { PAL_SEL = i; list.querySelectorAll(".pal-item").forEach((el, idx) => el.classList.toggle("sel", idx === i)); const s = list.querySelector(".pal-item.sel"); if (s) s.scrollIntoView({ block: "nearest" }); };
+  const run = i => { const it = PAL_FILTERED[i]; closePalette(); if (it) it.go(); };
+  input.addEventListener("input", () => render(input.value));
+  input.addEventListener("keydown", e => {
+    if (e.key === "ArrowDown") { e.preventDefault(); select(Math.min(PAL_SEL + 1, PAL_FILTERED.length - 1)); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); select(Math.max(PAL_SEL - 1, 0)); }
+    else if (e.key === "Enter") { e.preventDefault(); run(PAL_SEL); }
+    else if (e.key === "Escape") closePalette();
+  });
+  back.addEventListener("click", e => { if (e.target === back) closePalette(); });
+  render(""); input.focus();
+}
+function closePalette() { if (PAL) { PAL.remove(); PAL = null; } }
+$("#searchBtn").onclick = openPalette;
+document.addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) {
+    // Let the live terminal keep Ctrl-K (kill-line) when it has focus.
+    const inTerm = !PAL && document.activeElement && document.activeElement.closest && document.activeElement.closest("#termwrap");
+    if (inTerm) return;
+    e.preventDefault(); PAL ? closePalette() : openPalette();
+  }
+});
+
 function updateChrome() {
   $("#who").textContent = BOOT.student ? "👤 " + BOOT.student : "Set your name →";
   const p = $("#dockerPill");
@@ -57,50 +119,53 @@ function vDashboard() {
   const next = !anyProgress ? (modById("m0") || BOOT.modules[0])
     : (BOOT.modules.find(m => m.hasLab && !m.complete) || BOOT.modules[0]);
   const days = [...new Set(BOOT.modules.map(m => m.day))].sort();
+  const termOk = BOOT.summary.terminal !== false;
   view.innerHTML = `
   <div class="hero">
-    <div class="row wrap" style="justify-content:space-between;align-items:flex-start;gap:20px">
-      <div style="flex:1;min-width:240px">
-        <div class="dim" style="letter-spacing:2px;font-size:12px;text-transform:uppercase">Professional Certificate in Cybersecurity, AI &amp; Digital Resilience</div>
+    <div class="row wrap" style="justify-content:space-between;align-items:center;gap:24px">
+      <div style="flex:1;min-width:260px">
+        <div class="dim" style="letter-spacing:2px;font-size:11.5px;text-transform:uppercase">Professional Certificate in Cybersecurity, AI &amp; Digital Resilience</div>
         <h1>Welcome${BOOT.student ? ", " + esc(BOOT.student) : ""}</h1>
-        <p class="muted">Your course, labs, lessons, tools and deliverables — all in one place, on this machine.</p>
-        <div class="row" style="margin-top:6px">
-          <input id="nameIn" class="" type="text" placeholder="Enter your name" value="${esc(BOOT.student)}"
+        <p class="muted" style="max-width:520px">Your course, labs, lessons, tools and deliverables — all in one place, on this machine. Press <span class="kbd">Ctrl K</span> to jump anywhere.</p>
+        <div class="row" style="margin-top:10px">
+          <input id="nameIn" type="text" placeholder="Enter your name" value="${esc(BOOT.student)}"
             style="background:var(--bg);border:1px solid var(--border2);border-radius:9px;padding:9px 12px;color:var(--fg);font-size:14px">
           <button class="btn sec" id="nameSave">Save</button>
         </div>
       </div>
-      <div style="min-width:170px">
-        <div class="stat"><span class="n">${done}/${total}</span><span class="l">labs completed</span></div>
-        <div class="bar"><i style="width:${pct}%"></i></div>
-        <div class="dim" style="margin-top:6px;font-size:12.5px">${pct}% of the hands-on labs</div>
-      </div>
+      <div class="ring" style="--p:${pct}"><div class="hole"><div style="text-align:center"><b>${pct}%</b><br><span>${done}/${total} labs</span></div></div></div>
     </div>
   </div>
 
-  <div class="section-title">Continue</div>
-  <div class="card click" id="continueCard">
-    <div class="row" style="justify-content:space-between">
-      <div><strong>${next.id.toUpperCase()} — ${esc(next.title)}</strong><div class="dim">Day ${next.day}</div></div>
-      <div>${modBadges(next)}</div>
-    </div>
+  <div class="section-title">Jump back in</div>
+  <div class="quick">
+    <a id="qResume"><span class="ic">▶</span> ${anyProgress ? "Next lab" : "Start orientation"}: <strong style="margin-left:4px">${next.id.toUpperCase()}</strong></a>
+    ${termOk ? `<a onclick="location.hash='terminal'"><span class="ic">▶_</span> Open live terminal</a>` : ""}
+    <a onclick="location.hash='labs'"><span class="ic">⌘</span> All labs</a>
+    <a onclick="location.hash='materials'"><span class="ic">◉</span> Tools reference</a>
   </div>
 
-  <div class="section-title">The five days</div>
-  <div class="grid cards-3">
+  <div class="section-title">Your five days</div>
+  <div class="card">
     ${days.map(d => {
       const mods = BOOT.modules.filter(m => m.day === d);
-      const dn = mods.filter(m => m.complete).length;
-      return `<div class="card click" data-day="${d}">
-        <div class="dim" style="font-size:12px">DAY ${d}</div>
-        <strong>${esc(BOOT.dayTitles[d] || ("Day " + d))}</strong>
-        <div class="dim" style="margin-top:8px;font-size:13px">${mods.length} modules · ${dn} complete</div>
+      const grad = mods.filter(m => m.maxPoints > 0);
+      const dn = grad.filter(m => m.complete).length;
+      const dp = grad.length ? Math.round(100 * dn / grad.length) : 0;
+      return `<div class="dayrow">
+        <div class="daynum">D${d}</div>
+        <div style="flex:1;min-width:0">
+          <div class="row" style="justify-content:space-between"><strong style="font-size:14px">${esc(BOOT.dayTitles[d] || ("Day " + d))}</strong>
+            <span class="dim" style="font-size:12.5px">${grad.length ? dn + "/" + grad.length + " labs" : mods.length + " sessions"}</span></div>
+          <div class="bar"><i style="width:${dp}%"></i></div>
+        </div>
+        <a class="ghost" data-day="${d}">Open</a>
       </div>`;
     }).join("")}
   </div>`;
   $("#nameSave").onclick = saveName;
   $("#nameIn").addEventListener("keydown", e => { if (e.key === "Enter") saveName(); });
-  $("#continueCard").onclick = () => { location.hash = (next.hasLab ? "labs/" : "course/") + next.id; };
+  $("#qResume").onclick = () => { location.hash = (next.hasLab ? "labs/" : "course/") + next.id; };
   view.querySelectorAll("[data-day]").forEach(c => c.onclick = () => { location.hash = "course"; });
 }
 async function saveName() {
@@ -141,8 +206,25 @@ async function vModule(mid) {
     <div class="content">${lesson.html}</div>
     ${sheets.sheets.length ? `<div class="section-title">Deliverable templates</div>
       ${sheets.sheets.map(s => `<details><summary>📝 ${esc(s.name)}</summary><div class="inner content">${s.html}</div></details>`).join("")}
-      <p class="dim">Get editable copies in your terminal: <code>labctl worksheet ${mid}</code></p>` : ""}`;
+      <p class="dim">Get editable copies in your terminal: <code>labctl worksheet ${mid}</code></p>` : ""}
+    <div class="section-title">My notes</div>
+    <div class="notes panel">
+      <textarea id="noteBox" placeholder="Jot your findings, commands, and answers for ${mid.toUpperCase()} here — saved automatically in this browser."></textarea>
+      <div class="row" style="justify-content:space-between;margin-top:8px">
+        <span class="dim" id="noteState">Saved locally on this device.</span>
+        <button class="ghost" id="noteClear">Clear</button>
+      </div>
+    </div>`;
   if (m.hasLab) $("#toLab").onclick = () => { location.hash = "labs/" + mid; };
+  const box = $("#noteBox"), key = "caic_notes_" + mid, st = $("#noteState");
+  try { box.value = localStorage.getItem(key) || ""; } catch (e) {}
+  let tmr = null;
+  box.addEventListener("input", () => {
+    st.className = "dim"; st.textContent = "Saving…";
+    clearTimeout(tmr);
+    tmr = setTimeout(() => { try { localStorage.setItem(key, box.value); st.className = "saved"; st.textContent = "✓ Saved"; } catch (e) { st.textContent = "Could not save"; } }, 400);
+  });
+  $("#noteClear").onclick = () => { box.value = ""; try { localStorage.removeItem(key); } catch (e) {} st.textContent = "Cleared."; };
 }
 
 async function vLabs() {
