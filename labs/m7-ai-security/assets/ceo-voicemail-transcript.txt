@@ -1,0 +1,30 @@
+VOICEMAIL — transcript & analyst notes
+======================================
+Received: 2026-10-16 10:31 (during the incident window)
+Caller ID: "MD — Head Office"  (display only; number withheld)
+Duration: 0:22
+Channel: WhatsApp voice note forwarded to the Finance Officer
+
+TRANSCRIPT
+----------
+"Hi, it's the Managing Director. I'm in a board meeting and can't talk — don't
+call back, just handle it by message. We've closed an urgent acquisition and I
+need you to wire GHS 480,000 to the account I'm sending now, today, before 12.
+Keep this strictly confidential, don't loop in the usual approvers, there's no
+time. Thank you — I'm counting on you."
+
+ANALYST NOTES (what to teach the student)
+-----------------------------------------
+* The voice is a near-perfect clone of the MD (AI voice cloning needs only a few
+  seconds of sample audio — plenty exists in public speeches and webinars).
+* Deepfake DETECTORS are unreliable (high error rates; attackers adapt), so the
+  decision must NOT rest on "it sounded real."
+* The RED FLAGS here are behavioural, not acoustic:
+    - extreme urgency and a deadline ("today, before 12")
+    - an explicit instruction NOT to call back ("don't call back")
+    - a demand to BYPASS the normal approvers ("don't loop in the usual approvers")
+    - secrecy ("strictly confidential")
+    - a request arriving over an out-of-band channel (a WhatsApp voice note)
+* The CONTROL that defeats this every time: independent, out-of-band
+  verification — call the MD back on a PRE-ESTABLISHED known number (or verify in
+  person), and enforce dual-control on any payment regardless of who "asked".
