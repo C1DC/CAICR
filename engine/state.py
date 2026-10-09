@@ -113,6 +113,23 @@ def quiz_status(quiz_id: str) -> dict:
     return _load().get("quizzes", {}).get(quiz_id, {})
 
 
+def certificate_issue(serial: str) -> dict:
+    """Record the certificate issue date once, so the verification code is
+    stable across re-prints. Returns the stored {serial, issued}."""
+    data = _load()
+    cert = data.get("certificate")
+    if not isinstance(cert, dict) or not cert.get("issued"):
+        cert = {"serial": serial, "issued": _dt.date.today().isoformat()}
+        data["certificate"] = cert
+        _save(data)
+    return data["certificate"]
+
+
+def certificate_status() -> dict:
+    c = _load().get("certificate")
+    return c if isinstance(c, dict) else {}
+
+
 def is_complete(lab_id: str, max_points: int) -> bool:
     entry = lab_status(lab_id)
     return max_points > 0 and entry.get("best_score", 0) >= max_points

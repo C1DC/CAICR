@@ -338,3 +338,14 @@ details .inner{padding:4px 18px 14px;border-top:1px solid var(--border)}
 .qfb.no{background:color-mix(in srgb,var(--red) 11%,transparent);color:var(--fg)}
 .quiz-result{margin-bottom:6px;border-left:4px solid var(--brand)}
 .quiz-result.good{border-left-color:var(--green)}
+
+/* ---------- certificate card ---------- */
+.cert-card{display:flex;gap:18px;align-items:center}
+.cert-ribbon{font-size:34px;width:60px;height:60px;border-radius:14px;display:grid;place-items:center;flex:0 0 auto}
+.cert-card.earned{border-color:color-mix(in srgb,var(--green) 50%,var(--border));
+  background:linear-gradient(135deg,color-mix(in srgb,var(--green) 10%,var(--panel)),var(--panel))}
+.cert-card.earned .cert-ribbon{background:color-mix(in srgb,var(--green) 18%,transparent)}
+.cert-card.locked .cert-ribbon{background:var(--panel2)}
+.cert-card code{font-size:12px;background:var(--panel2);padding:1px 7px;border-radius:6px;color:var(--brand-lt)}
+.cert-todo{margin:10px 0 0;padding-left:20px;font-size:13px;color:var(--fg-mid)}
+.cert-todo li{margin:3px 0}

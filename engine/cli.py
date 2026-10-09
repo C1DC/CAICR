@@ -459,6 +459,45 @@ def cmd_grade(_args) -> int:
     return 0
 
 
+def cmd_certificate(args) -> int:
+    from . import certificate
+    if getattr(args, "verify", None):
+        res = certificate.verify(args.verify)
+        if res["ok"]:
+            ui.ok(f"Valid — certificate {res['serial']} for {res['student']}.")
+            return 0
+        ui.fail(res.get("reason") or "Code does not match this machine's record.")
+        if res.get("expected"):
+            ui.dim(f"  Expected code for this machine: {res['expected']}")
+        return 1
+    b = certificate.build()
+    if not b["eligible"]:
+        ui.banner("Certificate — not yet earned")
+        ui.warn(f"You're at {b['grade']['overall']}% overall; the pass mark is "
+                f"{b['grade']['passMark']}%.")
+        ui.info("To earn your certificate:")
+        for r in b["reasons"]:
+            print(f"    • {r}")
+        ui.dim("  See the full breakdown with: labctl grade")
+        return 1
+    rec = b["record"]
+    paths.WORK_DIR.mkdir(parents=True, exist_ok=True)
+    safe = "".join(ch if ch.isalnum() else "_" for ch in rec["student"]) or "participant"
+    out = paths.WORK_DIR / f"CAIC_certificate_{safe}.html"
+    out.write_text(b["html"], encoding="utf-8")
+    ui.banner("Certificate earned 🎓")
+    ui.ok(f"{rec['student']} — {rec['grade']['overall']}% overall. Congratulations!")
+    ui.info(f"Serial: {rec['serial']}")
+    ui.info(f"Verification code: {rec['code']}")
+    ui.info(f"Saved: {out}")
+    ui.dim("  Open it in a browser and use File → Print → Save as PDF for a shareable copy.")
+    ui.dim(f"  Verify authenticity on this machine: labctl certificate --verify {rec['code']}")
+    if getattr(args, "open", False):
+        import webbrowser
+        webbrowser.open(out.as_uri())
+    return 0
+
+
 def cmd_prep(args) -> int:
     """Build every lab image up front, so later launches work fully offline.
     Run this ONCE on each machine while internet is available."""
@@ -566,6 +605,9 @@ def build_parser() -> argparse.ArgumentParser:
     add("exam", cmd_exam, "sit the final exam", lab="none")
     add("diagnostic", cmd_diagnostic, "take the (ungraded) baseline diagnostic", lab="none")
     add("grade", cmd_grade, "show your composite course grade + pass status", lab="none")
+    cert = add("certificate", cmd_certificate, "generate your completion certificate (once you pass)", lab="none")
+    cert.add_argument("--verify", metavar="CODE", help="check a certificate code against this machine")
+    cert.add_argument("--open", action="store_true", help="open the certificate in a browser")
     add("info", cmd_info, "show a lab's briefing and targets", lab="required")
     add("start", cmd_start, "bring up a lab's isolated targets", lab="required")
     add("status", cmd_status, "show which lab targets are running")

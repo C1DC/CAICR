@@ -600,9 +600,29 @@ async function vAssessment(arg) {
       ${q.graded && done ? `<div class="bar" style="margin-top:10px"><i style="width:${q.pct}%"></i></div>` : ""}
     </div>`;
   };
+  let cert = null; try { cert = await api("/api/certificate"); } catch (e) {}
+  const certHtml = cert ? (cert.eligible
+    ? `<div class="card cert-card earned">
+        <div class="cert-ribbon">🎓</div>
+        <div style="flex:1;min-width:220px">
+          <strong style="font-size:16px">Certificate earned</strong>
+          <div class="dim" style="margin-top:4px">Serial <code>${esc(cert.record.serial)}</code> · code <code>${esc(cert.record.code)}</code></div>
+          <div class="row" style="margin-top:12px;gap:10px">
+            <a class="btn" href="/certificate.html" target="_blank" rel="noopener">Open &amp; print certificate →</a>
+          </div>
+          <div class="dim" style="margin-top:8px;font-size:12px">In the new tab use File → Print → Save as PDF for a shareable copy.</div>
+        </div></div>`
+    : `<div class="card cert-card locked">
+        <div class="cert-ribbon">🔒</div>
+        <div style="flex:1;min-width:220px">
+          <strong style="font-size:16px">Completion certificate</strong>
+          <div class="dim" style="margin-top:4px">Unlocks at ${cert.grade.passMark}% overall — you're at ${cert.grade.overall}%.</div>
+          ${cert.reasons && cert.reasons.length ? `<ul class="cert-todo">${cert.reasons.map(r => `<li>${esc(r)}</li>`).join("")}</ul>` : ""}
+        </div></div>`) : "";
   view.innerHTML = `
   <p class="muted">Your grade combines three things — hands-on labs (50%), the module quizzes (25%) and the final exam (25%). You need <strong>${a.grade.passMark}%</strong> overall to earn the certificate.</p>
   <div class="card gauge-card">${gradeGauge(a.grade, true)}</div>
+  ${certHtml}
 
   ${a.baseline ? `<div class="section-title">Before you begin</div>
   <div class="grid cards-3">${card(a.baseline, "self-check, not graded")}</div>` : ""}

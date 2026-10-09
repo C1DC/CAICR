@@ -75,6 +75,24 @@ are safe. Fill in the `[...]` placeholders in any editor.
 
 `./labctl progress` shows how far through the course you are.
 
+### Quizzes, the exam and your certificate
+
+Hands-on labs are half your grade. The rest comes from the module quizzes and
+the final exam:
+
+```
+./labctl diagnostic             # optional baseline self-check (not graded)
+./labctl quiz m3                # a short knowledge check for a module
+./labctl exam                   # the final exam (counts for 25%)
+./labctl grade                  # your composite grade: labs 50 / quizzes 25 / exam 25
+./labctl certificate            # generate your certificate once you pass (70%)
+```
+
+Quiz and exam options are reshuffled for every student, so answers can't be
+shared. When you reach **70% overall**, `./labctl certificate` writes a branded
+certificate (open it and Print → Save as PDF). You can do all of this in the web
+app too — open the **Assessment** page with `./labctl serve`.
+
 ---
 
 ## The golden safety rule

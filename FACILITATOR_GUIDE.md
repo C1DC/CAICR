@@ -139,3 +139,23 @@ Each student drives everything from one command, `labctl`, or the browser app
 - A student's scores are tangled → `labctl reset-progress`.
 - Collect progress for grading → copy each student's
   `~/.local/share/caic-lab/state.json` and run `labctl report <folder>`.
+
+---
+
+## Assessment & certification
+
+Three weighted components make the final grade: **labs 50% · quizzes 25% ·
+exam 25%**, pass mark **70%** (`labctl grade`, or the Assessment page in the
+web app).
+
+- Quiz and exam options are **reshuffled per student** from the seed, so answers
+  can't be copied. Correct answers (keyed by text, not letter) are in the second
+  half of `FACILITATOR_ANSWER_KEY.md`.
+- `labctl diagnostic` is an ungraded baseline — have students run it on Day 1 to
+  self-place; it doesn't affect the grade.
+- At 70% a student runs `labctl certificate` to produce a branded certificate
+  (HTML → Print → Save as PDF) carrying a serial and verification code.
+- To authenticate a certificate, run `labctl certificate --verify <code>` **on
+  that student's machine** — the code is re-derived from their recorded
+  achievement and seed, so a hand-edited certificate fails the check. This is an
+  integrity check for the classroom, not a cryptographic anti-forgery guarantee.

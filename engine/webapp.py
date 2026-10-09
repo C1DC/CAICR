@@ -15,7 +15,7 @@ import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
-from . import __version__, dockerctl, grade as grading, paths, quiz, state, verify
+from . import __version__, certificate, dockerctl, grade as grading, paths, quiz, state, verify
 from .course import COMMANDS, COURSE_MAP, DAY_TITLES, LINUX_COMMANDS, TOOLS
 from .manifest import ManifestError, discover_labs, load_one
 from .mdhtml import md_to_html
@@ -226,6 +226,15 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _html(self, body, code=200):
+        data = body.encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(data)
+
     def _err(self, msg, code=400):
         self._json({"error": msg}, code)
 
@@ -300,6 +309,24 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(_assessment())
             if p == "/api/grade":
                 return self._json(grading.compute())
+            if p == "/api/certificate":
+                b = certificate.build()
+                b.pop("html", None)   # the SPA fetches the printable page separately
+                return self._json(b)
+            if p == "/certificate.html":
+                b = certificate.build()
+                if b["eligible"]:
+                    return self._html(b["html"])
+                reasons = "".join(f"<li>{r}</li>" for r in b.get("reasons", []))
+                return self._html(
+                    "<!doctype html><meta charset=utf-8><title>Certificate</title>"
+                    "<body style='font-family:system-ui;max-width:640px;margin:60px auto;"
+                    "padding:0 20px;color:#1a1530'><h1>Not earned yet</h1>"
+                    f"<p>You're at {b['grade']['overall']}% overall; the pass mark is "
+                    f"{b['grade']['passMark']}%.</p><p>To earn your certificate:</p>"
+                    f"<ul>{reasons}</ul>"
+                    "<p><a href='/#assessment'>← Back to the assessment</a></p></body>",
+                    code=403)
             if p.startswith("/api/quiz/"):
                 qid = p.rsplit("/", 1)[-1]
                 items = quiz.present(qid)

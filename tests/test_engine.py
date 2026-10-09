@@ -338,6 +338,35 @@ class TestAssessment(unittest.TestCase):
         self.assertIn("passed", g)
         self.assertEqual(sum(c["weight"] for c in g["components"].values()), 1.0)
 
+    def _pass_everything(self):
+        from engine import state, quiz
+        from engine.manifest import discover_labs
+        state.set_student("Test Student")
+        for lab in discover_labs():
+            if lab.max_points:
+                state.record_result(lab.id, {}, lab.max_points, lab.max_points)
+        for qid, q in quiz.load().items():
+            if qid != "baseline":
+                n = len(q["questions"]); state.record_quiz(qid, n, n)
+
+    def test_certificate_locked_until_pass(self):
+        from engine import certificate
+        b = certificate.build()
+        self.assertFalse(b["eligible"])
+        self.assertTrue(b["reasons"])
+
+    def test_certificate_earned_and_verifiable(self):
+        from engine import certificate
+        self._pass_everything()
+        b = certificate.build()
+        self.assertTrue(b["eligible"])
+        code = b["record"]["code"]
+        self.assertEqual(certificate.build()["record"]["code"], code)  # stable
+        self.assertTrue(certificate.verify(code)["ok"])
+        self.assertFalse(certificate.verify("0000-0000-0000")["ok"])
+        self.assertIn("Test Student", b["html"])
+        self.assertIn(code, b["html"])
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
