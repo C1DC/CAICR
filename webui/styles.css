@@ -164,6 +164,11 @@ details .inner{padding:2px 18px 14px;border-top:1px solid var(--border)}
 .cmdline code{color:var(--green);flex:1}
 .cmdline button{background:none;border:1px solid var(--border2);color:var(--fg-dim);
   border-radius:7px;padding:3px 9px;font-size:12px}
+#termwrap{height:68vh;margin-top:12px;border:1px solid var(--border);border-radius:12px;
+  overflow:hidden;background:#0a0812;padding:8px}
+#termwrap .xterm{height:100%}
+.tool-detail h4{margin:.8em 0 .3em;color:var(--teal);font-size:14px;text-transform:uppercase;letter-spacing:.5px}
+.tool-cat{font-size:11.5px;color:var(--gold);border:1px solid var(--border2);border-radius:20px;padding:2px 9px;margin-left:8px}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--raised);
   border:1px solid var(--border2);color:var(--fg);padding:11px 18px;border-radius:11px;
   box-shadow:var(--shadow);z-index:20;font-size:14px}

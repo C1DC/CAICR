@@ -225,6 +225,42 @@ class TestWebApp(unittest.TestCase):
         for f in ("index.html", "app.js", "styles.css"):
             self.assertTrue((ROOT / "webui" / f).is_file(), f"webui/{f} missing")
 
+    def test_tools_are_richly_documented(self):
+        self.assertGreaterEqual(len(course.TOOLS), 15)
+        for t in course.TOOLS:
+            for k in ("name", "cat", "desc", "usage", "commands"):
+                self.assertIn(k, t, f"tool {t.get('name')} missing '{k}'")
+            self.assertTrue(t["commands"], f"tool {t['name']} has no commands")
+            for c in t["commands"]:
+                self.assertIn("cmd", c); self.assertIn("desc", c)
+
+
+class TestTerminal(unittest.TestCase):
+    def test_webterm_imports_and_vendor_present(self):
+        from engine import webterm  # noqa: F401
+        for f in ("xterm.js", "xterm.css", "xterm-addon-fit.js"):
+            self.assertTrue((ROOT / "webui" / "vendor" / f).is_file(),
+                            f"vendor/{f} missing")
+
+    def test_ws_frame_roundtrip(self):
+        """The WebSocket codec must decode a masked client frame correctly."""
+        import os
+        import struct
+        from engine import webterm
+
+        class FakeSock:
+            def __init__(self, data): self.buf = data
+            def recv(self, n):
+                chunk = self.buf[:n]; self.buf = self.buf[n:]; return chunk
+
+        payload = b'{"t":"data","d":"x"}'
+        mask = os.urandom(4)
+        masked = bytes(b ^ mask[i % 4] for i, b in enumerate(payload))
+        frame = bytes([0x81, 0x80 | len(payload)]) + mask + masked
+        op, got = webterm._read_frame(FakeSock(frame))
+        self.assertEqual(op, 0x1)
+        self.assertEqual(got, payload)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

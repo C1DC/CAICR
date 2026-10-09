@@ -2,6 +2,7 @@
 const $ = (s, r = document) => r.querySelector(s);
 const view = $("#view");
 let BOOT = null, POLL = null;
+let TERM = null, TWS = null, TFIT = null, TRESIZE = null;
 
 /* ---------- utilities ---------- */
 async function api(path, opts) {
@@ -13,6 +14,12 @@ const esc = s => (s == null ? "" : String(s)).replace(/[&<>"]/g, c => ({ "&": "&
 function toast(msg) { const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); }
 function copy(txt) { navigator.clipboard?.writeText(txt).then(() => toast("Copied")); }
 function clearPoll() { if (POLL) { clearInterval(POLL); POLL = null; } }
+function cleanupTerm() {
+  if (TRESIZE) { window.removeEventListener("resize", TRESIZE); TRESIZE = null; }
+  if (TWS) { try { TWS.close(); } catch (e) {} TWS = null; }
+  if (TERM) { try { TERM.dispose(); } catch (e) {} TERM = null; }
+  TFIT = null;
+}
 
 /* ---------- chrome ---------- */
 function initTheme() { try { const t = localStorage.getItem("caic_theme"); if (t) document.documentElement.setAttribute("data-theme", t); } catch (e) {} }
@@ -268,15 +275,81 @@ async function verifyLab(id, d) {
   btn.disabled = false; btn.textContent = "Submit & grade";
 }
 
+function vTerminal() {
+  setActive("terminal"); crumb([{ t: "Terminal" }]);
+  if (BOOT.summary && BOOT.summary.terminal === false) {
+    view.innerHTML = `<div class="card">The live terminal is disabled on this installation.</div>`;
+    return;
+  }
+  if (typeof Terminal === "undefined") {
+    view.innerHTML = `<div class="card">Terminal component failed to load (vendor/xterm.js).</div>`;
+    return;
+  }
+  view.innerHTML = `
+    <div class="row wrap" style="justify-content:space-between;margin-bottom:10px">
+      <div><strong>Live Kali terminal</strong> <span class="dim">— a real shell on this machine, in the lab folder.</span></div>
+      <div class="row"><span class="badge b-stop" id="termStatus">connecting…</span>
+        <button class="ghost" id="termReconnect">Reconnect</button></div>
+    </div>
+    <div class="safety">⚠ This is your real machine, with your real privileges. The rules still apply: only scan or attack the <code>10.13.x.x</code> lab targets.</div>
+    <div id="termwrap"></div>
+    <p class="dim">New here? Run <code>./labctl learn m0</code> for the command-line primer, or <code>./labctl list</code> to see the labs.</p>`;
+  connectTerminal();
+  $("#termReconnect").onclick = () => { cleanupTerm(); connectTerminal(); };
+}
+function connectTerminal() {
+  const wrap = $("#termwrap"); if (!wrap) return;
+  wrap.innerHTML = "";
+  const term = new Terminal({
+    cursorBlink: true, fontSize: 14, scrollback: 5000,
+    fontFamily: 'SFMono-Regular,Consolas,"Liberation Mono",monospace',
+    theme: { background: "#0a0812", foreground: "#e6e2f5", cursor: "#9b6dff",
+             selectionBackground: "#3a3158" },
+  });
+  const fit = new FitAddon.FitAddon();
+  term.loadAddon(fit); term.open(wrap); try { fit.fit(); } catch (e) {}
+  TERM = term; TFIT = fit;
+  const proto = location.protocol === "https:" ? "wss" : "ws";
+  const ws = new WebSocket(proto + "://" + location.host + "/ws/terminal");
+  ws.binaryType = "arraybuffer"; TWS = ws;
+  const status = $("#termStatus");
+  const sendResize = () => { if (ws.readyState === 1) ws.send(JSON.stringify({ t: "resize", cols: term.cols, rows: term.rows })); };
+  ws.onopen = () => { if (status) { status.className = "badge b-run"; status.textContent = "● connected"; } sendResize(); term.focus(); };
+  ws.onmessage = e => { if (typeof e.data === "string") term.write(e.data); else term.write(new Uint8Array(e.data)); };
+  ws.onclose = () => { if (status) { status.className = "badge b-stop"; status.textContent = "○ disconnected"; } try { term.write("\r\n\x1b[90m[session ended — press Reconnect]\x1b[0m\r\n"); } catch (e) {} };
+  ws.onerror = () => { if (status) { status.className = "badge b-busy"; status.textContent = "error"; } };
+  term.onData(d => { if (ws.readyState === 1) ws.send(JSON.stringify({ t: "data", d })); });
+  TRESIZE = () => { try { fit.fit(); sendResize(); } catch (e) {} };
+  window.addEventListener("resize", TRESIZE);
+}
+
+function toolDetail(t) {
+  const cmds = (t.commands || []).map(c =>
+    `<div class="cmdline"><code>${esc(c.cmd)}</code><span class="dim" style="flex:2">${esc(c.desc)}</span><button data-c="${esc(c.cmd)}">copy</button></div>`).join("");
+  const tips = (t.tips || []).map(x => `<li>${esc(x)}</li>`).join("");
+  return `<div class="tool-detail">
+    <p>${esc(t.desc || "")}</p>
+    ${t.usage ? `<h4>How to use it</h4><p class="muted">${esc(t.usage)}</p>` : ""}
+    ${cmds ? `<h4>Key commands</h4>${cmds}` : ""}
+    ${tips ? `<h4>Practitioner tips</h4><ul>${tips}</ul>` : ""}
+    ${t.modules ? `<p class="dim" style="margin-top:10px">Used in: ${esc(t.modules)}</p>` : ""}
+  </div>`;
+}
 function vMaterials() {
   setActive("materials"); crumb([{ t: "Tools & Materials" }]);
+  const cats = [...new Set(BOOT.tools.map(t => t.cat))];
   view.innerHTML = `
-  <div class="section-title">Kali tool reference</div>
-  <div class="card" style="padding:0;overflow:auto">
-    <table><thead><tr><th>Tool</th><th>Category</th><th>Modules</th><th>What it's for</th></tr></thead><tbody>
-    ${BOOT.tools.map(t => `<tr><td><strong>${esc(t.name)}</strong></td><td class="muted">${esc(t.cat)}</td><td class="dim">${esc(t.modules)}</td><td class="muted">${esc(t.purpose)}</td></tr>`).join("")}
-    </tbody></table>
+  <p class="muted">The real toolkit — what each tool is, how to use it, and the commands that matter. Everything here you can run right now in the <a onclick="location.hash='terminal'">Terminal</a>.</p>
+  <input id="toolSearch" placeholder="Search tools (name, category, command)…"
+    style="width:100%;padding:10px 13px;margin:6px 0 14px;background:var(--panel2);border:1px solid var(--border2);border-radius:9px;color:var(--fg);font-size:14px">
+  <div id="toolList">
+    ${BOOT.tools.map(t => `
+      <details class="toolrow" data-hay="${esc((t.name + " " + t.cat + " " + (t.desc||"") + " " + (t.commands||[]).map(c=>c.cmd).join(" ")).toLowerCase())}">
+        <summary><strong>${esc(t.name)}</strong><span class="tool-cat">${esc(t.cat)}</span></summary>
+        <div class="inner">${toolDetail(t)}</div>
+      </details>`).join("")}
   </div>
+
   <div class="section-title">Deliverable templates</div>
   <div class="grid cards-3">
     ${BOOT.modules.filter(m => m.hasWorksheets).map(m => `<div class="card click" data-mid="${m.id}">
@@ -284,7 +357,13 @@ function vMaterials() {
       <div class="muted" style="font-size:12.5px;margin-top:6px">${m.worksheets.map(esc).join("<br>")}</div></div>`).join("")}
   </div>
   <p class="dim">Open a template in the Course view, or copy editable files with <code>labctl worksheet m2</code>.</p>`;
+  view.querySelectorAll(".cmdline button").forEach(b => b.onclick = () => copy(b.dataset.c));
   view.querySelectorAll("[data-mid]").forEach(c => c.onclick = () => { location.hash = "course/" + c.dataset.mid; });
+  const search = $("#toolSearch");
+  if (search) search.oninput = () => {
+    const q = search.value.toLowerCase();
+    view.querySelectorAll(".toolrow").forEach(r => { r.style.display = r.dataset.hay.includes(q) ? "block" : "none"; });
+  };
 }
 
 function vCommands() {
@@ -323,12 +402,14 @@ function refreshSummary() {
 function parseHash() { const h = (location.hash || "#dashboard").slice(1).split("/"); return { v: h[0] || "dashboard", arg: h[1] }; }
 async function route() {
   clearPoll();
+  cleanupTerm();
   $("#app").classList.remove("nav-open");
   const { v, arg } = parseHash();
   try {
     if (v === "dashboard") return vDashboard();
     if (v === "course") return arg ? vModule(arg) : vCourse();
     if (v === "labs") return arg ? vLab(arg) : vLabs();
+    if (v === "terminal") return vTerminal();
     if (v === "materials") return vMaterials();
     if (v === "commands") return vCommands();
     if (v === "progress") return vProgress();

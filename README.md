@@ -13,9 +13,15 @@ International Peacekeeping Training Centre), Accra, Ghana.
 
 This launches the **CAIC CyberLab web application** — a single place where
 students do everything: a dashboard, the full course, every deep lesson, the
-hands-on **labs launched and graded from the browser**, the Kali tool
-reference, deliverable templates, a command reference, and progress tracking.
-It opens in your browser automatically; press Ctrl-C to stop.
+hands-on **labs launched and graded from the browser**, a **live Kali terminal
+in the browser** (a real shell over a PTY/WebSocket bridge), a researched **tool
+reference** (what each industry tool is, how to use it, and its commands),
+deliverable templates, a command reference, and progress tracking. It opens in
+your browser automatically; press Ctrl-C to stop.
+
+The live terminal runs a real shell as your user on this machine and is bound to
+localhost — a single-user local workstation by design. Set `CAIC_NO_TERMINAL=1`
+to disable it.
 
 Under the hood it's a local web app (`labctl serve`) whose API drives the same
 lab engine as the terminal, so the browser and `labctl` stay in sync.

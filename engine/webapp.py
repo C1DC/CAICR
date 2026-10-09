@@ -10,6 +10,7 @@ stay perfectly in sync.
 from __future__ import annotations
 
 import json
+import os
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
@@ -113,7 +114,8 @@ def _bootstrap() -> dict:
         "commands": [{"group": g, "cmd": c, "desc": d} for g, c, d in COMMANDS],
         "summary": {"labsComplete": done, "totalLabs": len(gradable),
                     "totalModules": len(mods),
-                    "dockerOk": dockerctl.preflight().ok},
+                    "dockerOk": dockerctl.preflight().ok,
+                    "terminal": os.environ.get("CAIC_NO_TERMINAL") != "1"},
     }
 
 
@@ -218,6 +220,16 @@ class Handler(BaseHTTPRequestHandler):
     # -- routing --
     def do_GET(self):
         p = urlparse(self.path).path
+        # Real browser terminal: upgrade this GET to a WebSocket <-> PTY bridge.
+        if p == "/ws/terminal":
+            from . import webterm
+            if webterm.is_upgrade(self):
+                try:
+                    webterm.handle(self)
+                except Exception:
+                    pass
+                return
+            return self._err("expected websocket upgrade", 400)
         try:
             if p == "/api/bootstrap":
                 return self._json(_bootstrap())
