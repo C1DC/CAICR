@@ -28,3 +28,16 @@ relies on. Explain any trade-offs.]
 
 > A backup you have never restored is a hope, not a control. The restore-test
 > column is the one leadership should check every quarter.
+
+---
+
+## Worked example (reference — fictional "Adom Microfinance Ltd")
+
+| Priority | Service | Business impact if down | RTO | RPO | Depends on | Owner |
+|----------|---------|-------------------------|-----|-----|-----------|-------|
+| 1 | Core banking / ledger | No deposits, withdrawals or MoMo; regulatory + trust | 1 h | 5 min | Database, network | CFO / Head of IT |
+| 2 | Member-facing mobile app | Customers locked out; reputational | 4 h | 15 min | Core banking, API gateway | Head of IT |
+| 3 | Email & payment approvals | Operations and supplier payments stall | 8 h | 1 h | Identity, internet | Ops Manager |
+| 4 | Internal reporting / BI | Delayed MI; low urgency | 72 h | 24 h | Data warehouse | Finance |
+
+**Backup posture:** Core banking — backups exist, 3-2-1 **not** yet met (no offline copy), last restore test **never** → **top remediation**. Recovery sequence follows dependencies: database → core banking → app → email.

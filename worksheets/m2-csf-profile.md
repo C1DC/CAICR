@@ -28,3 +28,18 @@ reduces the most risk? What is the single most important investment?]
 - Does the board have a standing cybersecurity agenda item? [yes/no]
 - Is there a named, resourced person accountable for cyber risk? [who]
 - When was the cyber-risk policy last approved? [date]
+
+---
+
+## Worked example (reference — fictional "Adom Microfinance Ltd")
+
+| Function | Current (0–4) | Target | Priority gap action |
+|----------|---------------|--------|---------------------|
+| GOVERN | 1 | 3 | Add a standing board cyber agenda item; name an accountable executive; approve the cyber-risk policy |
+| IDENTIFY | 2 | 3 | Complete the asset inventory; document crown-jewel data and third-party dependencies |
+| PROTECT | 1 | 3 | MFA on all remote access; enforce patch SLA; roll out phishing training |
+| DETECT | 1 | 3 | Stand up centralised logging; review alerts daily |
+| RESPOND | 1 | 3 | Write and table-top an incident-response plan; define escalation |
+| RECOVER | 2 | 4 | Move one backup offline (3-2-1); test restores monthly |
+
+**Narrative:** GOVERN and DETECT are weakest. Fixing GOVERN (board ownership) unlocks the budget for the rest; standing up DETECT gives the earliest warning. Single most important investment: **MFA everywhere**, which most reduces credential-theft risk.

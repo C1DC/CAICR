@@ -40,3 +40,20 @@ Rating = L × I (1–25).
 | Action | Addresses risk # | Owner | Target date | Cost / effort |
 |--------|------------------|-------|-------------|---------------|
 | [FILL IN] | | | | |
+
+---
+
+## Worked example (reference — fictional "Adom Microfinance Ltd")
+
+| # | Risk statement | Inherent L×I | Controls | Residual L×I | Treatment | Owner | Review |
+|---|----------------|--------------|----------|--------------|-----------|-------|--------|
+| 1 | IF an attacker exploits our internet-facing VPN (no MFA) THEN member records are stolen → DPC penalties + trust loss | 4×5=20 | Patch SLA, MFA, DNS monitoring | 2×5=10 | Mitigate | Head of IT | 2026-01-15 |
+| 2 | IF a finance officer actions a spoofed supplier email THEN funds are wired to a mule account | 4×4=16 | Dual-control + callback on known number | 2×4=8 | Mitigate | CFO | 2026-01-31 |
+| 3 | IF ransomware encrypts the core banking server AND backups THEN multi-day outage + data loss | 3×5=15 | 3-2-1 backups, monthly restore test, segmentation | 2×4=8 | Mitigate | Head of IT | 2026-02-15 |
+| 4 | IF a laptop with member PII is lost unencrypted THEN confidentiality breach + notification | 3×3=9 | Full-disk encryption, remote wipe | 1×3=3 | Mitigate | Ops Manager | 2026-02-28 |
+
+**Top 3 by residual:** #1 (fund the MFA rollout now), #2 (mandate callback before the next payment run), #3 (verify the restore test).
+
+**Accepted risk:** #5 — legacy reporting tool cannot support MFA; compensating control = IP allow-list; accepted by **CFO**, review **2026-03-31**.
+
+**90-day backlog:** MFA on VPN (IT, wk 2) · dual-control payment policy (CFO, wk 3) · first monthly restore test (IT, wk 4) · laptop encryption rollout (Ops, wk 8).
