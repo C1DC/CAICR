@@ -2,17 +2,20 @@
 id = "m6"
 module = "M6"
 day = 3
-title = "Digital Forensics — Autopsy, Sleuthkit & CyberChef"
-tools = ["sha256sum", "autopsy", "fls", "icat", "tsk_recover", "cyberchef"]
-estimated_minutes = 90
+title = "Digital Forensics & Incident Response — Disk, Memory & Timeline"
+tools = ["sha256sum", "fls/icat/tsk_recover", "strings", "bulk_extractor", "CyberChef", "grep"]
+estimated_minutes = 150
 briefing = "briefing.md"
 objective = """
-Work a prepared disk image like a real case: prove its integrity by hashing, \
-list and recover files (including a deleted credentials file), reconstruct what \
-the user ran, and decode an obfuscated C2 artefact — maintaining chain of custody."""
+Work a full IR evidence package across disk, memory and logs: prove integrity by \
+hashing, recover a deleted credentials file from a disk image (Sleuthkit), carve \
+the malware's command line, C2, in-memory credential and exfil address from a RAM \
+dump (strings/bulk_extractor), decode an obfuscated dropper (CyberChef), and \
+reconstruct the attack timeline from the auth log — then correlate it all."""
 
-# File-based lab: evidence in assets/, no containers.
+# File-based lab: evidence in assets/.
 
+# ── Chain of custody ────────────────────────────────────────────────────────
 [[check]]
 id = "integrity"
 type = "script"
@@ -26,46 +29,99 @@ prompt = "What is the SHA-256 of evidence.img?"
 answer = "1cd9ccc112367afb21b00f3300922757862d685749a1100620e1e17ee7d4d300"
 hint = "sha256sum assets/evidence.img"
 
+# ── Disk forensics (Sleuthkit / Autopsy) ────────────────────────────────────
 [[check]]
 id = "fs_type"
 type = "string_any"
 prompt = "What filesystem does the evidence image use?"
 accept = ["fat16", "fat", "fat 16"]
-hint = "fsstat assets/evidence.img   (or Autopsy image details)"
+hint = "fsstat assets/evidence.img"
 
 [[check]]
 id = "lure_file"
 type = "string_any"
-prompt = "Name the macro-enabled spreadsheet the user opened."
+prompt = "Name the macro-enabled spreadsheet the user opened (the lure)."
 accept = ["q3invoic.xls", "Q3INVOIC.XLS", "q3invoic"]
-hint = "fls evidence.img  — list the files in the root directory"
+hint = "fls assets/evidence.img"
 
 [[check]]
 id = "recovered_pass"
 type = "string"
-prompt = "Recover the DELETED credentials file — what is the VPN password?"
+prompt = "Recover the DELETED credentials file — what is the VPN password in it?"
 answer = "Gh@na2026!"
-hint = "The deleted entry is inode 6:  icat evidence.img 6   (or tsk_recover)"
+hint = "The deleted entry is inode 6:  icat assets/evidence.img 6   (or tsk_recover)"
+
+# ── Decode the dropper (CyberChef) ──────────────────────────────────────────
+[[check]]
+id = "artifact_c2"
+type = "string_any"
+prompt = "Decode suspicious_artifact.txt — what C2 domain does it reveal?"
+accept = ["beacon.sync-malware-c2.net", "sync-malware-c2.net",
+          "http://beacon.sync-malware-c2.net/gate.php?id=FIN03"]
+hint = "CyberChef: From Base64 -> URL Decode  (or base64 -d)"
+
+# ── Memory triage (strings / bulk_extractor) ────────────────────────────────
+[[check]]
+id = "mem_malware"
+type = "string_any"
+prompt = "Carve memory.raw — what malicious executable (masquerading as a service) is running?"
+accept = ["svch0st.exe", "svch0st", "c:\\windows\\temp\\svch0st.exe"]
+hint = "strings assets/memory.raw | grep -iE 'svch0st|temp'"
 
 [[check]]
-id = "c2_domain"
+id = "mem_c2"
 type = "string_any"
-prompt = "Decode suspicious_artifact.txt — what C2 domain does it call out to?"
-accept = ["beacon.sync-malware-c2.net",
-          "http://beacon.sync-malware-c2.net/gate.php?id=FIN03",
-          "sync-malware-c2.net"]
-hint = "CyberChef: From Base64 -> URL Decode"
+prompt = "What C2 host does the in-memory PowerShell stager call? (it matches the decoded dropper)"
+accept = ["beacon.sync-malware-c2.net", "sync-malware-c2.net"]
+hint = "bulk_extractor -o be_out assets/memory.raw ; cat be_out/url.txt"
 
+[[check]]
+id = "mem_cred"
+type = "string"
+prompt = "A plaintext credential sits in memory — what is the VPN admin's password?"
+answer = "S3cr3tVPN!2026"
+hint = "strings assets/memory.raw | grep -i vpnadmin"
+
+[[check]]
+id = "mem_exfil_email"
+type = "string_any"
+prompt = "bulk_extractor pulls an exfiltration email address from memory. What is it?"
+accept = ["exfil-drop@attacker-mail.ru"]
+hint = "cat be_out/email.txt  (or strings | grep @)"
+
+[[check]]
+id = "mem_persistence"
+type = "string_any"
+prompt = "How does the malware persist (a scheduled task is created in memory)? Name the method or ATT&CK id."
+accept = ["schtasks", "scheduled task", "scheduled task/job", "T1053", "T1053.005", "cron", "cron job"]
+hint = "strings assets/memory.raw | grep -i schtasks  — and see the cron line in auth.log"
+
+# ── Log timeline ────────────────────────────────────────────────────────────
+[[check]]
+id = "log_brute_ip"
+type = "string"
+prompt = "From auth.log, which source IP brute-forced SSH and then succeeded?"
+answer = "10.13.4.66"
+hint = "grep -E 'Failed|Accepted' assets/auth.log"
+
+[[check]]
+id = "log_success_user"
+type = "string_any"
+prompt = "Which account did the attacker finally log in as (Accepted password)?"
+accept = ["labuser"]
+hint = "grep Accepted assets/auth.log"
+
+# ── IR concepts ─────────────────────────────────────────────────────────────
 [[check]]
 id = "volatility_first"
 type = "string_any"
-prompt = "By order of volatility, which evidence must you collect FIRST?"
+prompt = "By order of volatility, which evidence must be collected FIRST?"
 accept = ["memory", "ram", "volatile memory", "memory (ram)"]
-hint = "RAM -> swap -> network state -> disk"
+hint = "RAM -> swap -> network state -> disk (RFC 3227)"
 
 [[check]]
 id = "attack_technique"
 type = "string_any"
-prompt = "Which MITRE ATT&CK technique covers the macro running PowerShell?"
+prompt = "Which MITRE ATT&CK technique covers the macro launching PowerShell?"
 accept = ["T1059.001", "T1059", "T1204.002", "T1204"]
-hint = "Execution -> Command/Scripting Interpreter: PowerShell (or User Execution)"
+hint = "Execution -> Command/Scripting Interpreter: PowerShell"

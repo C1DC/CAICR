@@ -2,72 +2,111 @@
 id = "m5"
 module = "M5"
 day = 3
-title = "Business Email Compromise — Email Header Forensics"
-tools = ["terminal", "grep", "dig", "whois"]
-estimated_minutes = 90
+title = "Business Email Compromise — Header & Attachment Forensics"
+tools = ["grep", "exiftool", "pdfinfo", "dig", "whois"]
+estimated_minutes = 120
 briefing = "briefing.md"
 objective = """
-Investigate a supplier payment-change email. Read the raw headers to prove it \
-is a Business Email Compromise: find the look-alike domain, the real source IP, \
-and the SPF/DKIM/DMARC failures — then design the control that stops the fraud."""
+Investigate a BEC thread end to end: compare the genuine supplier email against \
+the spoofed reply, trace the spoof's headers and infrastructure, then run \
+exiftool on the malicious attachment to expose the attacker's author name and \
+authoring timezone — and prove premeditation. Build the evidence timeline and \
+design the payment control that stops it."""
 
-# No [network] / docker-compose.yml — this is a file-based lab. Evidence lives
-# in assets/. Grading is answer-based.
+# File-based lab: evidence in assets/, graded on your findings.
 
+# ── The email thread ────────────────────────────────────────────────────────
 [[check]]
 id = "envelope_header"
 type = "string_any"
-prompt = "Which header reveals the true envelope sender (where bounces go)?"
+prompt = "In the spoofed email, which header reveals the true envelope sender (where bounces go)?"
 accept = ["return-path", "return path", "return-path:"]
 hint = "grep -iE '^(Return-Path|From|Reply-To)' invoice-change-request.eml"
 
 [[check]]
 id = "source_ip"
 type = "string"
-prompt = "What is the source IP of the server that actually sent this mail?"
+prompt = "What is the source IP of the server that actually sent the spoof?"
 answer = "45.137.112.63"
-hint = "The lowest/earliest 'Received: from ... (unknown [IP])' line"
+hint = "The earliest 'Received: from ... (unknown [IP])' line"
 
 [[check]]
-id = "spf_result"
+id = "spf_spoof"
 type = "string_any"
-prompt = "Did SPF pass or fail?"
+prompt = "Did SPF pass or fail on the SPOOFED email?"
 accept = ["fail", "failed", "spf fail", "spf=fail"]
-hint = "Look at the Authentication-Results / Received-SPF header"
+hint = "Authentication-Results in invoice-change-request.eml"
+
+[[check]]
+id = "spf_genuine"
+type = "string_any"
+prompt = "And in the GENUINE earlier email (genuine-quote.eml), did SPF pass or fail?"
+accept = ["pass", "passed", "spf=pass"]
+hint = "Compare the two — the contrast is the proof"
 
 [[check]]
 id = "lookalike_domain"
 type = "string_any"
-prompt = "What look-alike domain is used in Reply-To / Return-Path?"
+prompt = "What look-alike domain does the spoof use in Reply-To / Return-Path?"
 accept = ["zenith-supplies.com"]
-hint = "Compare it carefully to the real supplier domain in the From: line"
+hint = "Compare it to the real supplier domain in the From: display"
 
 [[check]]
 id = "real_domain"
 type = "string_any"
-prompt = "What is the real supplier domain the attacker is impersonating?"
+prompt = "What is the real supplier domain the attacker impersonates?"
 accept = ["zenithsupplies.com.gh"]
-hint = "The From: display shows the genuine domain to earn trust"
+hint = "The From: display shows the genuine domain; it appears in genuine-quote.eml"
+
+[[check]]
+id = "po_number"
+type = "string_any"
+prompt = "The spoof hijacks the real thread by reusing its PO number. What is it?"
+accept = ["ZS-20418", "zs-20418", "20418"]
+hint = "Both emails reference the same purchase order"
 
 [[check]]
 id = "fraud_account"
 type = "string"
-prompt = "What NEW bank account number does the email ask payments to go to?"
+prompt = "What NEW bank account number does the spoof ask payment to go to?"
 answer = "1402300087654"
-hint = "It's in the message body"
+hint = "It's in the spoof's message body"
 
+# ── The malicious attachment (exiftool) ─────────────────────────────────────
+[[check]]
+id = "pdf_author"
+type = "string_any"
+prompt = "Run exiftool on remittance-advice.pdf. What AUTHOR is recorded in its metadata?"
+accept = ["k1ngpin", "kingpin"]
+hint = "exiftool remittance-advice.pdf  — the Author field"
+
+[[check]]
+id = "pdf_tz"
+type = "string_any"
+prompt = "The attachment's Create Date carries a UTC offset inconsistent with a Ghanaian (+00:00) supplier. What offset?"
+accept = ["+07:00", "+0700", "+07", "7", "+7", "utc+7"]
+hint = "exiftool ... — the Create Date ends in the authoring timezone"
+
+[[check]]
+id = "premeditation"
+type = "string_any"
+prompt = "Was the attachment created BEFORE the email was sent (evidence of premeditation)?"
+accept = ["yes", "before", "y", "created before", "premeditated"]
+hint = "PDF Create Date 2026-09-28 vs the email Date 2026-10-06"
+
+# ── Conclude ────────────────────────────────────────────────────────────────
 [[check]]
 id = "stopping_control"
 type = "string_any"
 prompt = "Name the payment control that would have stopped this fraud."
 accept = ["dual control", "dual-control", "callback", "call back",
-          "out-of-band verification", "verbal verification",
-          "separation of duties", "callback verification"]
-hint = "Verify the change by calling a KNOWN number — not the one in the email"
+          "out-of-band verification", "verbal verification", "separation of duties",
+          "callback verification", "out of band"]
+hint = "Verify the change by calling a KNOWN number — never the one in the email"
 
 [[check]]
 id = "attack_technique"
 type = "string_any"
-prompt = "Which MITRE ATT&CK technique ID covers phishing for initial access?"
+prompt = "Which MITRE ATT&CK technique covers this phishing/impersonation?"
 accept = ["T1566", "T1566.002", "T1656"]
-hint = "ATT&CK Initial Access → Phishing (or Impersonation, T1656)"
+hint = "Initial Access → Phishing, or Impersonation (T1656)"
