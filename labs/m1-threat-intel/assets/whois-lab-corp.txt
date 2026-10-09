@@ -1,0 +1,28 @@
+% Lab WHOIS export for lab-corp.com.gh  (offline capture for the M1 practicum)
+% In the field you would run:  whois lab-corp.com.gh
+
+Domain Name:                 lab-corp.com.gh
+Registry Domain ID:          GH-LC-884412
+Registrar:                   Ghana Dot Com (gDNS) Ltd
+Registrar WHOIS Server:      whois.nic.gh
+Updated Date:                2026-07-02T09:14:00Z
+Creation Date:               2019-03-18T11:02:00Z
+Registry Expiry Date:        2027-03-18T11:02:00Z
+Registrant Organization:     Lab-Corp Ghana Ltd
+Registrant Country:          GH
+Registrant Email:            hostmaster@lab-corp.com.gh
+Admin Email:                 ict-admin@lab-corp.com.gh
+Name Server:                 ns1.lab-corp.com.gh
+Name Server:                 ns2.lab-corp.com.gh
+DNSSEC:                       unsigned
+
+% Compare with a LOOK-ALIKE domain seen in the wild (do not trust it):
+%
+% Domain Name:               lab-corp-gh.com
+% Creation Date:             2026-10-01T00:00:00Z   <-- registered 5 days ago
+% Registrant Email:          paymentsdept19@proton.me
+% Name Server:               (free DNS hosting)
+%
+% Analyst note: an established organisation's real domain is years old and uses
+% its own name servers. A payment-themed look-alike registered days ago, on a
+% free email and free DNS, is a classic BEC pre-staging indicator.

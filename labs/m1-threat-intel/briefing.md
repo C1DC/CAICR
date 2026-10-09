@@ -1,59 +1,67 @@
-# M1 — Threat Intelligence & OSINT: DNS Recon
+# M1 — Passive Reconnaissance Practicum
 
-**Scenario.** Before attackers phish an organisation, they study it from the
-outside — no packets sent to the target's own servers, just public DNS and
-open-source intelligence. You will do exactly that against **lab-corp.com.gh**
-and decide how exposed it is to email spoofing.
+**Scenario.** Before attackers phish an organisation they profile it from the
+outside — no packets to the target's own servers, just public DNS and OSINT. You
+will do exactly that against **lab-corp.com.gh** and judge how exposed it is to
+email spoofing, then write it up as a threat brief.
 
-A lab DNS server (`10.13.1.10`) answers authoritatively for the zone. An OSINT
-report sits in `assets/osint-report.txt`.
+A lab DNS server (`10.13.1.10`) answers authoritatively for the zone. A WHOIS
+export and an OSINT report are in `assets/`.
 
-> This is *passive* recon against a lab-only domain. The same `dig` queries run
-> against a real domain are how an attacker plans a phishing campaign — and how
-> a defender audits their own exposure.
+> This is *passive* recon against a lab-only domain. The same `dig`/`whois`
+> queries run against a real domain are how an attacker plans a campaign — and
+> how a defender audits their own exposure. Only ever query the lab targets.
 
 ---
 
-## 1. Enumerate DNS
+## Part 1 — Sweep the DNS
 
 ```
-$ dig @10.13.1.10 lab-corp.com.gh        A      # where does the domain point?
-$ dig @10.13.1.10 lab-corp.com.gh        MX     # who handles its mail?
-$ dig @10.13.1.10 mail.lab-corp.com.gh   A +short
-$ dig @10.13.1.10 lab-corp.com.gh        TXT    # SPF lives here
-$ dig @10.13.1.10 _dmarc.lab-corp.com.gh TXT    # ...and DMARC should live here
+$ dig @10.13.1.10 lab-corp.com.gh        A +short      # IPv4
+$ dig @10.13.1.10 lab-corp.com.gh        AAAA +short   # IPv6
+$ dig @10.13.1.10 lab-corp.com.gh        MX +short     # mail servers
+$ dig @10.13.1.10 mail.lab-corp.com.gh   A +short      # the mail server's IP
+$ dig @10.13.1.10 lab-corp.com.gh        SOA +short    # authoritative NS + admin
+$ dig @10.13.1.10 lab-corp.com.gh        TXT +short    # SPF lives here
+$ dig @10.13.1.10 default._domainkey.lab-corp.com.gh TXT   # DKIM key
+$ dig @10.13.1.10 _dmarc.lab-corp.com.gh TXT           # DMARC policy?
+$ dig @10.13.1.10 lab-corp.com.gh        CAA           # cert-issuance control?
 ```
 
-Answer:
-- the **MX host** and the **IP** it resolves to,
-- the **SPF qualifier** at the end of the TXT record (`-all` = hard fail,
-  `~all` = soft fail — which is weaker?),
-- whether a **DMARC** record exists at all.
+Record what each returns. Then read the **email-authentication posture**:
+- the **SPF** qualifier (`-all` hard vs `~all` soft);
+- whether **DKIM** is published, and at which selector;
+- whether **DMARC** exists at all (an `NXDOMAIN` means *no policy*);
+- whether **CAA** exists (an empty answer means *any* CA may issue certificates).
 
-## 2. Read the OSINT footprint
+## Part 2 — Investigate the registration (WHOIS)
+
+```
+$ cat assets/whois-lab-corp.txt
+```
+Note the **creation date** (how old is the domain?), the name servers, and the
+**look-alike domain** the export flags — registered days ago, on free email and
+free DNS. That pattern is classic BEC pre-staging.
+
+## Part 3 — Read the OSINT footprint
 
 ```
 $ cat assets/osint-report.txt
 ```
-How many employee email addresses are exposed? Which role accounts (finance@,
-helpdesk@) make the easiest phishing targets?
+How many employee emails are exposed? Which subdomains (vpn, dev, mail) widen the
+attack surface?
 
-*(In a live engagement you'd gather this with `theHarvester -d <domain> -b all`
-and `whois <domain>` — both need internet, so the report is captured for you
-here.)*
+## Part 4 — Judge the exposure & map to ATT&CK
 
-## 3. Judge the exposure
-
-- SPF is published but ends in `~all`, and **no DMARC policy exists**. Explain,
-  in one line, why that combination lets an attacker spoof this domain and have
-  the mail still land in inboxes.
-- Which single control closes this gap?
-- Map your recon to a **MITRE ATT&CK** reconnaissance technique.
+- SPF is `~all`, DKIM is present, but **no DMARC** → explain in one line why the
+  domain is still spoofable (hint: policy + alignment).
+- Map your reconnaissance to a **MITRE ATT&CK** Reconnaissance technique (TA0043).
 
 ---
 
-## Grade yourself
+## Grade yourself, then write the brief
 
 ```
 $ labctl verify m1
+$ labctl worksheet m1     # the threat-brief template
 ```

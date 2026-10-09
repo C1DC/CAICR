@@ -1,11 +1,32 @@
 """Markdown -> HTML converter (stdlib only), shared by the web app and the
-static lessons-HTML build script. Handles the subset used across lessons,
-briefings and worksheets: headings, bold/italic/code, fenced code, lists,
-tables, blockquotes, horizontal rules, bare links."""
+static lessons-HTML build script.
+
+Supports the subset used across lessons, briefings and worksheets: headings,
+bold/italic/code, lists, tables, blockquotes, rules, bare links, PLUS two
+presentation extensions used by the deep lessons:
+
+  * Fenced code blocks render as a titled "terminal card". An info string after
+    the opening fence becomes the card title:  ```Terminal — DNS series
+  * Callout blocks:
+        ::: key | Key concept
+        body markdown...
+        :::
+    types: key, warning, ghana, case, note, outcome.
+"""
 from __future__ import annotations
 
 import html
 import re
+
+CALLOUTS = {
+    "key":     ("🔑", "Key concept", "key"),
+    "warning": ("⚠",  "Warning", "warning"),
+    "ghana":   ("🇬🇭", "Ghana in focus", "ghana"),
+    "case":    ("📁", "Case study", "case"),
+    "note":    ("ℹ",  "Note", "note"),
+    "outcome": ("🎯", "Learning outcome", "outcome"),
+    "quote":   ("❝",  "", "quote"),
+}
 
 
 def _inline(text: str) -> str:
@@ -41,13 +62,20 @@ def _table_html(rows: list[str]) -> str:
     if not cells:
         return ""
     head, *body = cells
-    out = ["<table><thead><tr>"]
+    out = ["<div class='tablewrap'><table><thead><tr>"]
     out += [f"<th>{_inline(c)}</th>" for c in head]
     out.append("</tr></thead><tbody>")
     for r in body:
         out.append("<tr>" + "".join(f"<td>{_inline(c)}</td>" for c in r) + "</tr>")
-    out.append("</tbody></table>")
+    out.append("</tbody></table></div>")
     return "".join(out)
+
+
+def _code_card(info: str, code: str) -> str:
+    title = info.strip() or "Terminal"
+    return (f"<div class='term'><div class='term-bar'><span class='dots'>"
+            f"<i></i><i></i><i></i></span><span class='term-title'>{html.escape(title)}</span></div>"
+            f"<pre><code>{code}</code></pre></div>")
 
 
 def md_to_html(md: str) -> str:
@@ -70,16 +98,42 @@ def md_to_html(md: str) -> str:
 
     while i < len(lines):
         s = lines[i].strip()
+
+        # ----- callout block -----
+        if s.startswith(":::"):
+            flush_para(); close_list()
+            spec = s[3:].strip()
+            m = re.match(r"(\w+)\s*(?:\|\s*(.*))?$", spec)
+            kind = (m.group(1).lower() if m else "note")
+            override = (m.group(2).strip() if m and m.group(2) else "")
+            icon, default_title, cls = CALLOUTS.get(kind, CALLOUTS["note"])
+            title = override or default_title
+            i += 1
+            buf = []
+            while i < len(lines) and lines[i].strip() != ":::":
+                buf.append(lines[i])
+                i += 1
+            i += 1  # skip closing :::
+            inner = md_to_html("\n".join(buf))
+            head = (f"<div class='callout-h'><span class='ci'>{icon}</span>{html.escape(title)}</div>"
+                    if title else "")
+            out.append(f"<div class='callout callout-{cls}'>{head}<div class='callout-b'>{inner}</div></div>")
+            continue
+
+        # ----- fenced code / terminal card -----
         if s.startswith("```"):
             flush_para(); close_list()
+            info = s[3:]
             buf = []
             i += 1
             while i < len(lines) and not lines[i].strip().startswith("```"):
                 buf.append(html.escape(lines[i], quote=False))
                 i += 1
-            out.append("<pre><code>" + "\n".join(buf) + "</code></pre>")
             i += 1
+            out.append(_code_card(info, "\n".join(buf)))
             continue
+
+        # ----- tables -----
         if s.startswith("|") and "|" in s[1:]:
             flush_para(); close_list()
             block = []
@@ -88,6 +142,7 @@ def md_to_html(md: str) -> str:
                 i += 1
             out.append(_table_html(block))
             continue
+
         if not s:
             flush_para(); close_list()
         elif s.startswith("# "):
@@ -96,6 +151,8 @@ def md_to_html(md: str) -> str:
             flush_para(); close_list(); out.append("<h2>" + _inline(s[3:]) + "</h2>")
         elif s.startswith("### "):
             flush_para(); close_list(); out.append("<h3>" + _inline(s[4:]) + "</h3>")
+        elif s.startswith("#### "):
+            flush_para(); close_list(); out.append("<h4>" + _inline(s[5:]) + "</h4>")
         elif s in ("---", "***", "___"):
             flush_para(); close_list(); out.append("<hr>")
         elif s.startswith(">"):

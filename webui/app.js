@@ -199,33 +199,81 @@ async function vModule(mid) {
   try { lesson = await api("/api/lesson/" + mid); } catch (e) {}
   let sheets = { sheets: [] };
   if (m.hasWorksheets) { try { sheets = await api("/api/worksheets/" + mid); } catch (e) {} }
-  view.innerHTML = `
-    <div class="row wrap" style="justify-content:space-between;margin-bottom:6px">
-      <div></div>
-      ${m.hasLab ? `<button class="btn" id="toLab">⌘ Open the ${m.id.toUpperCase()} lab →</button>` : ""}
-    </div>
-    <div class="content">${lesson.html}</div>
-    ${sheets.sheets.length ? `<div class="section-title">Deliverable templates</div>
+  // Split the lesson into chapter pages on <h2> boundaries.
+  const tmp = document.createElement("div"); tmp.innerHTML = lesson.html;
+  const pages = [{ title: "Overview", nodes: [] }];
+  [...tmp.childNodes].forEach(n => {
+    if (n.nodeType === 1 && n.tagName === "H2") pages.push({ title: n.textContent.trim(), nodes: [n] });
+    else pages[pages.length - 1].nodes.push(n);
+  });
+  if (!pages[0].nodes.length) pages.shift();
+  const pageHtml = p => p.nodes.map(n => n.outerHTML || (n.textContent || "")).join("");
+  // Final page: deliverables + notes
+  const deliverHtml = `
+    ${sheets.sheets.length ? `<h2>Deliverable templates</h2>
       ${sheets.sheets.map(s => `<details><summary>📝 ${esc(s.name)}</summary><div class="inner content">${s.html}</div></details>`).join("")}
-      <p class="dim">Get editable copies in your terminal: <code>labctl worksheet ${mid}</code></p>` : ""}
-    <div class="section-title">My notes</div>
-    <div class="notes panel">
-      <textarea id="noteBox" placeholder="Jot your findings, commands, and answers for ${mid.toUpperCase()} here — saved automatically in this browser."></textarea>
+      <p class="dim">Get editable copies in your terminal: <code>labctl worksheet ${mid}</code></p>` : "<h2>Your notes</h2>"}
+    <div class="notes panel" style="margin-top:14px">
+      <strong>My notes — ${mid.toUpperCase()}</strong>
+      <textarea id="noteBox" style="margin-top:8px" placeholder="Jot your findings, commands and answers here — saved automatically in this browser."></textarea>
       <div class="row" style="justify-content:space-between;margin-top:8px">
         <span class="dim" id="noteState">Saved locally on this device.</span>
         <button class="ghost" id="noteClear">Clear</button>
       </div>
     </div>`;
+  pages.push({ title: "Deliverables & notes", nodes: null, html: deliverHtml });
+
+  view.innerHTML = `
+  <div class="reader">
+    <aside class="toc">
+      <div class="toc-h">${esc(m.id.toUpperCase())} · Chapters</div>
+      <div id="tocList">${pages.map((p, i) => `<a class="toc-i" data-p="${i}">${i + 1}. ${esc(p.title.replace(/^\d+\s*·\s*/, ""))}</a>`).join("")}</div>
+      ${m.hasLab ? `<button class="btn" id="toLab" style="width:100%;margin-top:14px">⌘ Open the ${m.id.toUpperCase()} lab →</button>` : ""}
+    </aside>
+    <div class="reader-main">
+      <div class="reader-top">
+        <div class="rt-prog"><div class="bar"><i id="rtFill"></i></div></div>
+        <div class="dim" id="pageInd" style="font-size:12.5px;white-space:nowrap"></div>
+      </div>
+      <div class="content" id="pageBody"></div>
+      <div class="pager">
+        <button class="btn sec" id="prevBtn">← Previous</button>
+        <button class="btn" id="nextBtn">Next chapter →</button>
+      </div>
+    </div>
+  </div>`;
   if (m.hasLab) $("#toLab").onclick = () => { location.hash = "labs/" + mid; };
-  const box = $("#noteBox"), key = "caic_notes_" + mid, st = $("#noteState");
-  try { box.value = localStorage.getItem(key) || ""; } catch (e) {}
-  let tmr = null;
-  box.addEventListener("input", () => {
-    st.className = "dim"; st.textContent = "Saving…";
-    clearTimeout(tmr);
-    tmr = setTimeout(() => { try { localStorage.setItem(key, box.value); st.className = "saved"; st.textContent = "✓ Saved"; } catch (e) { st.textContent = "Could not save"; } }, 400);
-  });
-  $("#noteClear").onclick = () => { box.value = ""; try { localStorage.removeItem(key); } catch (e) {} st.textContent = "Cleared."; };
+
+  let cur = 0;
+  const body = $("#pageBody"), tocList = $("#tocList");
+  const wireNotes = () => {
+    const box = $("#noteBox"); if (!box) return;
+    const key = "caic_notes_" + mid, st = $("#noteState");
+    try { box.value = localStorage.getItem(key) || ""; } catch (e) {}
+    let tmr = null;
+    box.addEventListener("input", () => {
+      st.className = "dim"; st.textContent = "Saving…"; clearTimeout(tmr);
+      tmr = setTimeout(() => { try { localStorage.setItem(key, box.value); st.className = "saved"; st.textContent = "✓ Saved"; } catch (e) { st.textContent = "Could not save"; } }, 400);
+    });
+    $("#noteClear").onclick = () => { box.value = ""; try { localStorage.removeItem(key); } catch (e) {} st.textContent = "Cleared."; };
+  };
+  const goPage = i => {
+    cur = Math.max(0, Math.min(i, pages.length - 1));
+    const p = pages[cur];
+    body.innerHTML = p.html != null ? p.html : pageHtml(p);
+    tocList.querySelectorAll(".toc-i").forEach((a, idx) => a.classList.toggle("active", idx === cur));
+    $("#rtFill").style.width = Math.round(100 * (cur + 1) / pages.length) + "%";
+    $("#pageInd").textContent = `Chapter ${cur + 1} of ${pages.length}`;
+    $("#prevBtn").disabled = cur === 0;
+    $("#nextBtn").textContent = cur === pages.length - 1 ? "Finish" : "Next chapter →";
+    if (p.html != null) wireNotes();
+    view.scrollTo ? view.scrollTo(0, 0) : window.scrollTo(0, 0);
+    document.querySelector(".reader-main")?.scrollIntoView({ block: "start" });
+  };
+  tocList.querySelectorAll(".toc-i").forEach(a => a.onclick = () => goPage(+a.dataset.p));
+  $("#prevBtn").onclick = () => goPage(cur - 1);
+  $("#nextBtn").onclick = () => { if (cur === pages.length - 1 && m.hasLab) location.hash = "labs/" + mid; else goPage(cur + 1); };
+  goPage(0);
 }
 
 async function vLabs() {

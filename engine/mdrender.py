@@ -95,11 +95,19 @@ def _join_list_continuations(lines: list[str]) -> list[str]:
     return out
 
 
+_CALLOUT = {"key": ("🔑", "KEY CONCEPT", ui.GOLD if hasattr(ui, "GOLD") else ui.YELLOW),
+            "warning": ("⚠", "WARNING", ui.RED), "ghana": ("🇬🇭", "GHANA IN FOCUS", ui.CYAN),
+            "case": ("📁", "CASE STUDY", ui.MAGENTA), "note": ("ℹ", "NOTE", ui.BLUE if hasattr(ui, "BLUE") else ui.CYAN),
+            "outcome": ("🎯", "LEARNING OUTCOME", ui.GREEN), "quote": ("❝", "", ui.GREY)}
+
+
 def render(md: str) -> None:
+    import re as _re
     lines = _join_list_continuations(md.splitlines())
     i = 0
     in_code = False
     code_buf: list[str] = []
+    code_title = ""
     para: list[str] = []
 
     def flush():
@@ -109,16 +117,35 @@ def render(md: str) -> None:
 
     while i < len(lines):
         line = lines[i]
+        stripped = line.strip()
 
-        # fenced code
-        if line.strip().startswith("```"):
+        # callout markers (::: type | Title  ...  :::)
+        if not in_code and stripped.startswith(":::"):
+            flush()
+            spec = stripped[3:].strip()
+            if spec:
+                m = _re.match(r"(\w+)\s*(?:\|\s*(.*))?$", spec)
+                kind = (m.group(1).lower() if m else "note")
+                override = (m.group(2).strip() if m and m.group(2) else "")
+                icon, label, col = _CALLOUT.get(kind, _CALLOUT["note"])
+                title = override or label
+                print(f"\n  {col}{ui.BOLD}{icon} {title}{ui.RESET}")
+            i += 1
+            continue
+
+        # fenced code / terminal card
+        if stripped.startswith("```"):
             flush()
             if in_code:
+                if code_title:
+                    print(f"  {ui.DIM}{code_title}{ui.RESET}")
                 print(ui.GREY + "  ┌" + "─" * (_WIDTH - 4) + ui.RESET)
                 for c in code_buf:
                     print("  " + ui.GREY + "│ " + ui.GREEN + c + ui.RESET)
                 print(ui.GREY + "  └" + "─" * (_WIDTH - 4) + ui.RESET)
-                code_buf = []
+                code_buf = []; code_title = ""
+            else:
+                code_title = stripped[3:].strip()
             in_code = not in_code
             i += 1
             continue
