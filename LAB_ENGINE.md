@@ -60,19 +60,30 @@ of the (possibly root-owned, read-only) install tree.
 ## 3. Student workflow
 
 ```
-./labctl doctor          # one-time: is Docker + tooling ready?
+bash scripts/setup.sh    # ONCE per machine: install Docker + pre-build images
+./labctl doctor          # is Docker + tooling ready?
+./labctl prep            # (what setup.sh calls) build all images for offline use
 ./labctl list            # see all labs, their status and your progress
 ./labctl info m3         # read the mission briefing + target list
-./labctl start m3        # bring up the isolated targets (builds image 1st time)
+./labctl start m3        # bring up the isolated targets; waits until they're ready
 #   ... student runs nmap / wireshark / etc. against the listed IPs ...
 ./labctl verify m3       # submit findings → graded, progress saved
 ./labctl reset m3        # wipe targets back to a clean state
 ./labctl stop m3         # shut the lab down
 ./labctl progress        # overall course completion
+./labctl reset-progress  # start the whole course over (erases scores)
 ```
+
+Facilitator: `labctl report <dir>` aggregates collected `state.json` files
+(copied from each student's `~/.local/share/caic-lab/`) into a class matrix.
 
 `sudo` is only needed if the student's user isn't in the `docker` group
 (`labctl doctor` tells them which).
+
+**Classroom rollout.** Ship the whole `CAIC_lab/` folder (USB or share). On each
+machine run `bash scripts/setup.sh` once **with internet** — it installs Docker,
+adds the user to the `docker` group, and pre-builds every lab image. After that
+every launch is fully offline.
 
 ---
 
