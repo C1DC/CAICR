@@ -48,15 +48,21 @@ def preflight() -> Preflight:
     return Preflight(True, daemon_up, compose_v2, needs_sudo, detail)
 
 
-def _compose(lab: Lab, *args: str, capture: bool = False) -> subprocess.CompletedProcess:
+def _compose(lab: Lab, *args: str, capture: bool = False,
+             env: dict | None = None) -> subprocess.CompletedProcess:
+    import os
     cmd = [
         "docker", "compose",
         "-p", lab.project,
         "-f", str(lab.compose_file),
         *args,
     ]
+    runenv = None
+    if env:
+        runenv = os.environ.copy()
+        runenv.update(env)
     return subprocess.run(cmd, capture_output=capture, text=True,
-                          cwd=str(lab.directory))
+                          cwd=str(lab.directory), env=runenv)
 
 
 def build(lab: Lab) -> None:
@@ -66,8 +72,8 @@ def build(lab: Lab) -> None:
         raise DockerError(f"compose build failed for {lab.id} (exit {r.returncode})")
 
 
-def up(lab: Lab) -> None:
-    r = _compose(lab, "up", "-d", "--remove-orphans", capture=True)
+def up(lab: Lab, env: dict | None = None) -> None:
+    r = _compose(lab, "up", "-d", "--remove-orphans", capture=True, env=env)
     if r.returncode != 0:
         err = (r.stderr or "").strip()
         if "overlaps" in err.lower() or "pool" in err.lower():

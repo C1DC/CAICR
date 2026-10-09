@@ -55,6 +55,19 @@ def get_student() -> str:
     return _load().get("student", "")
 
 
+def get_seed() -> int:
+    """A stable per-student random seed; created and persisted on first use.
+    Drives per-student lab randomization so answers can't be copied."""
+    import secrets
+    data = _load()
+    seed = data.get("seed")
+    if not isinstance(seed, int):
+        seed = secrets.randbelow(2**31)
+        data["seed"] = seed
+        _save(data)
+    return seed
+
+
 def mark_started(lab_id: str) -> None:
     data = _load()
     _lab(data, lab_id)["started"] = _now()

@@ -19,3 +19,7 @@ state.json
 
 # distributable rollout bundle (built by scripts/package.sh)
 dist/
+
+# per-student rendered lab assets (generated at start from *.tmpl)
+labs/m1-threat-intel/assets/whois-lab-corp.txt
+labs/*/assets/*.rendered

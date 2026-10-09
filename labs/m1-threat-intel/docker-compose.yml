@@ -6,7 +6,11 @@ services:
   labdns:
     build: ./dns
     image: caic-labdns:1.0
-    environment: { HOSTLABEL: labdns }
+    environment:
+      HOSTLABEL: labdns
+      HIDDEN_HOST: ${CAIC_HIDDEN_HOST:-vpn-admin}
+      HIDDEN_IP: ${CAIC_HIDDEN_IP:-10.20.0.7}
+      MAIL_IP: ${CAIC_MAIL_IP:-41.210.15.21}
     networks: { range: { ipv4_address: 10.13.1.10 } }
     restart: unless-stopped
 

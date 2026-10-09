@@ -111,12 +111,32 @@ class TestArtefacts(unittest.TestCase):
         self.assertIn("spf=fail", eml)
 
     def test_answers_in_manifests_are_gradable(self):
-        """Every string/numeric check's own answer should grade as correct."""
+        """Every string/numeric check's own answer should grade as correct,
+        after resolving any per-student randomized placeholders."""
+        from engine import seed
         for lab in manifest.discover_labs():
+            vals = seed.compute(lab)
             for c in lab.checks:
-                if c.type in ("string", "numeric") and c.answer is not None:
+                c = seed.resolved_check(c, vals)
+                if c.type in ("string", "numeric") and c.answer:
                     out = verify.grade_answer(c, str(c.answer))
                     self.assertTrue(out.passed, f"{lab.id}:{c.id} answer not self-consistent")
+
+    def test_randomization_is_per_student(self):
+        """Two different seeds must yield different values for a randomized lab."""
+        from engine import seed, state
+        lab = manifest.load_one("m1")
+        self.assertTrue(lab.randomize, "m1 should be randomized")
+        orig = state.get_seed
+        try:
+            state.get_seed = lambda: 1001
+            a = seed.compute(lab)
+            state.get_seed = lambda: 2002
+            b = seed.compute(lab)
+        finally:
+            state.get_seed = orig
+        self.assertNotEqual(a, b)
+        self.assertIn("hidden_host", a)
 
 
 class TestLessons(unittest.TestCase):

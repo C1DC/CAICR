@@ -125,7 +125,11 @@ def _run_lab_op(lab_id: str, op: str) -> None:
     try:
         lab = load_one(lab_id)
         if op == "start":
-            dockerctl.up(lab)
+            from . import seed
+            vals = seed.compute(lab)
+            if vals:
+                seed.render_assets(lab, vals)
+            dockerctl.up(lab, env=seed.env_for(vals))
             dockerctl.wait_ready(lab)
             state.mark_started(lab.id)
         elif op == "stop":
@@ -150,10 +154,13 @@ def _start_op(lab_id: str, op: str) -> dict:
 
 
 def _grade(lab, answers: dict) -> dict:
+    from . import seed
+    vals = seed.compute(lab)
     results = []
     score = 0
     verified = {}
     for c in lab.checks:
+        c = seed.resolved_check(c, vals)
         if c.type == "script":
             out = verify.run_script_check(lab, c)
         else:

@@ -120,10 +120,16 @@ def cmd_start(args) -> int:
         return 0
     if not _require_docker():
         return 2
+    from . import seed
+    vals = seed.compute(lab)
+    if vals:
+        seed.render_assets(lab, vals)   # render assets/*.tmpl for this student
     ui.header(f"Starting {lab.module}: {lab.title}")
     ui.info(f"Bringing up isolated targets on {lab.subnet} (project {lab.project})…")
+    if vals:
+        ui.info("Targets personalised for you — your flags/answers differ from others'.")
     try:
-        dockerctl.up(lab)
+        dockerctl.up(lab, env=seed.env_for(vals))
     except dockerctl.DockerError as exc:
         ui.error(str(exc))
         return 2

@@ -63,8 +63,11 @@ def build_md() -> str:
         out.append("")
         for i, c in enumerate(checks, 1):
             t = c.get("type", "string")
+            raw = str(c.get("answer", "")) + "".join(str(x) for x in c.get("accept", []))
             if t == "script":
                 ans = "_(automatic script check — verifies live state)_"
+            elif "{{" in raw:
+                ans = "**«randomized per student»** — grade on the student's own machine (`labctl verify`)"
             elif t == "string_any":
                 acc = c.get("accept", [])
                 ans = "**" + str(acc[0]) + "**" + (f"  _(also: {', '.join(map(str, acc[1:]))})_" if len(acc) > 1 else "")

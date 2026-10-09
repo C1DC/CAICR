@@ -39,7 +39,12 @@ def main() -> int:
                 rows.append((lid, "START FAIL", r.stderr.strip()[:50])); ok_all = False
                 continue
             time.sleep(2)  # settle
-        answers = "\n".join(answers_for(data)) + "\n"
+        # resolve any per-student randomized placeholders for this machine's seed
+        sys.path.insert(0, str(ROOT))
+        from engine import seed as _seed  # noqa: E402
+        from engine.manifest import load_one  # noqa: E402
+        vals = _seed.compute(load_one(lid))
+        answers = "\n".join(_seed.resolve(a, vals) for a in answers_for(data)) + "\n"
         v = run(["verify", lid], inp=answers, timeout=120)
         m = re.search(r"(\d+)/(\d+)\s*\((\d+)%\)", v.stdout)
         if m and m.group(1) == m.group(2):

@@ -50,6 +50,7 @@ class Lab:
     targets: list[Target]
     checks: list[Check]
     ready: list[str]   # "ip:port" endpoints to probe before a lab is "ready"
+    randomize: dict    # per-student randomization spec (empty = static lab)
 
     @property
     def project(self) -> str:
@@ -134,6 +135,7 @@ def load_lab(directory: Path) -> Lab:
         targets=targets,
         checks=checks,
         ready=[str(x) for x in net.get("ready", [])],
+        randomize=data.get("randomize", {}) or {},
     )
 
 

@@ -14,7 +14,7 @@ from __future__ import annotations
 import subprocess
 from dataclasses import dataclass
 
-from . import state, ui
+from . import seed, state, ui
 from .manifest import Check, Lab
 
 
@@ -67,9 +67,11 @@ def interactive(lab: Lab) -> None:
     ui.header(f"Verify — {lab.module}: {lab.title}")
     ui.dim("  Enter what you found. Type 's' to skip a check, 'q' to quit.\n")
 
+    vals = seed.compute(lab)
     results: dict[str, bool] = {}
     score = 0
     for i, check in enumerate(lab.checks, 1):
+        check = seed.resolved_check(check, vals)
         if check.type == "script":
             out = run_script_check(lab, check)
             label = f"[{i}/{len(lab.checks)}] {check.prompt}"

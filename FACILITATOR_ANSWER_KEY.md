@@ -15,15 +15,15 @@
 4. What is the mail server (MX) host?
    → **mail.lab-corp.com.gh**  _(also: mail.lab-corp.com.gh.)_
 5. What IP does that mail server resolve to?
-   → **41.210.15.21**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 6. From the SOA record, what is the authoritative name server?
    → **ns1.lab-corp.com.gh**  _(also: ns1.lab-corp.com.gh.)_
 7. Attempt a zone transfer (AXFR). Does the server allow it? (a serious misconfiguration)
    → **yes**  _(also: allowed, successful, it works, transfer allowed, y)_
 8. The zone transfer leaks an internal admin host not published anywhere else. Name it.
-   → **vpn-admin**  _(also: vpn-admin.lab-corp.com.gh, vpn-admin.lab-corp.com.gh.)_
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 9. What internal IP does that leaked admin host resolve to?
-   → **10.20.0.7**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 10. Run nmap against 10.13.1.10 — what service/software does it fingerprint on port 53?
    → **bind**  _(also: isc bind, domain, dns, bind9, named)_
 11. The SPF record ends in a qualifier — what is it, and what does it mean?
@@ -37,9 +37,9 @@
 15. Which single email-authentication control is missing and enables spoofing?
    → **dmarc**
 16. From the WHOIS export, in what YEAR was lab-corp.com.gh originally registered?
-   → **2019**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 17. The WHOIS export flags a recently-registered look-alike domain. Name it.
-   → **lab-corp-gh.com**
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 18. In the OSINT report, how many employee email addresses were found?
    → **5**
 19. Which MITRE ATT&CK technique covers gathering victim DNS/network info?

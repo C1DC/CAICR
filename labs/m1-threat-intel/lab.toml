@@ -55,7 +55,7 @@ hint = "dig @10.13.1.10 lab-corp.com.gh MX +short"
 id = "mail_ip"
 type = "string"
 prompt = "What IP does that mail server resolve to?"
-answer = "41.210.15.21"
+answer = "{{mail_ip}}"
 hint = "dig @10.13.1.10 mail.lab-corp.com.gh A +short"
 
 [[check]]
@@ -76,14 +76,14 @@ hint = "dig AXFR @10.13.1.10 lab-corp.com.gh  — did it dump the whole zone?"
 id = "hidden_host"
 type = "string_any"
 prompt = "The zone transfer leaks an internal admin host not published anywhere else. Name it."
-accept = ["vpn-admin", "vpn-admin.lab-corp.com.gh", "vpn-admin.lab-corp.com.gh."]
+accept = ["{{hidden_host}}", "{{hidden_host}}.lab-corp.com.gh", "{{hidden_host}}.lab-corp.com.gh."]
 hint = "Read the AXFR output — which host has a private (10.x) address?"
 
 [[check]]
 id = "hidden_ip"
 type = "string"
 prompt = "What internal IP does that leaked admin host resolve to?"
-answer = "10.20.0.7"
+answer = "{{hidden_ip}}"
 hint = "It's in the AXFR dump next to vpn-admin"
 
 [[check]]
@@ -132,14 +132,14 @@ hint = "SPF present (weak) + DKIM present + ??? — the policy + alignment layer
 id = "reg_year"
 type = "numeric"
 prompt = "From the WHOIS export, in what YEAR was lab-corp.com.gh originally registered?"
-answer = 2019
+answer = "{{reg_year}}"
 hint = "cat assets/whois-lab-corp.txt  — the Creation Date"
 
 [[check]]
 id = "lookalike_domain"
 type = "string_any"
 prompt = "The WHOIS export flags a recently-registered look-alike domain. Name it."
-accept = ["lab-corp-gh.com"]
+accept = ["{{lookalike}}"]
 hint = "Compare the Creation Dates in assets/whois-lab-corp.txt"
 
 [[check]]
@@ -155,3 +155,23 @@ type = "string_any"
 prompt = "Which MITRE ATT&CK technique covers gathering victim DNS/network info?"
 accept = ["T1590", "T1590.002", "T1589", "T1598"]
 hint = "Reconnaissance (TA0043) → Gather Victim Network Information"
+
+# ── Per-student randomization (each student's "trophy" answers differ) ───────
+[randomize.mail_ip]
+kind = "ip_public"
+
+[randomize.hidden_host]
+kind = "hostname"
+
+[randomize.hidden_ip]
+kind = "ip_private"
+
+[randomize.lookalike]
+kind = "choice"
+choices = ["zenith-supplies.com", "zenithsupplies-gh.com", "zenith-supplies.net",
+           "zenithsupplies.co", "zenith-supply.com", "zenithsupplies.org"]
+
+[randomize.reg_year]
+kind = "int_range"
+min = 2014
+max = 2022
