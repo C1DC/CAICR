@@ -16,3 +16,6 @@ state.json
 # Editor / OS noise
 .DS_Store
 *.swp
+
+# distributable rollout bundle (built by scripts/package.sh)
+dist/

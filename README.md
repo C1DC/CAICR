@@ -89,7 +89,10 @@ The platform runs entirely in the browser. Progress is saved automatically in th
 | `worksheets/` | Fillable deliverable templates (`labctl worksheet`) |
 | `labctl` + `engine/` | The practical lab engine (Python, stdlib only) |
 | `labs/` | The hands-on labs (M1, M3–M7, M10) |
-| `STUDENT_GUIDE.md` | One-page student guide to the labs |
+| `STUDENT_GUIDE.md` / `STUDENT_HANDOUT.md` | One-page student guides (handout is printable) |
+| `FACILITATOR_GUIDE.md` | 5-day run-of-show for instructors |
+| `FACILITATOR_ANSWER_KEY.md` | Model answers for every lab (facilitator-only) |
+| `OFFLINE_ROLLOUT.md` | USB / offline classroom rollout checklist |
 | `LAB_ENGINE.md` | Engine architecture + facilitator/author guide |
 | `scripts/setup.sh` | One-time machine setup (Docker + image pre-build) |
 | `README.md` | This file |
