@@ -159,5 +159,33 @@ class TestWorksheets(unittest.TestCase):
             self.assertGreater(len(buf.getvalue()), 200, f"{p.name} rendered too short")
 
 
+class TestLessonsHtml(unittest.TestCase):
+    def test_md_to_html_converter(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "blh", ROOT / "scripts" / "build_lessons_html.py")
+        blh = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(blh)
+        out = blh.md_to_html("# T\n\n**bold** and `code`\n\n- a\n- b\n\n```\nx=1\n```\n")
+        self.assertIn("<h1>T</h1>", out)
+        self.assertIn("<strong>bold</strong>", out)
+        self.assertIn("<code>code</code>", out)
+        self.assertIn("<ul>", out)
+        self.assertIn("<pre><code>", out)
+        self.assertNotIn("**", out)
+
+    def test_generated_html_has_all_modules(self):
+        f = ROOT / "cyberlab-lessons.html"
+        if not f.is_file():
+            self.skipTest("cyberlab-lessons.html not built")
+        import json
+        import re
+        html = f.read_text(encoding="utf-8")
+        self.assertNotIn("/*__DATA__*/", html)
+        m = re.search(r"const DATA = (\{.*?\});\s*\nconst DAYS", html, re.S)
+        data = json.loads(m.group(1))
+        self.assertEqual(set(data), {f"m{n}" for n in range(1, 11)})
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

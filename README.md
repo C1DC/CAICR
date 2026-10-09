@@ -19,6 +19,13 @@ covers the courseware. For the hands-on labs:
 - **Facilitators / developers:** `LAB_ENGINE.md` — architecture, the lab
   catalogue, authoring new labs, and classroom rollout.
 
+Each module has three layers, all driven from `labctl`: **learn** (a deep
+lesson), **do** (a hands-on lab, where one exists), and **produce** (a fillable
+deliverable template). Read lessons in the terminal with `labctl learn`, or open
+`cyberlab-lessons.html` in a browser for the same content with navigation and
+search. Regenerate that file after editing lessons with
+`python3 scripts/build_lessons_html.py`.
+
 ```
 ./labctl doctor     # check the machine is ready
 ./labctl prep       # build all lab images once (needs internet this one time)
@@ -42,6 +49,9 @@ The platform runs entirely in the browser. Progress is saved automatically in th
 | File / folder | Purpose |
 |------|---------|
 | `cyberlab.html` | The browser courseware (single file) |
+| `cyberlab-lessons.html` | Browser reader for the deep lessons + templates (generated) |
+| `lessons/` | Deep teaching lessons, one per module (read via `labctl learn`) |
+| `worksheets/` | Fillable deliverable templates (`labctl worksheet`) |
 | `labctl` + `engine/` | The practical lab engine (Python, stdlib only) |
 | `labs/` | The hands-on labs (M1, M3–M7, M10) |
 | `STUDENT_GUIDE.md` | One-page student guide to the labs |
