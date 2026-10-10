@@ -37,7 +37,22 @@
 - [ ] Input/output guardrails & filtering (scan output for secrets / injected tool calls)
 - [ ] Human-in-the-loop for consequential actions (payments, exports, access changes)
 - [ ] Integrity controls on the RAG knowledge base (who can write to it?)
+- [ ] **Output sanitised** before it reaches a browser/DB/shell (LLM05)
+- [ ] **Dual-LLM / privilege separation** — the tool-holding model never sees untrusted input directly
+- [ ] **Rate limits & budgets**; prompts/responses logged for monitoring
 - [ ] AI acceptable-use policy + a sanctioned alternative (addresses shadow AI)
+
+## 4b. Red-team & evaluation
+
+- **Jailbreaks tested:** [role-play / obfuscation / many-shot / prompt-leaking / indirect]
+- **Safety eval suite:** [where it lives; runs on every model/prompt change? yes/no]
+- **Tooling:** [e.g. garak / PyRIT / promptfoo]
+
+## 4c. Governance & law
+
+- **NIST AI RMF** weakest function (Govern/Map/Measure/Manage): [ ]
+- **Automated decisions** affecting people? [ ] → human-review + lawful basis under **Act 843**? [ ]
+- **Data residency** — does personal data leave Ghana to a foreign AI API? [ ]
 
 ## 5. Deepfake verification protocol
 
