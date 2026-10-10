@@ -62,3 +62,49 @@ Look-alike domain: [ ]  Highest alert severity: [ ]
 1. [ ]
 2. [ ]
 3. [ ]
+
+---
+
+## Self-check before you submit
+
+- [ ] §2 tells **one** campaign story, not eight separate incidents.
+- [ ] I proved the **signature correlation**: the BEC mule account == the AI's
+      poisoned answer == tied to the foothold IP.
+- [ ] My decision log shows **isolate (not power off)** and **callback-verify** the voice order.
+- [ ] Every roadmap item maps to a **root cause** and a **CSF function**.
+- [ ] I only touched 10.13.10.0/24.
+
+## Grading rubric (100 pts)
+
+| Band | Attack story & correlation (40) | Decisions & evidence (25) | Response & obligations (15) | Roadmap & board lessons (20) |
+|------|----------------------------------|---------------------------|-----------------------------|------------------------------|
+| Excellent (full) | All injects correlated into one campaign; signature link proven | Sound, timestamped, evidence-backed decisions | Correct NIST phases + Act 1038/843 considered | Prioritised, root-cause-linked, CSF-mapped |
+| Adequate (~60%) | Most injects linked, signature link missed | Decisions made, thin rationale | Generic response | Generic actions |
+| Weak (<40%) | Injects listed separately | Ad-hoc decisions, no log | Power-off / action the transfer | No roadmap |
+
+---
+
+## Worked example (reference — fictional "Adom Microfinance Ltd")
+
+*Illustrative values — yours are randomised.*
+
+**The story:** one adversary. A look-alike **zennith-supplies.com** email (T+00)
+demanded payment to mule account **0123456789**; the bank's **AI assistant**,
+asked about the supplier, returned the **same 0123456789** — its knowledge base
+was **poisoned** (T+160). Meanwhile foothold **10.13.10.66** logged in with privilege
+(T+20), scanned internally (T+40), beaconed to a dynamic-DNS C2, and exfiltrated to
+**185.220.101.44** (T+120) before ransomware took the database (T+145). **The same
+account appearing in the email and the AI proves it is one campaign.**
+
+**Decisions (logged):** 11:02 **isolate** 10.13.10.66 (not power off) — preserve
+RAM; 10:31 **refuse & callback-verify** the T+90 voice order on the MD's known
+number (deepfake); 11:05 declare **High** severity; quarantine the poisoned AI KB.
+
+**Response:** eradicate (reset cracked admin creds, remove persistence, clean KB);
+recover ransomed DB from **offline** backup (RPO ≤ 24h, RTO ≤ 8h); assess CSA/DPC
+notification. **Roadmap:** MFA everywhere (Protect) · DNS monitoring (Detect) ·
+dual-control payments + callback (Protect/Govern) · AI KB change-control + least-
+privilege tools (Govern) · monthly restore test (Recover).
+
+**Board lessons:** (1) one callback would have stopped the fraud; (2) our own AI
+was turned against us — govern it; (3) tested offline backups are what got us back.
