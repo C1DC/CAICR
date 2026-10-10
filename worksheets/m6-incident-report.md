@@ -15,6 +15,10 @@
 - How detected: [ ]
 - Scope — systems affected: [ ]  Data affected: [ ]  Users affected: [ ]
 - Attacker still present? [yes/no/unknown]
+- **Data exfiltrated before impact? [yes/no/unknown]** — if yes (or ransomware
+  double-extortion), this is a **breach**: trigger the Act 843 (DPC) / Act 1038
+  (CSA) notification assessment (Module 8), not just availability recovery.
+- Anti-forensics observed? [e.g. Event ID 1102 log-clear, timestomping — note it]
 
 ## 3. Evidence manifest
 
