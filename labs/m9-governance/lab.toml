@@ -1,0 +1,176 @@
+[lab]
+id = "m9"
+module = "M9"
+day = 5
+title = "Governance & Continuity Review — Volta Pension Trust"
+tools = ["NIST CSF 2.0", "ISO 22301", "BIA", "three-lines model"]
+estimated_minutes = 90
+briefing = "briefing.md"
+objective = """
+A pension trust's board has called a governance and business-continuity review \
+before its next meeting. Work the case the way a CISO briefing the board must: \
+read the BIA to set recovery priorities, find the RTO/RPO gap on the service \
+pensioners depend on, catch the governance failures (no board owner, a muddled \
+policy hierarchy, vanity metrics, untested backups, no crisis command), and name \
+the right answers. This is the analytical core of the executive risk memo and the \
+recovery-priority table you then write up."""
+
+# File-based lab: the case pack is in assets/ (personalised to you). No targets.
+
+# ── 1. Recovery priorities (BIA) ────────────────────────────────────────────
+[[check]]
+id = "members"
+type = "numeric"
+prompt = "How many members does the Trust serve (per the case pack)?"
+answer = "{{members}}"
+tolerance = 0
+hint = "§1 of the case pack."
+
+[[check]]
+id = "recover_first"
+type = "string_any"
+prompt = "Which service must be recovered FIRST (shortest RTO, highest impact)?"
+accept = ["benefits payment", "benefits payment system", "benefits", "the benefits payment system", "payments", "benefit payments"]
+hint = "Which outage hurts pensioners — and the Trust's reputation — most, fastest?"
+
+[[check]]
+id = "bp_rto_required"
+type = "numeric"
+prompt = "What RTO (hours) has the board mandated for the benefits-payment system?"
+answer = "{{bp_rto_required}}"
+tolerance = 0
+hint = "§2 — the BIA table, required column."
+
+[[check]]
+id = "bp_rto_current"
+type = "numeric"
+prompt = "What is the CURRENT recovery time (RTO, hours) for the benefits-payment system?"
+answer = "{{bp_rto_current}}"
+tolerance = 0
+hint = "§2 — the BIA table, current column."
+
+[[check]]
+id = "rto_gap"
+type = "string_any"
+prompt = "Does the current RTO meet the board's mandate?"
+accept = ["no", "n", "exceeds", "no it exceeds", "fails", "unacceptable", "not within", "breach", "no gap exists? no"]
+hint = "Compare current to required."
+
+[[check]]
+id = "impact_per_day"
+type = "numeric"
+prompt = "What financial impact per day of a benefits-payment outage does the case cite (GHS)?"
+answer = "{{impact_per_day}}"
+tolerance = 0
+hint = "§2 — the impact column."
+
+# ── 2. Governance posture ───────────────────────────────────────────────────
+[[check]]
+id = "gov_vs_mgmt"
+type = "string_any"
+prompt = "Setting the risk appetite and approving the cyber policy is a GOVERNANCE or a MANAGEMENT activity?"
+accept = ["governance", "govern", "board", "a governance activity"]
+hint = "The board directs and assures; management executes."
+
+[[check]]
+id = "weakest_csf"
+type = "string_any"
+prompt = "Given no board agenda item, no accountable executive and a stale policy, which NIST CSF 2.0 function is weakest?"
+accept = ["govern", "govern function", "the govern function"]
+hint = "The function, new in CSF 2.0, that is about board accountability."
+
+[[check]]
+id = "policy_hierarchy"
+type = "string_any"
+prompt = "A document titled 'Password Policy' that lists the step-by-step enrolment is really which layer of the policy hierarchy?"
+accept = ["procedure", "a procedure", "procedures"]
+hint = "Policy = what & why; this specifies the exact HOW."
+
+[[check]]
+id = "vanity_metric"
+type = "string_any"
+prompt = "The board pack reports 'number of attacks blocked: 4.2M'. Is that a useful board metric?"
+accept = ["no", "n", "vanity", "vanity metric", "not useful", "meaningless", "no it is vanity", "not a useful metric"]
+hint = "Does it help the board make a decision, or just look busy?"
+
+[[check]]
+id = "better_metric"
+type = "string_any"
+prompt = "Name one metric the board SHOULD see instead."
+accept = ["mttd", "mttr", "patch compliance", "patch rate", "mfa adoption", "mfa", "restore test",
+          "backup restore test", "phishing failure rate", "mean time to detect", "mean time to respond",
+          "patch compliance rate", "restore test result"]
+hint = "A decision-useful metric: detection/response time, patch %, MFA %, restore-test result."
+
+# ── 3. Business continuity ──────────────────────────────────────────────────
+[[check]]
+id = "missing_bc_test"
+type = "string_any"
+prompt = "Backups exist but were never ___ — the control that proves recovery actually works?"
+accept = ["restore tested", "restore-tested", "tested", "restore test", "tested recovery", "restore testing",
+          "test restored", "dr test", "backup restore test", "tested by restoring"]
+hint = "A backup you have never restored is a hope, not a control."
+
+# ── 4. Crisis command & assurance ───────────────────────────────────────────
+[[check]]
+id = "third_line"
+type = "string_any"
+prompt = "In the three-lines model, independent assurance is provided by which line (or which function)?"
+accept = ["third", "3rd", "third line", "internal audit", "audit", "the third line"]
+hint = "First = operations, second = risk & compliance, third = ___."
+
+[[check]]
+id = "crisis_owner"
+type = "string_any"
+prompt = "In a crisis, who owns and directs the decisions?"
+accept = ["incident commander", "the incident commander", "ic", "commander"]
+hint = "Borrow the emergency-services command model."
+
+[[check]]
+id = "decision_log"
+type = "string_any"
+prompt = "What must the crisis team keep as its audit trail (and later defence)?"
+accept = ["decision log", "a decision log", "decision-log", "log of decisions", "timestamped decisions", "log every decision"]
+hint = "Every decision, with a timestamp, the decision-maker and the rationale."
+
+[[check]]
+id = "report_authority"
+type = "string_any"
+prompt = "A regulated institution reports the incident to which authority under Act 1038?"
+accept = ["csa", "cert-gh", "cert", "cyber security authority", "the csa", "cert gh"]
+hint = "Act 1038's authority / national CERT."
+
+[randomize.members]
+kind = "int_range"
+min = 60000
+max = 320000
+
+[randomize.pensioners]
+kind = "int_range"
+min = 12000
+max = 90000
+
+[randomize.bp_rto_required]
+kind = "int_range"
+min = 2
+max = 8
+
+[randomize.bp_rto_current]
+kind = "int_range"
+min = 24
+max = 96
+
+[randomize.bp_rpo_current]
+kind = "int_range"
+min = 12
+max = 72
+
+[randomize.impact_per_day]
+kind = "int_range"
+min = 400000
+max = 3200000
+
+[randomize.policy_age]
+kind = "int_range"
+min = 3
+max = 7

@@ -14,7 +14,7 @@ COURSE_MAP = [
     ("m6",  3, "Digital Forensics & Incident Response", True),
     ("m7",  4, "AI Security, Deepfakes & Emerging Threats", True),
     ("m8",  4, "Data Protection, Privacy & Compliance", True),
-    ("m9",  5, "Cyber Governance & Business Continuity", False),
+    ("m9",  5, "Cyber Governance & Business Continuity", True),
     ("m10", 5, "Operation Cyber Resilience — Capstone", True),
 ]
 

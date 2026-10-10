@@ -315,6 +315,42 @@
 15. T+160: the bank's own AI assistant was abused in this campaign. Name the technique/class.
    → **prompt injection**  _(also: rag poisoning, rag-poisoning, indirect prompt injection, llm01, knowledge base poisoning, data poisoning)_
 
+## M9 — Governance & Continuity Review — Volta Pension Trust
+*Day 5 · 16 checks · 16 points · tools: NIST CSF 2.0, ISO 22301, BIA, three-lines model*
+
+1. How many members does the Trust serve (per the case pack)?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+2. Which service must be recovered FIRST (shortest RTO, highest impact)?
+   → **benefits payment**  _(also: benefits payment system, benefits, the benefits payment system, payments, benefit payments)_
+3. What RTO (hours) has the board mandated for the benefits-payment system?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+4. What is the CURRENT recovery time (RTO, hours) for the benefits-payment system?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+5. Does the current RTO meet the board's mandate?
+   → **no**  _(also: n, exceeds, no it exceeds, fails, unacceptable, not within, breach, no gap exists? no)_
+6. What financial impact per day of a benefits-payment outage does the case cite (GHS)?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+7. Setting the risk appetite and approving the cyber policy is a GOVERNANCE or a MANAGEMENT activity?
+   → **governance**  _(also: govern, board, a governance activity)_
+8. Given no board agenda item, no accountable executive and a stale policy, which NIST CSF 2.0 function is weakest?
+   → **govern**  _(also: govern function, the govern function)_
+9. A document titled 'Password Policy' that lists the step-by-step enrolment is really which layer of the policy hierarchy?
+   → **procedure**  _(also: a procedure, procedures)_
+10. The board pack reports 'number of attacks blocked: 4.2M'. Is that a useful board metric?
+   → **no**  _(also: n, vanity, vanity metric, not useful, meaningless, no it is vanity, not a useful metric)_
+11. Name one metric the board SHOULD see instead.
+   → **mttd**  _(also: mttr, patch compliance, patch rate, mfa adoption, mfa, restore test, backup restore test, phishing failure rate, mean time to detect, mean time to respond, patch compliance rate, restore test result)_
+12. Backups exist but were never ___ — the control that proves recovery actually works?
+   → **restore tested**  _(also: restore-tested, tested, restore test, tested recovery, restore testing, test restored, dr test, backup restore test, tested by restoring)_
+13. In the three-lines model, independent assurance is provided by which line (or which function)?
+   → **third**  _(also: 3rd, third line, internal audit, audit, the third line)_
+14. In a crisis, who owns and directs the decisions?
+   → **incident commander**  _(also: the incident commander, ic, commander)_
+15. What must the crisis team keep as its audit trail (and later defence)?
+   → **decision log**  _(also: a decision log, decision-log, log of decisions, timestamped decisions, log every decision)_
+16. A regulated institution reports the incident to which authority under Act 1038?
+   → **csa**  _(also: cert-gh, cert, cyber security authority, the csa, cert gh)_
+
 ---
 
 # Assessment answer key (quizzes & final exam)

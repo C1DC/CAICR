@@ -29,6 +29,17 @@ relies on. Explain any trade-offs.]
 > A backup you have never restored is a hope, not a control. The restore-test
 > column is the one leadership should check every quarter.
 
+## RTO gap & strategy (per critical service)
+
+| Service | Required RTO | Current RTO | Gap? | Strategy to close it | Manual workaround |
+|---------|--------------|-------------|------|----------------------|-------------------|
+| [ ] | [ ] | [ ] | [yes/no] | [cold / warm / hot / cloud DR] | [bridge while recovering] |
+
+## Exercise plan
+
+- Last BC/DR exercise (type + date): [tabletop / walkthrough / failover]
+- Next exercise scheduled: [ ]  ·  Severe-but-plausible scenario to test: [ ]
+
 ---
 
 ## Worked example (reference — fictional "Adom Microfinance Ltd")

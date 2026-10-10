@@ -30,7 +30,7 @@ class TestManifests(unittest.TestCase):
     def test_all_labs_discover_and_validate(self):
         labs = manifest.discover_labs()
         ids = {l.id for l in labs}
-        self.assertEqual(ids, {"m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m10"})
+        self.assertEqual(ids, {"m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10"})
 
     def test_every_lab_has_checks_and_points(self):
         for lab in manifest.discover_labs():
@@ -56,6 +56,7 @@ class TestManifests(unittest.TestCase):
         byid = {l.id: l for l in manifest.discover_labs()}
         self.assertFalse(byid["m2"].has_targets)
         self.assertFalse(byid["m8"].has_targets)
+        self.assertFalse(byid["m9"].has_targets)
         self.assertFalse(byid["m5"].has_targets)
         self.assertFalse(byid["m6"].has_targets)
         self.assertTrue(byid["m3"].has_targets)

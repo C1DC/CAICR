@@ -1,0 +1,64 @@
+# Volta Pension Trust — Governance & Continuity Review
+
+*The board has called a cyber-governance and business-continuity review before its
+next quarterly meeting. You are briefing it. Work this pack into recovery
+priorities and a clear-eyed list of the governance gaps — then write the executive
+memo and the recovery-priority table.*
+
+---
+
+## 1. The institution
+
+Volta Pension Trust manages retirement savings for about **__MEMBERS__ members**
+and pays monthly benefits to **__PENSIONERS__ pensioners** who depend on that
+money to live. Core services:
+
+- **Benefits Payment System** — pays pensioners each month (the crown jewel of
+  *availability*).
+- **Contributions Portal** — employers and members pay in.
+- **Member Records Database** — personal and financial data.
+- **Public Website** — information only, no transactions.
+
+**Governance posture:** the board meets quarterly but has **no standing cyber
+agenda item** and **no named accountable executive** (no CISO or DPO). The IT
+policy was last approved **__POLICY_AGE__ years ago**. There is **no tested
+disaster-recovery plan** and **no crisis-command structure**.
+
+## 2. Business impact analysis (BIA)
+
+| Service | Board-mandated RTO | Current RTO | Board RPO | Current RPO | Impact of an outage |
+|---------|--------------------|-------------|-----------|-------------|---------------------|
+| **Benefits Payment System** | **__BP_RTO_REQUIRED__ h** | **__BP_RTO_CURRENT__ h** | 1 h | __BP_RPO_CURRENT__ h | **GHS __IMPACT_PER_DAY__ / day** + pensioner hardship, reputational damage |
+| Contributions Portal | 12 h | 36 h | 4 h | 24 h | Delayed contributions; member frustration |
+| Member Records DB | 8 h | 24 h | 2 h | 24 h | Service degradation; data-loss exposure |
+| Public Website | 72 h | 48 h | 24 h | 24 h | Minor — informational only |
+
+Backups run weekly to a networked drive and have **never been restore-tested**.
+
+## 3. The current board pack (for your critique)
+
+The security slide the board currently receives reports:
+
+- "**Attacks blocked this quarter: 4.2 million**" (the headline metric)
+- "Firewall uptime: 99.98%"
+- "Antivirus installed on 100% of laptops"
+
+It does **not** report detection/response times, patch compliance, MFA adoption,
+or whether backups have ever been restored. A document titled **"Password
+Policy"** turns out to be a **step-by-step MFA-enrolment walkthrough**.
+
+## 4. The regulatory frame
+
+As a financial institution, the Trust is likely **Critical Information
+Infrastructure** under the **Cybersecurity Act 2020 (Act 1038)**, with incident-
+reporting duties to the **CSA / CERT-GH**, and it holds personal data under the
+**Data Protection Act 2012 (Act 843)** (DPC).
+
+---
+
+## Your task
+
+Answer the checks in `labctl verify m9`, then produce the two deliverables with
+`labctl worksheet m9`: an **executive cyber-risk memo** (one page, a decision for
+the board) and a **service recovery-priority table**. Everything should trace to
+this pack and to the governance frame in `labctl learn m9`.
