@@ -43,9 +43,17 @@ Look-alike domain: [ ]  Highest alert severity: [ ]
 - Eradication: [ ]
 - Recovery priorities (RTO/RPO): [ ]
 
-## 5. Reporting obligations considered
+## 5. Reporting obligations & crisis communications
 
-[Act 1038 CSA / Act 843 DPC questions — to confirm with counsel.]
+- **Reporting:** [Act 1038 CSA/CERT-GH · Act 843 DPC — questions for counsel]
+- **Stakeholders briefed:** [board · staff · customers · regulator · bank · press]
+- **Holding statement / spokesperson:** [one voice, confirmed facts only]
+
+## 5b. After-action review (hotwash)
+
+- **What went well:** [ ]
+- **What didn't:** [ ] *(blameless — systems, not scapegoats)*
+- **True root cause (five whys past the symptom):** [ ]
 
 ## 6. 90-Day resilience roadmap
 
