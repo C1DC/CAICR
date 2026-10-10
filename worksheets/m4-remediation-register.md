@@ -54,6 +54,14 @@ even at a lower CVSS.
 
 [Key log lines in time order that justify the classification — the proof.]
 
+### Detection to add (so you catch the next one automatically)
+
+- **Behaviour to catch:** [e.g. N+ SSH failures then a success from one source IP in M minutes]
+- **Log source required:** [e.g. sshd auth logs shipped to the SIEM]
+- **Rule (Sigma/Wazuh sketch):** [threshold, timeframe, same-source-IP condition]
+- **Tuning / allow-list:** [known scanners, backup jobs, admin jump host]
+- **SOAR response:** [auto-enrich IP, block, disable account, open ticket]
+
 ---
 
 ## Self-check before you submit
