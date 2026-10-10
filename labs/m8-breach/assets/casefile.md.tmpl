@@ -1,0 +1,65 @@
+# Akoma Health Network — Data Breach & Compliance Case Pack
+
+*You are the Data Protection Officer. A breach has just been confirmed and the
+board meets this afternoon. Work this pack into the decisions and the findings the
+law requires — then write them up as a breach assessment and a compliance-gap
+register.*
+
+---
+
+## 1. The institution
+
+Akoma Health Network is a private health provider — **6 clinics** across Accra and
+Kumasi — holding about **__RECORDS__** patient records. Its electronic health
+records run in the cloud, operated by a vendor, **CloudMed Ltd**. The data held
+includes:
+
+- names, phone numbers and **Ghana Card numbers**;
+- **diagnoses and treatment history** — i.e. **health data** (a sensitive /
+  special category);
+- **card payment details** used for billing.
+
+Akoma is a data **controller** under the **Data Protection Act 2012 (Act 843)**,
+overseen by the **Data Protection Commission (DPC)**; as a health provider it is
+also relevant to the **Cybersecurity Act 2020 (Act 1038)** regime (CSA / CERT-GH).
+
+## 2. What happened
+
+A data analyst exported a patient dataset to a **cloud storage bucket** for a
+reporting project. The bucket was **misconfigured as public**. It remained public
+for **__EXPOSURE_DAYS__ days** before an outside security researcher reported it.
+The cloud **access logs show __DOWNLOAD_COUNT__ downloads from external / foreign
+IP addresses** during that window. The exported file contained **__RECORDS__
+patient records**, including diagnoses (sensitive health data) and card details.
+
+## 3. What the compliance review found
+
+- The exported dataset included records kept **__RETENTION_YEARS__ years past** the
+  documented retention need — far beyond Akoma's own retention schedule.
+- The lawful basis on file is **"consent"** — but it was **bundled into a mandatory
+  intake form** patients could not decline, so it was **not freely given**.
+- **No DPIA** (Data Protection Impact Assessment) was ever carried out, despite
+  large-scale processing of **sensitive health data**.
+- The contract with **CloudMed has no data processing agreement (DPA)** — there are
+  no written controller–processor terms binding the vendor.
+- Akoma's **DPC registration lapsed 14 months ago**.
+- The export itself had **no encryption and no access control**.
+
+## 4. The regulatory frame
+
+- Personal-data breach → the **Data Protection Commission (DPC)** under **Act 843**.
+- Cyber incident / critical infrastructure → the **Cyber Security Authority (CSA) /
+  CERT-GH** under **Act 1038**.
+- The **GDPR** norm — notify the regulator within **72 hours** of becoming aware —
+  is the benchmark clients, partners and insurers assume.
+- Given the failures above, the DPC has indicated a potential penalty in the order
+  of **GHS __FINE__**.
+
+---
+
+## Your task
+
+Answer the checks in `labctl verify m8`, then produce the two deliverables with
+`labctl worksheet m8`: a **data-breach assessment** and a **compliance-gap
+register** for Akoma Health Network. Every decision should trace to evidence in
+this pack — and to the law in `labctl learn m8`.

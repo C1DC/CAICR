@@ -245,6 +245,42 @@
 12. From the transcript, name one BEHAVIOURAL red flag (not acoustic) that marks it as likely fraud.
    → **urgency**  _(also: urgent, deadline, don't call back, dont call back, no callback, bypass approvers, bypass approval, skip approvers, confidential, secrecy, don't loop in approvers, out-of-band channel, whatsapp)_
 
+## M8 — Data Breach & Compliance Case — Akoma Health Network
+*Day 4 · 16 checks · 16 points · tools: Act 843, Act 1038, GDPR, DPIA, breach notification*
+
+1. Is this a reportable personal-data breach under Act 843? (yes/no)
+   → **yes**  _(also: y, it is, reportable, yes it is)_
+2. Does the exposed data include sensitive / special-category data? What makes it sensitive?
+   → **yes**  _(also: health, health data, medical, diagnoses, health records, special category, yes health)_
+3. How many patient records were in the exposed export?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+4. How many external downloads do the access logs show during the exposure window?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+5. Under Act 843, who is ACCOUNTABLE for this breach — Akoma (the hospital) or CloudMed (the cloud vendor)?
+   → **akoma**  _(also: the hospital, hospital, controller, the controller, akoma health, akoma is, akoma (controller))_
+6. What is CloudMed's role under the Act?
+   → **processor**  _(also: data processor, the processor, a processor)_
+7. What is the GDPR-benchmark time (hours) to notify the regulator once aware of a breach?
+   → **72**
+8. Which Ghanaian regulator oversees the PERSONAL-DATA breach?
+   → **dpc**  _(also: data protection commission, the dpc, data protection commission (dpc))_
+9. Which authority handles the CYBER-incident reporting side (Act 1038)?
+   → **csa**  _(also: cert-gh, cert, cyber security authority, the csa, cert gh)_
+10. Given the high risk to individuals (health data, confirmed downloads), should the affected patients be notified directly? (yes/no)
+   → **yes**  _(also: y, notify them, yes notify, notify the patients, directly)_
+11. Keeping records years past the documented need breaches which data-protection principle?
+   → **storage limitation**  _(also: retention, storage-limitation, storage, retention limitation)_
+12. The lawful basis on file is 'consent', but it was bundled into a mandatory form patients couldn't decline. Is that consent valid?
+   → **no**  _(also: n, invalid, not valid, no it is not, not freely given, no not valid)_
+13. What assessment was legally required before this large-scale sensitive processing, but was never done? (name it)
+   → **dpia**  _(also: data protection impact assessment, data-protection impact assessment, impact assessment)_
+14. The contract with CloudMed is missing the written controller–processor agreement. Name it.
+   → **dpa**  _(also: data processing agreement, data-processing agreement, data processor agreement)_
+15. What is the first CONTAINMENT action on the exposed cloud bucket?
+   → **remove public access**  _(also: revoke access, remove access, make it private, take it down, remove the public access, restrict access, close the bucket, remove public, lock it down)_
+16. What potential DPC penalty (in GHS) does the case file cite for these failures?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+
 ## M10 — Operation Cyber Resilience — CyberRange Capstone
 *Day 5 · 15 checks · 15 points · tools: nmap, wireshark, jq, email forensics, ai-sandbox, all*
 

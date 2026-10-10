@@ -39,6 +39,18 @@
 | Does this likely trigger DPC notification? | [confirm with counsel] |
 | Do affected individuals likely need to be told? | [confirm with counsel] |
 
+## 5b. Underlying compliance failures that enabled this
+
+*A breach usually exposes pre-existing gaps. Tick any that apply and feed them to
+the compliance-gap register.*
+
+- [ ] **Lawful basis** invalid or missing (e.g. bundled/forced "consent")
+- [ ] **Retention** — data kept past the documented need (storage-limitation breach)
+- [ ] **DPIA** not done for high-risk / sensitive processing
+- [ ] **DPA** missing with the processor/cloud vendor
+- [ ] **DPC registration** lapsed or absent
+- [ ] Data not **minimised / encrypted / access-controlled**
+
 ## 6. Questions for legal counsel (before any external communication)
 
 1. [ ]

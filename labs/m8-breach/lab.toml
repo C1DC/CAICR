@@ -1,0 +1,165 @@
+[lab]
+id = "m8"
+module = "M8"
+day = 4
+title = "Data Breach & Compliance Case — Akoma Health Network"
+tools = ["Act 843", "Act 1038", "GDPR", "DPIA", "breach notification"]
+estimated_minutes = 120
+briefing = "briefing.md"
+objective = """
+A private health network has just discovered that a cloud export of patient data \
+was left public and downloaded. Work the case the way a Data Protection Officer \
+must in the first hours: classify the breach, fix controller/processor \
+accountability, scope the data and the people affected, decide the notification \
+obligations and timelines, and catch the compliance failures (retention, lawful \
+basis, DPIA, the missing vendor DPA, lapsed registration). This is the analytical \
+core of the breach assessment and compliance-gap register you then write up."""
+
+# File-based lab: the case pack is in assets/ (personalised to you). No targets.
+
+# ── 1. Classify the breach ──────────────────────────────────────────────────
+[[check]]
+id = "is_breach"
+type = "string_any"
+prompt = "Is this a reportable personal-data breach under Act 843? (yes/no)"
+accept = ["yes", "y", "it is", "reportable", "yes it is"]
+hint = "Personal data was exposed to unauthorised parties and downloaded — read §2."
+
+[[check]]
+id = "sensitive_data"
+type = "string_any"
+prompt = "Does the exposed data include sensitive / special-category data? What makes it sensitive?"
+accept = ["yes", "health", "health data", "medical", "diagnoses", "health records", "special category", "yes health"]
+hint = "What kind of records does a hospital hold?"
+
+[[check]]
+id = "records_exposed"
+type = "numeric"
+prompt = "How many patient records were in the exposed export?"
+answer = "{{records}}"
+tolerance = 0
+hint = "§2 of the case pack."
+
+[[check]]
+id = "downloads"
+type = "numeric"
+prompt = "How many external downloads do the access logs show during the exposure window?"
+answer = "{{download_count}}"
+tolerance = 0
+hint = "§2 — the access logs."
+
+# ── 2. Accountability ───────────────────────────────────────────────────────
+[[check]]
+id = "accountable_party"
+type = "string_any"
+prompt = "Under Act 843, who is ACCOUNTABLE for this breach — Akoma (the hospital) or CloudMed (the cloud vendor)?"
+accept = ["akoma", "the hospital", "hospital", "controller", "the controller", "akoma health", "akoma is", "akoma (controller)"]
+hint = "Outsourcing the processing does not outsource the accountability."
+
+[[check]]
+id = "vendor_role"
+type = "string_any"
+prompt = "What is CloudMed's role under the Act?"
+accept = ["processor", "data processor", "the processor", "a processor"]
+hint = "It processes the data on the controller's behalf."
+
+# ── 3. Notification decision ────────────────────────────────────────────────
+[[check]]
+id = "notify_hours"
+type = "numeric"
+prompt = "What is the GDPR-benchmark time (hours) to notify the regulator once aware of a breach?"
+answer = 72
+tolerance = 0
+hint = "The global norm partners and regulators assume."
+
+[[check]]
+id = "regulator_personal"
+type = "string_any"
+prompt = "Which Ghanaian regulator oversees the PERSONAL-DATA breach?"
+accept = ["dpc", "data protection commission", "the dpc", "data protection commission (dpc)"]
+hint = "Act 843's regulator."
+
+[[check]]
+id = "authority_cyber"
+type = "string_any"
+prompt = "Which authority handles the CYBER-incident reporting side (Act 1038)?"
+accept = ["csa", "cert-gh", "cert", "cyber security authority", "the csa", "cert gh"]
+hint = "Act 1038's authority / national CERT."
+
+[[check]]
+id = "notify_subjects"
+type = "string_any"
+prompt = "Given the high risk to individuals (health data, confirmed downloads), should the affected patients be notified directly? (yes/no)"
+accept = ["yes", "y", "notify them", "yes notify", "notify the patients", "directly"]
+hint = "High risk to the rights of individuals triggers direct notification."
+
+# ── 4. Compliance failures ──────────────────────────────────────────────────
+[[check]]
+id = "retention_principle"
+type = "string_any"
+prompt = "Keeping records years past the documented need breaches which data-protection principle?"
+accept = ["storage limitation", "retention", "storage-limitation", "storage", "retention limitation"]
+hint = "Keep personal data only as long as needed."
+
+[[check]]
+id = "consent_valid"
+type = "string_any"
+prompt = "The lawful basis on file is 'consent', but it was bundled into a mandatory form patients couldn't decline. Is that consent valid?"
+accept = ["no", "n", "invalid", "not valid", "no it is not", "not freely given", "no not valid"]
+hint = "Consent must be freely given, specific and unambiguous."
+
+[[check]]
+id = "missing_dpia"
+type = "string_any"
+prompt = "What assessment was legally required before this large-scale sensitive processing, but was never done? (name it)"
+accept = ["dpia", "data protection impact assessment", "data-protection impact assessment", "impact assessment"]
+hint = "The privacy-risk assessment for high-risk processing."
+
+[[check]]
+id = "missing_dpa"
+type = "string_any"
+prompt = "The contract with CloudMed is missing the written controller–processor agreement. Name it."
+accept = ["dpa", "data processing agreement", "data-processing agreement", "data processor agreement"]
+hint = "The contract that binds a processor to the controller's instructions."
+
+# ── 5. First action ─────────────────────────────────────────────────────────
+[[check]]
+id = "first_action"
+type = "string_any"
+prompt = "What is the first CONTAINMENT action on the exposed cloud bucket?"
+accept = ["remove public access", "revoke access", "remove access", "make it private", "take it down",
+          "remove the public access", "restrict access", "close the bucket", "remove public", "lock it down"]
+hint = "Stop the exposure first — then scope and preserve the logs."
+
+[[check]]
+id = "potential_fine"
+type = "numeric"
+prompt = "What potential DPC penalty (in GHS) does the case file cite for these failures?"
+answer = "{{fine}}"
+tolerance = 0
+hint = "§4 of the case pack."
+
+[randomize.records]
+kind = "int_range"
+min = 42000
+max = 185000
+
+[randomize.download_count]
+kind = "int_range"
+min = 3
+max = 41
+
+[randomize.exposure_days]
+kind = "int_range"
+min = 4
+max = 23
+
+[randomize.retention_years]
+kind = "int_range"
+min = 3
+max = 9
+
+[randomize.fine]
+kind = "int_range"
+min = 250000
+max = 2400000
