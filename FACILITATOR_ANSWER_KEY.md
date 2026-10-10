@@ -45,6 +45,44 @@
 19. Which MITRE ATT&CK technique covers gathering victim DNS/network info?
    → **T1590**  _(also: T1590.002, T1589, T1598)_
 
+## M2 — Institutional Risk Assessment — Sankofa Rural Bank
+*Day 1 · 17 checks · 17 points · tools: risk analysis, NIST CSF 2.0, FAIR*
+
+1. From the asset inventory, which single asset is the highest-criticality 'crown jewel'?
+   → **core banking**  _(also: core banking database, core banking system, fincore, cbs, the core banking database)_
+2. How many customer records does the pen-test say sit in the reporting DB with world-readable backups?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+3. What CVSS score does the pen-test give the internet-facing VPN (no MFA) finding?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+4. Is that VPN vulnerability listed in the CISA KEV catalogue (actively exploited)?
+   → **yes**  _(also: y, in kev, listed, it is, yes it is)_
+5. Internet-facing + in KEV + on a path to a critical asset — what remediation priority (High/Medium/Low)?
+   → **high**  _(also: h, highest, critical, high priority)_
+6. In the BEC near-miss, which NEW bank account did the 'supplier' email ask payment to go to?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+7. What look-alike domain did that fraudulent email use?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+8. Which single payment control would stop this fraud class every time?
+   → **callback**  _(also: call back, out-of-band, out of band, dual control, dual-control, callback verification, verify on a known number, out-of-band callback, separation of duties)_
+9. What annual loss exposure (ALE, in GHS, most-likely) does the FAIR analysis give for the fraud risk?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+10. What is the CURRENT recovery time (RTO, in hours) for the core banking system?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+11. The board mandates a 4-hour RTO for core banking. Is the current RTO acceptable?
+   → **no**  _(also: n, unacceptable, no it exceeds, exceeds, breach, not acceptable, fails)_
+12. Which draft-register risk is being ACCEPTED with no named owner and no review date (negligent acceptance)?
+   → **r5**  _(also: 5, risk 5, risk r5, #5)_
+13. Which risk has a Mitigate treatment but NO named owner at all?
+   → **r3**  _(also: 3, risk 3, risk r3, #3)_
+14. Which risk has the highest residual rating because its control (desktop antivirus only) does not reduce likelihood or impact?
+   → **r2**  _(also: 2, risk 2, risk r2, #2)_
+15. From the profile (no board agenda item, no named accountability, no approved policy), which CSF 2.0 function is weakest?
+   → **govern**  _(also: govern function, the govern function)_
+16. 'Daily review of a central alert feed' belongs to which CSF 2.0 function?
+   → **detect**  _(also: the detect function)_
+17. The board buys cyber insurance for the residual ransomware risk. Which of the four risk treatments is that?
+   → **transfer**  _(also: transference, risk transfer)_
+
 ## M3 — Network Compromise Investigation — Nmap, NSE & Wireshark
 *Day 2 · 16 checks · 16 points · tools: nmap, nmap NSE, wireshark, tcpdump, netstat*
 

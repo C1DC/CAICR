@@ -1,0 +1,106 @@
+# Sankofa Rural Bank Ltd — Risk Assessment Case Pack
+
+*Prepared for the incoming risk officer. Everything you need to build a
+board-ready risk picture is in this pack. Work it alongside the draft register
+in `draft-risk-register.md`.*
+
+---
+
+## 1. The institution
+
+Sankofa Rural Bank Ltd is a community bank with **11 branches** across the Volta
+and Oti regions and about **85,000 customers**. It offers savings and microloans,
+a **mobile-banking app and USSD service**, and operates a network of **240 mobile-
+money (MoMo) agents**. Its core banking system, **FinCore**, runs on-premises in
+the Ho head office.
+
+- **Regulated by** the Bank of Ghana; holds personal and financial data under the
+  **Data Protection Act 2012 (Act 843)**; as a financial-services operator it is
+  likely in scope for **Critical Information Infrastructure** duties under the
+  **Cybersecurity Act 2020 (Act 1038)**.
+- **People:** 38 staff, **one** IT officer, **no** dedicated security staff.
+- **Board:** meets quarterly; there is **no standing cybersecurity agenda item**,
+  **no named executive accountable** for cyber risk, and the last IT policy was
+  approved **four years ago**.
+
+## 2. Asset inventory
+
+| Asset | What it is | Criticality |
+|-------|-----------|-------------|
+| **FinCore core banking database** | The system of record for every account and transaction | **Critical** |
+| Customer PII store | Names, IDs, phone numbers, balances for 85,000 customers | **Critical** |
+| Mobile / USSD banking gateway | Customer-facing transactions | **Critical** |
+| MoMo agent reconciliation system | Settles 240 agents daily | High |
+| Email / Microsoft 365 | Staff mail, documents | High |
+| Branch workstations | Teller and back-office PCs | Medium |
+| Public website | Brochure site, no transactions | Low |
+
+## 3. Recent incidents & near-misses (last 12 months)
+
+*These are your evidence for **likelihood** — things that have actually happened
+to Sankofa or its peers.*
+
+1. **Phishing wave.** A credential-harvesting campaign hit 14 staff; **3 entered
+   their passwords**. There is **no MFA**, so those accounts were fully exposed
+   until passwords were reset.
+2. **BEC near-miss.** A finance officer received a "supplier" email asking to
+   change the bank account for an overdue invoice to a **new account
+   `__BEC_ACCOUNT__`** at the look-alike domain **`__LOOKALIKE__`**, marked urgent.
+   It was caught only because a teller happened to phone the supplier on the
+   number already on file. No formal callback policy exists.
+3. **Peer ransomware.** A neighbouring rural bank was hit by ransomware last
+   quarter, was **down for six days**, and found its backups had been encrypted
+   too because they sat on the same network.
+4. **Lost laptop.** An **unencrypted** branch laptop holding a customer
+   spreadsheet was lost on a tro-tro and never recovered.
+
+## 4. External assessment (independent pen-test)
+
+*These are your evidence for **vulnerability** — the weaknesses an attacker could
+use.*
+
+- **Internet-facing VPN with no MFA** — the appliance is unpatched; the relevant
+  CVE carries a CVSS of **__VPN_CVSS__** and **is listed in the CISA KEV
+  catalogue** (i.e. actively exploited in the wild right now).
+- **Exposed RDP** (port 3389) on a branch server, reachable from the internet.
+- **No segmentation** — the FinCore admin console is reachable from the general
+  staff LAN; any compromised workstation can reach the crown jewels.
+- **World-readable backups** — a reporting database containing **__RECORDS_AT_RISK__
+  customer records** has backup files exposed without access control.
+
+## 5. Quantified exposure (FAIR analysis)
+
+External analysts ran a **FAIR** quantification on the two biggest risks and
+expressed them in money (loss event frequency × loss magnitude):
+
+- **BEC / payment fraud** — annual loss exposure (ALE), most likely **GHS
+  __FRAUD_ALE__** (range roughly GHS 0.4M – GHS 6M).
+- Ransomware — most likely GHS 1.8M including downtime, before any recovery
+  investment.
+
+These figures let the board compare a security spend against the loss it avoids,
+like any other investment.
+
+## 6. Business impact analysis (BIA) — current recovery capability
+
+*The board has mandated a **4-hour RTO** and **1-hour RPO** for core banking.
+Here is what the bank can actually do today:*
+
+| Service | Current RTO | Current RPO | Board-mandated RTO | Board-mandated RPO |
+|---------|-------------|-------------|--------------------|--------------------|
+| **FinCore core banking** | **__CORE_RTO_CURRENT__ h** | __CORE_RPO_CURRENT__ h | 4 h | 1 h |
+| Mobile / USSD banking | 8 h | 4 h | 2 h | 1 h |
+| MoMo agent reconciliation | 24 h | 24 h | 8 h | 8 h |
+
+Backups run weekly to a NAS **on the same network** as FinCore. Restores have
+**never been tested**.
+
+---
+
+## Your task
+
+Use this pack (and `draft-risk-register.md`) to answer the checks in
+`labctl verify m2`, then produce the two deliverables with `labctl worksheet m2`:
+a **cyber risk register** and a **NIST CSF 2.0 current/target profile** for
+Sankofa Rural Bank. Everything you assert should trace back to evidence in this
+pack.

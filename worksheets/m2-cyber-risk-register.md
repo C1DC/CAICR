@@ -41,6 +41,20 @@ Rating = L × I (1–25).
 |--------|------------------|-------|-------------|---------------|
 | [FILL IN] | | | | |
 
+## Quantify your top risk in money (FAIR)
+
+Pick your #1 risk and turn it into an annual loss exposure a board can weigh
+against a spend. **ALE = Loss Event Frequency × Loss Magnitude.**
+
+- Risk chosen: [ ]
+- Loss Event Frequency (how many successful events per year): [ ]
+- Loss Magnitude per event (GHS): primary [funds/recovery] + secondary [fines/trust] = [ ]
+- **Annual Loss Exposure (ALE) = GHS [ ]** (most likely), range GHS [ ] – [ ]
+- Cost of the control that reduces it: GHS [ ] → **is the spend justified?** [yes/no, why]
+
+> You can do this exercise on the **Sankofa Rural Bank** case (`labctl start m2`)
+> or on your own institution.
+
 ---
 
 ## Worked example (reference — fictional "Adom Microfinance Ltd")

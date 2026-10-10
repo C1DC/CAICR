@@ -1,0 +1,180 @@
+[lab]
+id = "m2"
+module = "M2"
+day = 1
+title = "Institutional Risk Assessment — Sankofa Rural Bank"
+tools = ["risk analysis", "NIST CSF 2.0", "FAIR"]
+estimated_minutes = 120
+briefing = "briefing.md"
+objective = """
+Work a real institution's case pack — its asset inventory, its incident history, \
+an external pen-test, a FAIR loss estimate and a half-built draft risk register — \
+and turn it into a prioritised, board-ready risk picture. You triage the crown \
+jewels, score the exposure with evidence, catch the governance failures in the \
+draft register, read the recovery (RTO/RPO) gap, and map controls to NIST CSF \
+2.0. This is the analytical core of the risk register and CSF profile you then \
+write up as the deliverables."""
+
+# File-based lab: the case pack is in assets/ (personalised to you). No targets.
+
+# ── 1. Assets & exposure ────────────────────────────────────────────────────
+[[check]]
+id = "crown_jewel"
+type = "string_any"
+prompt = "From the asset inventory, which single asset is the highest-criticality 'crown jewel'?"
+accept = ["core banking", "core banking database", "core banking system", "fincore", "cbs", "the core banking database"]
+hint = "What, if breached or down, hurts the bank and its 85,000 customers most?"
+
+[[check]]
+id = "records_exposed"
+type = "numeric"
+prompt = "How many customer records does the pen-test say sit in the reporting DB with world-readable backups?"
+answer = "{{records_at_risk}}"
+tolerance = 0
+hint = "Section 4 of the case pack — the external assessment findings."
+
+[[check]]
+id = "vpn_cvss"
+type = "string_any"
+prompt = "What CVSS score does the pen-test give the internet-facing VPN (no MFA) finding?"
+accept = ["{{vpn_cvss}}"]
+hint = "Section 4 — the VPN finding."
+
+[[check]]
+id = "vpn_kev"
+type = "string_any"
+prompt = "Is that VPN vulnerability listed in the CISA KEV catalogue (actively exploited)?"
+accept = ["yes", "y", "in kev", "listed", "it is", "yes it is"]
+hint = "The case pack states it plainly — and KEV changes how you prioritise."
+
+[[check]]
+id = "vpn_priority"
+type = "string_any"
+prompt = "Internet-facing + in KEV + on a path to a critical asset — what remediation priority (High/Medium/Low)?"
+accept = ["high", "h", "highest", "critical", "high priority"]
+hint = "Context beats the raw score; this one has all three aggravating factors."
+
+# ── 2. The fraud near-miss ──────────────────────────────────────────────────
+[[check]]
+id = "bec_account"
+type = "string"
+prompt = "In the BEC near-miss, which NEW bank account did the 'supplier' email ask payment to go to?"
+answer = "{{bec_account}}"
+hint = "Section 3 — recent incidents & near-misses."
+
+[[check]]
+id = "bec_lookalike"
+type = "string_any"
+prompt = "What look-alike domain did that fraudulent email use?"
+accept = ["{{lookalike}}"]
+hint = "Compare it to the real supplier's domain."
+
+[[check]]
+id = "bec_control"
+type = "string_any"
+prompt = "Which single payment control would stop this fraud class every time?"
+accept = ["callback", "call back", "out-of-band", "out of band", "dual control",
+          "dual-control", "callback verification", "verify on a known number",
+          "out-of-band callback", "separation of duties"]
+hint = "Verify the change on a previously known number — never the one in the email."
+
+# ── 3. Quantified exposure (FAIR) ───────────────────────────────────────────
+[[check]]
+id = "fraud_ale"
+type = "numeric"
+prompt = "What annual loss exposure (ALE, in GHS, most-likely) does the FAIR analysis give for the fraud risk?"
+answer = "{{fraud_ale}}"
+tolerance = 0
+hint = "Section 5 — the quantified exposure. FAIR expresses risk in money."
+
+# ── 4. Recovery capability (BIA) ────────────────────────────────────────────
+[[check]]
+id = "core_rto"
+type = "numeric"
+prompt = "What is the CURRENT recovery time (RTO, in hours) for the core banking system?"
+answer = "{{core_rto_current}}"
+tolerance = 0
+hint = "Section 6 — the business impact analysis table."
+
+[[check]]
+id = "rto_acceptable"
+type = "string_any"
+prompt = "The board mandates a 4-hour RTO for core banking. Is the current RTO acceptable?"
+accept = ["no", "n", "unacceptable", "no it exceeds", "exceeds", "breach", "not acceptable", "fails"]
+hint = "Compare the current RTO to the 4-hour mandate."
+
+# ── 5. Critique the draft risk register ─────────────────────────────────────
+[[check]]
+id = "neg_acceptance"
+type = "string_any"
+prompt = "Which draft-register risk is being ACCEPTED with no named owner and no review date (negligent acceptance)?"
+accept = ["r5", "5", "risk 5", "risk r5", "#5"]
+hint = "Acceptance without accountability is negligence — find the Accept row with blanks."
+
+[[check]]
+id = "missing_owner"
+type = "string_any"
+prompt = "Which risk has a Mitigate treatment but NO named owner at all?"
+accept = ["r3", "3", "risk 3", "risk r3", "#3"]
+hint = "A register without owners is a wish list — find the blank Owner."
+
+[[check]]
+id = "ineffective_control"
+type = "string_any"
+prompt = "Which risk has the highest residual rating because its control (desktop antivirus only) does not reduce likelihood or impact?"
+accept = ["r2", "2", "risk 2", "risk r2", "#2"]
+hint = "Residual should be lower than inherent; find the row where it isn't."
+
+# ── 6. NIST CSF 2.0 ─────────────────────────────────────────────────────────
+[[check]]
+id = "weakest_function"
+type = "string_any"
+prompt = "From the profile (no board agenda item, no named accountability, no approved policy), which CSF 2.0 function is weakest?"
+accept = ["govern", "govern function", "the govern function"]
+hint = "Which function, new in CSF 2.0, is about board accountability, policy and risk appetite?"
+
+[[check]]
+id = "detect_function"
+type = "string_any"
+prompt = "'Daily review of a central alert feed' belongs to which CSF 2.0 function?"
+accept = ["detect", "the detect function"]
+hint = "Noticing when something is wrong."
+
+[[check]]
+id = "insurance_treatment"
+type = "string_any"
+prompt = "The board buys cyber insurance for the residual ransomware risk. Which of the four risk treatments is that?"
+accept = ["transfer", "transference", "risk transfer"]
+hint = "It shifts the financial cost — but not the operational or reputational harm."
+
+[randomize.records_at_risk]
+kind = "int_range"
+min = 18000
+max = 94000
+
+[randomize.vpn_cvss]
+kind = "choice"
+choices = ["9.8", "9.1", "8.8", "8.1", "7.5"]
+
+[randomize.bec_account]
+kind = "digits"
+length = 10
+
+[randomize.lookalike]
+kind = "choice"
+choices = ["sankofa-bank.com", "sankofarural.com", "sankofa-rural.net", "sankofabank-gh.com", "sankofa-ruralbank.com"]
+
+[randomize.fraud_ale]
+kind = "int_range"
+min = 850000
+max = 3400000
+
+[randomize.core_rto_current]
+kind = "int_range"
+min = 18
+max = 72
+
+[randomize.core_rpo_current]
+kind = "int_range"
+min = 6
+max = 48
