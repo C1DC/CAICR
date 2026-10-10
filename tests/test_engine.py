@@ -200,11 +200,17 @@ class TestLessons(unittest.TestCase):
         self.assertNotIn("<svg", t)                  # SVG hidden in terminal
 
     def test_lesson_svg_figures_are_well_formed(self):
-        """Every ~~~svg~~~ figure in the lessons has balanced <svg> tags."""
+        """Every inline SVG diagram in the lessons parses as well-formed XML."""
+        import re, xml.etree.ElementTree as ET
         for mid in LESSON_IDS:
             text = (self.LESSONS / f"{mid}.md").read_text(encoding="utf-8")
             self.assertEqual(text.count("<svg"), text.count("</svg>"),
                              f"{mid}: unbalanced <svg> tags")
+            for m in re.finditer(r"<svg.*?</svg>", text, re.S):
+                try:
+                    ET.fromstring(m.group(0))
+                except ET.ParseError as e:
+                    self.fail(f"{mid}: malformed SVG — {e}")
 
 
 class TestWorksheets(unittest.TestCase):
