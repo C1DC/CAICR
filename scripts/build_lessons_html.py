@@ -129,6 +129,11 @@ details .body{padding:4px 16px 12px}
 .term-bar .dots{display:flex;gap:6px}.term-bar .dots i{width:11px;height:11px;border-radius:50%;background:#ff5f56}
 .term-bar .dots i:nth-child(2){background:#ffbd2e}.term-bar .dots i:nth-child(3){background:#27c93f}
 .term pre{margin:0;border:none;border-radius:0}
+.fig{margin:22px 0;border:1px solid var(--border);border-radius:12px;background:var(--surface2);padding:18px 18px 12px;overflow-x:auto}
+.fig-svg{display:flex;justify-content:center}
+.fig-svg svg{max-width:100%;height:auto;color:var(--fg-mid)}
+.fig-ascii{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12.5px;line-height:1.35;color:var(--fg-mid);white-space:pre;overflow-x:auto;margin:0}
+.fig figcaption{margin-top:12px;text-align:center;font-size:12.5px;color:var(--fg-mid);font-style:italic}
 .tablewrap{overflow:auto}
 @media(max-width:820px){
   .layout{flex-direction:column}

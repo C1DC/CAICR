@@ -78,6 +78,21 @@ def _code_card(info: str, code: str) -> str:
             f"<pre><code>{code}</code></pre></div>")
 
 
+def _figure_html(title: str, raw_lines: list[str]) -> str:
+    """A diagram figure. Body is an ASCII diagram, optionally followed by a line
+    '~~~svg~~~' and inline SVG; the web reader prefers the SVG, falling back to
+    the ASCII rendered in a monospace block."""
+    marker = [ln.strip() for ln in raw_lines]
+    if "~~~svg~~~" in marker:
+        idx = marker.index("~~~svg~~~")
+        svg = "\n".join(raw_lines[idx + 1:]).strip()
+        body = f"<div class='fig-svg'>{svg}</div>"   # SVG passed through raw
+    else:
+        body = "<pre class='fig-ascii'>" + html.escape("\n".join(raw_lines), quote=False) + "</pre>"
+    cap = f"<figcaption>{html.escape(title)}</figcaption>" if title else ""
+    return f"<figure class='fig'>{body}{cap}</figure>"
+
+
 def md_to_html(md: str) -> str:
     lines = _join_list_continuations(md.splitlines())
     out: list[str] = []
@@ -120,17 +135,20 @@ def md_to_html(md: str) -> str:
             out.append(f"<div class='callout callout-{cls}'>{head}<div class='callout-b'>{inner}</div></div>")
             continue
 
-        # ----- fenced code / terminal card -----
+        # ----- fenced code / terminal card / diagram figure -----
         if s.startswith("```"):
             flush_para(); close_list()
-            info = s[3:]
-            buf = []
+            info = s[3:].strip()
+            raw = []
             i += 1
             while i < len(lines) and not lines[i].strip().startswith("```"):
-                buf.append(html.escape(lines[i], quote=False))
+                raw.append(lines[i])
                 i += 1
             i += 1
-            out.append(_code_card(info, "\n".join(buf)))
+            if info.split(" ", 1)[0] == "figure":
+                out.append(_figure_html(info[len("figure"):].strip(), raw))
+            else:
+                out.append(_code_card(info, "\n".join(html.escape(x, quote=False) for x in raw)))
             continue
 
         # ----- tables -----

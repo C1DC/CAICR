@@ -101,11 +101,28 @@ _CALLOUT = {"key": ("🔑", "KEY CONCEPT", ui.GOLD if hasattr(ui, "GOLD") else u
             "outcome": ("🎯", "LEARNING OUTCOME", ui.GREEN), "quote": ("❝", "", ui.GREY)}
 
 
+def _render_figure(title: str, buf: list[str]) -> None:
+    """Render a diagram figure's ASCII part (everything before a ~~~svg~~~
+    marker) as a cyan diagram block. The SVG part is for the web reader only."""
+    ascii_lines: list[str] = []
+    for ln in buf:
+        if ln.strip() == "~~~svg~~~":
+            break
+        ascii_lines.append(ln)
+    print()
+    if title:
+        print(f"  {ui.CYAN}{ui.BOLD}▦ {title}{ui.RESET}")
+    for c in ascii_lines:
+        print("  " + ui.CYAN + c + ui.RESET)
+    print()
+
+
 def render(md: str) -> None:
     import re as _re
     lines = _join_list_continuations(md.splitlines())
     i = 0
     in_code = False
+    in_figure = False
     code_buf: list[str] = []
     code_title = ""
     para: list[str] = []
@@ -133,19 +150,28 @@ def render(md: str) -> None:
             i += 1
             continue
 
-        # fenced code / terminal card
+        # fenced code / terminal card / diagram figure
         if stripped.startswith("```"):
             flush()
             if in_code:
-                if code_title:
-                    print(f"  {ui.DIM}{code_title}{ui.RESET}")
-                print(ui.GREY + "  ┌" + "─" * (_WIDTH - 4) + ui.RESET)
-                for c in code_buf:
-                    print("  " + ui.GREY + "│ " + ui.GREEN + c + ui.RESET)
-                print(ui.GREY + "  └" + "─" * (_WIDTH - 4) + ui.RESET)
-                code_buf = []; code_title = ""
+                if in_figure:
+                    _render_figure(code_title, code_buf)
+                else:
+                    if code_title:
+                        print(f"  {ui.DIM}{code_title}{ui.RESET}")
+                    print(ui.GREY + "  ┌" + "─" * (_WIDTH - 4) + ui.RESET)
+                    for c in code_buf:
+                        print("  " + ui.GREY + "│ " + ui.GREEN + c + ui.RESET)
+                    print(ui.GREY + "  └" + "─" * (_WIDTH - 4) + ui.RESET)
+                code_buf = []; code_title = ""; in_figure = False
             else:
-                code_title = stripped[3:].strip()
+                title = stripped[3:].strip()
+                if title.split(" ", 1)[0] == "figure":
+                    in_figure = True
+                    code_title = title[len("figure"):].strip()
+                else:
+                    in_figure = False
+                    code_title = title
             in_code = not in_code
             i += 1
             continue

@@ -179,6 +179,33 @@ class TestLessons(unittest.TestCase):
             for heading in ("Key takeaways", "Check yourself", "Glossary"):
                 self.assertIn(heading, text, f"{mid} missing '{heading}'")
 
+    def test_figure_block_renders_in_both_engines(self):
+        import io, contextlib
+        from engine import mdrender
+        from engine.mdhtml import md_to_html
+        md = ("```figure The Kill Chain\n"
+              "Recon -> Deliver -> C2\n"
+              "~~~svg~~~\n"
+              '<svg viewBox="0 0 10 10"><rect width="10" height="10"/></svg>\n'
+              "```\n")
+        h = md_to_html(md)
+        self.assertIn("<figure class='fig'>", h)
+        self.assertIn("<svg", h)              # raw SVG passed through
+        self.assertNotIn("&lt;svg", h)        # not escaped
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            mdrender.render(md)
+        t = buf.getvalue()
+        self.assertIn("Recon -> Deliver -> C2", t)   # ASCII shown
+        self.assertNotIn("<svg", t)                  # SVG hidden in terminal
+
+    def test_lesson_svg_figures_are_well_formed(self):
+        """Every ~~~svg~~~ figure in the lessons has balanced <svg> tags."""
+        for mid in LESSON_IDS:
+            text = (self.LESSONS / f"{mid}.md").read_text(encoding="utf-8")
+            self.assertEqual(text.count("<svg"), text.count("</svg>"),
+                             f"{mid}: unbalanced <svg> tags")
+
 
 class TestWorksheets(unittest.TestCase):
     WS = ROOT / "worksheets"
