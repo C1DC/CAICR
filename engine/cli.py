@@ -319,6 +319,27 @@ def cmd_learn(args) -> int:
     return 0
 
 
+def cmd_reference(args) -> int:
+    """The reference compendium: framework cards, Ghana-law at-a-glance, glossary."""
+    from . import mdrender, reference
+    topics = reference.discover()
+    if not args.topic:
+        ui.banner("CAIC CyberLab — reference compendium")
+        rows = [[f"{ui.BOLD}{t['id']}{ui.RESET}", t["title"], t["desc"]] for t in topics]
+        ui.table(rows, ["TOPIC", "TITLE", "WHAT'S IN IT"])
+        print()
+        ui.dim("  labctl reference frameworks   the framework quick-cards")
+        ui.dim("  labctl reference glossary     every key term, A–Z")
+        return 0
+    tid = args.topic.lower()
+    md = reference.load(tid)
+    if md is None:
+        ui.error(f"no reference topic '{tid}' (try: labctl reference)")
+        return 1
+    mdrender.render(md)
+    return 0
+
+
 def cmd_worksheet(args) -> int:
     """List deliverable templates, or copy a module's templates into the
     student's own working folder so they can fill them in."""
@@ -600,6 +621,8 @@ def build_parser() -> argparse.ArgumentParser:
     learn.add_argument("module", nargs="?", help="module id, e.g. m1 (omit to list)")
     ws = add("worksheet", cmd_worksheet, "get a module's deliverable template(s)", lab="none")
     ws.add_argument("module", nargs="?", help="module id, e.g. m2 (omit to list)")
+    rf = add("reference", cmd_reference, "reference cards: frameworks, Ghana law, glossary", lab="none")
+    rf.add_argument("topic", nargs="?", help="frameworks | ghana-law | glossary (omit to list)")
     qz = add("quiz", cmd_quiz, "take a module knowledge-check quiz", lab="none")
     qz.add_argument("module", nargs="?", help="module id, e.g. m1 (omit to list)")
     add("exam", cmd_exam, "sit the final exam", lab="none")

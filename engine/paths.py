@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parent.parent
 LABS_DIR = ROOT / "labs"
 LESSONS_DIR = ROOT / "lessons"
 WORKSHEETS_DIR = ROOT / "worksheets"
+REFERENCE_DIR = ROOT / "reference"
 ASSESSMENT_FILE = ROOT / "assessment" / "exams.toml"
 
 # Per-student mutable state and work, kept out of the (possibly read-only,

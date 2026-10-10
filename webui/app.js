@@ -37,6 +37,7 @@ function paletteItems() {
     { t: "Live Terminal", s: "Real Kali shell", ic: "▶_", go: () => location.hash = "terminal" },
     { t: "Tools & Materials", s: "Reference", ic: "◉", go: () => location.hash = "materials" },
     { t: "Commands", s: "Cheat-sheet", ic: "⌨", go: () => location.hash = "commands" },
+    { t: "Reference", s: "Frameworks, law, glossary", ic: "❖", go: () => location.hash = "reference" },
     { t: "Assessment", s: "Quizzes, exam & grade", ic: "✓", go: () => location.hash = "assessment" },
     { t: "Final exam", s: "Counts for 25%", ic: "✓", k: "exam", go: () => location.hash = "assessment/final" },
     { t: "Progress", s: "Your scores", ic: "▤", go: () => location.hash = "progress" },
@@ -50,6 +51,7 @@ function paletteItems() {
     t: t.name, s: t.cat + " · tool", ic: "◉", k: "tool",
     go: () => { location.hash = "materials"; setTimeout(() => { const el = [...document.querySelectorAll(".toolrow summary")].find(s => s.textContent.trim().startsWith(t.name)); if (el) { el.parentElement.open = true; el.scrollIntoView({ block: "center" }); } }, 140); }
   }));
+  (BOOT.reference || []).forEach(t => items.push({ t: t.title, s: "Reference", ic: "❖", k: "ref", go: () => location.hash = "reference/" + t.id }));
   (BOOT.commands || []).forEach(c => items.push({ t: c.cmd, s: c.desc, ic: "⌨", k: "copy", go: () => copy(c.cmd) }));
   (BOOT.linux || []).forEach(c => items.push({ t: c.cmd, s: c.desc + " · Linux", ic: "▶_", k: "copy", go: () => copy(c.cmd) }));
   return items;
@@ -692,6 +694,42 @@ async function vQuiz(qid) {
   };
 }
 
+/* ---------- reference compendium ---------- */
+async function vReference(arg) {
+  setActive("reference");
+  const topics = BOOT.reference || [];
+  if (!arg) {
+    crumb([{ t: "Reference" }]);
+    view.innerHTML = `
+      <p class="muted">Quick-reference cards you'll come back to all week — frameworks, the Ghana laws, and every key term. Also in the terminal: <code>labctl reference</code>.</p>
+      <div class="grid cards-2">${topics.map(t => `
+        <div class="card click" data-ref="${t.id}">
+          <strong>${esc(t.title)}</strong>
+          <div class="dim" style="margin-top:6px;font-size:13px">${esc(t.desc)}</div>
+        </div>`).join("") || "<p class='dim'>No reference material installed.</p>"}</div>`;
+    view.querySelectorAll("[data-ref]").forEach(c => c.onclick = () => { location.hash = "reference/" + c.dataset.ref; });
+    return;
+  }
+  const meta = topics.find(t => t.id === arg);
+  crumb([{ t: "Reference", href: "#reference" }, { t: meta ? meta.title : arg }]);
+  view.innerHTML = `<div class="loading">Loading…</div>`;
+  let d; try { d = await api("/api/reference/" + arg); } catch (e) { view.innerHTML = `<div class="card">${esc(e.message)}</div>`; return; }
+  view.innerHTML = `
+    <div class="row" style="justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px">
+      <input id="refSearch" placeholder="Filter this page…" autocomplete="off"
+        style="flex:1;max-width:340px;padding:9px 12px;background:var(--panel2);border:1px solid var(--border2);border-radius:9px;color:var(--fg);font-size:14px">
+      <a class="ghost" href="#reference">← All references</a>
+    </div>
+    <div class="content refbody">${d.html}</div>`;
+  const search = $("#refSearch"), body = view.querySelector(".refbody");
+  if (search) search.oninput = () => {
+    const q = search.value.toLowerCase();
+    body.querySelectorAll("li, tr, p").forEach(el => {
+      el.style.display = (!q || el.textContent.toLowerCase().includes(q)) ? "" : "none";
+    });
+  };
+}
+
 /* ---------- refresh summary after grading ---------- */
 function refreshSummary() {
   BOOT.summary.labsComplete = BOOT.modules.filter(m => m.complete).length;
@@ -711,6 +749,7 @@ async function route() {
     if (v === "terminal") return vTerminal();
     if (v === "materials") return vMaterials();
     if (v === "commands") return vCommands();
+    if (v === "reference") return vReference(arg);
     if (v === "assessment") return vAssessment(arg);
     if (v === "progress") return vProgress();
     vDashboard();

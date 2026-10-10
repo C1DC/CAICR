@@ -93,6 +93,17 @@ shared. When you reach **70% overall**, `./labctl certificate` writes a branded
 certificate (open it and Print → Save as PDF). You can do all of this in the web
 app too — open the **Assessment** page with `./labctl serve`.
 
+### Reference you'll keep coming back to
+
+```
+./labctl reference              # list the reference cards
+./labctl reference frameworks   # Kill Chain, ATT&CK, CSF 2.0, OWASP LLM Top 10…
+./labctl reference ghana-law    # Act 843 & Act 1038 at a glance
+./labctl reference glossary     # every key term, A–Z
+```
+
+The same cards are in the web app's **Reference** page (with a filter box).
+
 ---
 
 ## The golden safety rule

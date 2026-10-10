@@ -15,7 +15,7 @@ import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
-from . import __version__, certificate, dockerctl, grade as grading, paths, quiz, state, verify
+from . import __version__, certificate, dockerctl, grade as grading, paths, quiz, reference, state, verify
 from .course import COMMANDS, COURSE_MAP, DAY_TITLES, LINUX_COMMANDS, TOOLS
 from .manifest import ManifestError, discover_labs, load_one
 from .mdhtml import md_to_html
@@ -144,6 +144,7 @@ def _bootstrap() -> dict:
         "tools": TOOLS,
         "commands": [{"group": g, "cmd": c, "desc": d} for g, c, d in COMMANDS],
         "linux": [{"group": g, "cmd": c, "desc": d} for g, c, d in LINUX_COMMANDS],
+        "reference": reference.discover(),
         "grade": grading.compute(),
         "summary": {"labsComplete": done, "totalLabs": len(gradable),
                     "totalModules": len(mods),
@@ -295,6 +296,15 @@ class Handler(BaseHTTPRequestHandler):
                 sheets = [{"name": w.name, "html": md_to_html(w.read_text(encoding="utf-8"))}
                           for w in sorted(paths.WORKSHEETS_DIR.glob(f"{mid}-*.md"))]
                 return self._json({"id": mid, "sheets": sheets})
+            if p == "/api/reference":
+                return self._json({"topics": reference.discover()})
+            if p.startswith("/api/reference/"):
+                tid = p.rsplit("/", 1)[-1]
+                md = reference.load(tid)
+                if md is None:
+                    return self._err("no such reference topic", 404)
+                title = next((t["title"] for t in reference.discover() if t["id"] == tid), tid)
+                return self._json({"id": tid, "title": title, "html": md_to_html(md)})
             if p.startswith("/api/lab/") and p.endswith("/status"):
                 lab = load_one(p.split("/")[3])
                 return self._json(_lab_runtime(lab))

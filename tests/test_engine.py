@@ -330,6 +330,30 @@ class TestTerminal(unittest.TestCase):
         self.assertEqual(got, payload)
 
 
+class TestReference(unittest.TestCase):
+    def test_topics_discover(self):
+        from engine import reference
+        ids = {t["id"] for t in reference.discover()}
+        self.assertEqual(ids, {"frameworks", "ghana-law", "glossary"})
+
+    def test_topics_render_in_both_engines(self):
+        import io, contextlib
+        from engine import reference, mdrender
+        from engine.mdhtml import md_to_html
+        for t in reference.discover():
+            md = reference.load(t["id"])
+            self.assertTrue(md and len(md) > 400, f"{t['id']} too short")
+            self.assertIn("<", md_to_html(md))               # HTML renders
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                mdrender.render(md)
+            self.assertGreater(len(buf.getvalue()), 400, f"{t['id']} terminal render short")
+
+    def test_missing_topic_returns_none(self):
+        from engine import reference
+        self.assertIsNone(reference.load("does-not-exist"))
+
+
 class TestAssessment(unittest.TestCase):
     def setUp(self):
         # Redirect per-student state to a throwaway file so grading these
