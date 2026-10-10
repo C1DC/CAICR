@@ -54,6 +54,19 @@ and the single most urgent action.]
 - **Failures:** [e.g. no dual-control callback on a known number before a bank-detail change]
 - **Process fix:** [who initiates vs approves; mandatory out-of-band callback to a
   previously known number for any bank-detail change; thresholds; logging]
+- **Harden our own domain:** our current DMARC policy is [none/quarantine/reject];
+  target [p=reject] by [date] so our brand can't be spoofed at a counterparty.
+
+## 6b. Recall & report (if money moved — the golden hour)
+
+*In order, and in parallel where possible:*
+
+- [ ] Called **our bank's fraud desk** to freeze/recall — time: [ ]
+- [ ] **Receiving bank / telco** asked to freeze the account/wallet — ref: [ ]
+- [ ] Reported to **CSA / CERT-GH** (Act 1038) — ref: [ ]
+- [ ] **Bank of Ghana** notified (if a regulated obligation) — [ ]
+- [ ] **Police Cybercrime Unit / EOCO** — case ref: [ ]
+- [ ] Evidence preserved (emails with full headers, attachment, this brief)
 
 **ATT&CK:** T1566 (Phishing) / T1656 (Impersonation).
 
