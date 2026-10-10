@@ -63,6 +63,19 @@
 | 3 | [FILL IN] | [e.g. DNS monitoring/logging] | | |
 | 4 | [FILL IN] | [e.g. replace FTP with SFTP] | | |
 
+## 5b. Detection design (how you'd catch it next time)
+
+*Prevention fails eventually; detection is how you catch the next attempt in
+minutes. For each stage, name the log/signal and where it comes from.*
+
+| Attack stage | Signal to detect it | Log source / tool |
+|--------------|---------------------|-------------------|
+| Recon scan | [e.g. burst of SYNs from one host] | [IDS / firewall logs] |
+| C2 beacon | [e.g. repeated fixed-interval dynamic-DNS lookups] | [DNS query logging + IDS rule] |
+| Exfiltration | [e.g. large sustained outbound to a new IP] | [NetFlow / Wireshark Conversations] |
+
+**The one log source I'd fund first, and why:** [ ]
+
 ## 6. One-line summary for leadership (BLUF)
 
 > [Business impact of what's exposed + the single most urgent fix, in plain
