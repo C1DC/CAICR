@@ -1,78 +1,104 @@
-# M4 — Vulnerability Management & SOC Operations
+**Assess a leaky web server, loot and crack what you find, then turn the alert flood into one incident.**  ·  Day 2 · ~2.5 h · 16 graded tasks
 
-**Scenario.** You are the security engineer *and* the SOC analyst for Acme
-Payroll. A web server is exposed, a backup was left world-readable, and the SIEM
-is lighting up. Assess the server, loot and crack what you find, prove the weak
-credentials, and turn the alert flood into one clear incident.
+::: note | What this lab is
+You are the security engineer *and* the SOC analyst for Acme Payroll. A web
+server is exposed, a database backup was left world-readable, and the SIEM is
+lighting up. You assess the server (Nmap/whatweb/Nikto/gobuster), **loot** a
+leaked backup and **crack** its unsalted-MD5 hashes (hashcat/John), prove a weak
+SSH credential (Hydra), and triage a realistic **Wazuh** alert feed into one
+correlated incident. The attacks are taught so you understand why the controls
+(salting, MFA, correlation) are non-negotiable.
+:::
 
-Targets: `10.13.4.10` (web) · `10.13.4.20` (ssh). Evidence in `assets/`:
-`lab-wordlist.txt`, `lab_hashes.txt`, `wazuh-alerts.json`.
+## What's running
 
-> ⚠ Hydra, hashcat and John are run **only** against the lab targets and the
-> provided hashes. Anywhere else is a criminal offence (Act 1038).
+- **Two live targets:** `10.13.4.10` (leaky Apache web server), `10.13.4.20`
+  (SSH host with a weak account — the authorised Hydra target).
+- **Evidence files (`assets/`):** `lab-wordlist.txt`, `wazuh-alerts.json`, and the
+  looted `db_dump.sql` / `config.php.bak` you pull from the web server.
 
----
+## How to use this lab
 
-## Part 1 — Assess & fuzz the web server
+**In the GUI (this page):**
+1. Click **Start**; wait for **● running** on both targets.
+2. In the **Terminal** tab, work the five parts below.
+3. Enter findings in the **Verify** panel → **Submit & grade**.
+4. **Reset** / **Stop** as needed.
 
-```
-$ nmap -sV -p80 10.13.4.10                 # server software + version
-$ whatweb http://10.13.4.10                # web technology fingerprint
-$ nikto -h http://10.13.4.10               # known issues, risky files, headers
-$ gobuster dir -u http://10.13.4.10 -w /usr/share/wordlists/dirb/common.txt
-$ curl http://10.13.4.10/backup/           # directory listing is ON...
-$ curl http://10.13.4.10/config.php.bak    # ...and a config backup leaks creds
-```
+**Prefer the terminal?** `labctl start m4` → investigate → `labctl verify m4`.
 
-Find the exposed **admin path**, the **leaked database backup** under `/backup/`,
-and the **database password** in the config backup.
+::: warning | The guards — read before you start
+- Hydra, hashcat and John are run **only** against `10.13.4.10` / `10.13.4.20`
+  and the **provided** hashes. Using them anywhere else is a criminal offence
+  (Act 1038).
+- The admin password (and its MD5 hash) and the DB password are **randomised to
+  you** — crack and report *your own* values.
+- These cracks are deliberately trivial (a tiny wordlist, unsalted MD5) so you
+  *see* why the real controls matter — this is not how you'd attack production.
+:::
 
-## Part 2 — Loot & crack
+## The mission — step by step
 
-Open `db_dump.sql`. The passwords are stored as **unsalted MD5** — the point of
-the exercise. Extract the hashes and crack them offline:
+### Part 1 — Assess & fuzz the web server
 
-```
-$ curl -s http://10.13.4.10/backup/db_dump.sql     # read the dump
-$ # put the 32-char hashes in hashes.txt, then:
-$ hashcat -m 0 -a 0 hashes.txt assets/lab-wordlist.txt --potfile-disable
-$ hashcat -m 0 hashes.txt --show
-$ # or with John:
-$ john --format=raw-md5 --wordlist=assets/lab-wordlist.txt hashes.txt ; john --show ...
-```
-
-Recover **admin**'s and the **backup** service account's plaintext passwords.
-(In the real world you'd use `/usr/share/wordlists/rockyou.txt` — the lab ships a
-tiny list so it cracks instantly offline.)
-
-## Part 3 — Prove the weak SSH credential (Hydra)
-
-```
-$ hydra -l labuser -P assets/lab-wordlist.txt ssh://10.13.4.20
-```
-
-## Part 4 — Triage & correlate the SOC feed
-
-```
-$ jq -r '.[] | "\(.rule.level)\t\(.rule.description)"' assets/wazuh-alerts.json | sort -rn
-$ jq -r '.[].data.srcip // empty' assets/wazuh-alerts.json | sort | uniq -c | sort -rn
-$ jq '[.[].rule.level] | max' assets/wazuh-alerts.json
+```Terminal
+nmap -sV -p80 10.13.4.10                 # server software + version
+whatweb http://10.13.4.10                # web technology fingerprint
+nikto -h http://10.13.4.10               # risky files, stale software, headers
+gobuster dir -u http://10.13.4.10 -w /usr/share/wordlists/dirb/common.txt
+curl http://10.13.4.10/backup/           # directory listing is ON…
+curl http://10.13.4.10/config.php.bak    # …and a config backup leaks the DB password
 ```
 
-Reconstruct the chain from one source IP: **brute force → web scan → successful
-login → sudo to root → persistence (cron) → exfiltration.** Identify the highest
-severity, whether the attacker got in, and how they persisted.
+### Part 2 — Loot & crack
 
-## Part 5 — Deliver
+The dump stores passwords as **unsalted MD5** (the point of the exercise):
 
-In the worksheet, produce a **remediation register** (prioritise by CVSS + KEV +
-exposure) and a **SOC triage ticket** for the correlated incident.
-
----
-
-## Grade yourself
-
+```Terminal
+curl -s http://10.13.4.10/backup/db_dump.sql     # read the dump
+# put the 32-char hashes in hashes.txt, then crack offline:
+hashcat -m 0 -a 0 hashes.txt assets/lab-wordlist.txt --potfile-disable
+hashcat -m 0 hashes.txt --show
+# or:  john --format=raw-md5 --wordlist=assets/lab-wordlist.txt hashes.txt
 ```
-$ labctl verify m4
-$ labctl worksheet m4
+
+Recover **admin**'s and the **backup** account's plaintext passwords.
+
+### Part 3 — Prove the weak SSH credential (Hydra)
+
+```Terminal
+hydra -l labuser -P assets/lab-wordlist.txt ssh://10.13.4.20
 ```
+
+### Part 4 — Triage & correlate the SOC feed
+
+```Terminal
+jq -r '.[] | "\(.rule.level)\t\(.rule.description)"' assets/wazuh-alerts.json | sort -rn
+jq -r '.[].data.srcip // empty' assets/wazuh-alerts.json | sort | uniq -c | sort -rn
+jq '[.[].rule.level] | max' assets/wazuh-alerts.json
+```
+
+Reconstruct the chain from **one source IP**: brute force → web scan → successful
+login → sudo to root → persistence (cron). Find the highest severity, whether the
+attacker got in, and how they persisted.
+
+### Part 5 — Deliver
+
+Produce a **remediation register** (prioritise by CVSS + KEV + exposure) and a
+**SOC triage ticket** for the correlated incident.
+
+## What you'll be graded on
+
+16 checks in the **Verify** panel across assessment, cracking and triage. Then:
+
+```Terminal
+labctl verify m4
+labctl worksheet m4    # remediation register + SOC case ticket
+```
+
+::: key | Tips
+- Prioritise by **context**, not CVSS alone: internet-facing + in KEV + critical
+  asset wins, even at a lower score.
+- Ten alerts from one IP are **one incident**, not ten — correlation is the skill.
+- The one control that makes every cracked password harmless: **MFA**.
+:::

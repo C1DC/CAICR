@@ -79,14 +79,17 @@ def cmd_list(_args) -> int:
 
 
 def cmd_info(args) -> int:
+    from . import mdrender
     lab = load_one(args.lab)
     ui.banner(f"{lab.module} — {lab.title}")
-    ui.header("Briefing")
-    if lab.objective:
-        print(f"  {lab.objective}\n")
     if lab.briefing_file:
-        print(lab.briefing_file.read_text(encoding="utf-8"))
+        # Render the briefing with the same engine as the lessons, so its
+        # callouts, guards and terminal cards look right in the terminal too.
+        mdrender.render(lab.briefing_file.read_text(encoding="utf-8"))
     else:
+        ui.header("Briefing")
+        if lab.objective:
+            print(f"  {lab.objective}\n")
         ui.dim("  (no briefing.md for this lab)")
     if lab.targets:
         ui.header("Targets (isolated — never scan outside this subnet)")
