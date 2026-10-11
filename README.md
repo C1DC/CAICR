@@ -5,6 +5,22 @@ The learning environment for the **Professional Certificate in Cybersecurity, AI
 & Digital Resilience** — a 5-day intensive course run by KAIPTC (Kofi Annan
 International Peacekeeping Training Centre), Accra, Ghana.
 
+## Install on a student Kali PC (from GitHub)
+
+On a fresh Kali machine with **Docker** installed and internet available once:
+
+```
+git clone https://github.com/C1DC/CAICR.git
+cd CAICR
+./labctl doctor      # check Docker + tools are ready
+./labctl prep        # build & cache every lab image once (needs internet this one time)
+./start.sh           # launch the web app in the browser
+```
+
+After `labctl prep` the labs run **fully offline**. For classrooms with no
+per-machine internet, build the images on one machine and distribute them with
+the offline bundle — see **`OFFLINE_ROLLOUT.md`**.
+
 ## The one thing to run
 
 ```
