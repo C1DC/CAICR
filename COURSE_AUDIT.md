@@ -14,8 +14,8 @@ Five intensive days · 11 modules · *Generated 2026-10-11*
 |---------|-------|
 | Modules (incl. Day-1 orientation) | 12 |
 | Teaching lessons | 12 |
-| Total lesson word count | ~53,017 words |
-| In-lesson diagrams (SVG + ASCII) | 26 |
+| Total lesson word count | ~55,476 words |
+| In-lesson diagrams (SVG + ASCII) | 28 |
 | Hands-on graded labs | 11 |
 | Total graded lab tasks (checks) | 164 |
 | Deliverable worksheet templates | 15 |
@@ -31,7 +31,7 @@ Every lab is **per-student randomised** (each student gets unique flags, credent
 
 | Module | Day | Title | Lesson | Lab (graded tasks) | Deliverables |
 |--------|-----|-------|-------:|--------------------|--------------|
-| **M0** | 1 | Orientation, Kali Linux & the Command Line | 3,454 w | — | — |
+| **M0** | 1 | Orientation, Kali Linux & the Command Line | 5,913 w | — | — |
 | **RT** | 1 | Red Team Primer — Your First Hack | 2,330 w | 10 tasks | 1 template(s) |
 | **M1** | 1 | Threat Landscape & Cyber Threat Intelligence | 5,617 w | 19 tasks | 1 template(s) |
 | **M2** | 1 | Institutional Cyber Risk & Digital Resilience | 3,253 w | 17 tasks | 2 template(s) |
@@ -51,10 +51,15 @@ Every lab is **per-student randomised** (each student gets unique flags, credent
 ### M0 — Orientation, Kali Linux & the Command Line
 *Day 1*
 
-**Format:** ~3,454-word lesson · 1 diagram(s) · 9 teaching callouts · 19 worked command/example blocks.
+**Format:** ~5,913-word lesson · 3 diagram(s) · 14 teaching callouts · 19 worked command/example blocks.
 
 **Topics taught (the lesson's own chapters):**
 
+- What Cybersecurity Really Is — for an Organisation
+- Cybersecurity, AI & Digital Resilience — the Three Pillars
+- Why This Course — What You and Your Organisation Gain
+- The Language You Need
+- How Attacks Really Happen — and the Tools Attackers Use
 - How This Course Works
 - Rules of Engagement — Read Carefully
 - Your Workstation: Kali Linux
