@@ -2,7 +2,7 @@
 
 **Professional Certificate in Cybersecurity, AI & Digital Resilience**  
 Kofi Annan International Peacekeeping Training Centre (KAIPTC) · Cyber1Defense Communication Ltd  
-Five intensive days · 11 modules · *Generated 2026-10-10*
+Five intensive days · 11 modules · *Generated 2026-10-11*
 
 > **For external review.** This document is **auto-generated from the course repository** by `scripts/course_audit.py`. Every figure — word counts, topic lists, lab tasks, ATT&CK technique IDs, question counts — is read directly from the teaching files, lab manifests and assessment bank. It is not hand-written marketing; it can be regenerated and independently verified against the source at any time (see *How to verify* at the end).
 
@@ -14,7 +14,7 @@ Five intensive days · 11 modules · *Generated 2026-10-10*
 |---------|-------|
 | Modules (incl. Day-1 orientation) | 11 |
 | Teaching lessons | 11 |
-| Total lesson word count | ~50,577 words |
+| Total lesson word count | ~50,687 words |
 | In-lesson diagrams (SVG + ASCII) | 25 |
 | Hands-on graded labs | 10 |
 | Total graded lab tasks (checks) | 154 |
@@ -35,8 +35,8 @@ Every lab is **per-student randomised** (each student gets unique flags, credent
 | **M1** | 1 | Threat Landscape & Cyber Threat Intelligence | 5,617 w | 19 tasks | 1 template(s) |
 | **M2** | 1 | Institutional Cyber Risk & Digital Resilience | 3,253 w | 17 tasks | 2 template(s) |
 | **M3** | 2 | Network, Endpoint & Identity Security | 6,654 w | 16 tasks | 1 template(s) |
-| **M4** | 2 | Vulnerability Management & SOC Operations | 5,504 w | 16 tasks | 1 template(s) |
-| **M5** | 3 | Cyber Fraud, BEC & Mobile Money Security | 4,956 w | 13 tasks | 1 template(s) |
+| **M4** | 2 | Vulnerability Management & SOC Operations | 5,580 w | 16 tasks | 1 template(s) |
+| **M5** | 3 | Cyber Fraud, BEC & Mobile Money Security | 4,990 w | 13 tasks | 1 template(s) |
 | **M6** | 3 | Digital Forensics & Incident Response | 5,174 w | 14 tasks | 2 template(s) |
 | **M7** | 4 | AI Security, Deepfakes & Emerging Threats | 4,921 w | 12 tasks | 1 template(s) |
 | **M8** | 4 | Data Protection, Privacy & Compliance | 3,778 w | 16 tasks | 2 template(s) |
@@ -235,7 +235,7 @@ Graded tasks (16 — the student is assessed on each; «your value» marks a per
 ### M4 — Vulnerability Management & SOC Operations
 *Day 2*
 
-**Format:** ~5,504-word lesson · 3 diagram(s) · 13 teaching callouts · 8 worked command/example blocks.
+**Format:** ~5,580-word lesson · 3 diagram(s) · 13 teaching callouts · 8 worked command/example blocks.
 
 **Topics taught (the lesson's own chapters):**
 
@@ -290,7 +290,7 @@ Graded tasks (16 — the student is assessed on each; «your value» marks a per
 ### M5 — Cyber Fraud, BEC & Mobile Money Security
 *Day 3*
 
-**Format:** ~4,956-word lesson · 2 diagram(s) · 14 teaching callouts · 7 worked command/example blocks.
+**Format:** ~4,990-word lesson · 2 diagram(s) · 14 teaching callouts · 7 worked command/example blocks.
 
 **Topics taught (the lesson's own chapters):**
 
@@ -644,4 +644,4 @@ Nothing here needs to be taken on trust. An external reviewer can confirm every 
 4. **Validate the whole suite:** `python3 scripts/dry_run.py` brings every lab up, solves it against the per-student answer key, and tears it down (expect *ALL LABS PASS*); `python3 -m unittest discover -s tests` runs the engine test suite.
 5. **See the model answers:** `scripts/answer_key.py` writes the facilitator answer key for every lab and the assessment.
 
-*This audit is generated from the repository and reflects its exact state on 2026-10-10.*
+*This audit is generated from the repository and reflects its exact state on 2026-10-11.*
