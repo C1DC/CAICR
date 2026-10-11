@@ -1,0 +1,24 @@
+# Red Team Primer — "Operation First Blood" target.
+# One internal server exposing web (:80) + SSH (:22) with a leaked credential
+# and a sudo misconfiguration, for a full guided intrusion chain.
+# No ports published to the host LAN; reachable only on the private range.
+name: caic-rt
+
+services:
+  intranet:
+    build: ./target
+    image: caic-rtweb:1.0
+    environment:
+      CAIC_SSH_PASS: ${CAIC_SSH_PASS:-Spring2024!}
+      CAIC_USER_FLAG: ${CAIC_USER_FLAG:-FLAG{user_demo}}
+      CAIC_ROOT_FLAG: ${CAIC_ROOT_FLAG:-FLAG{root_demo}}
+    networks: { range: { ipv4_address: 10.13.2.10 } }
+    restart: unless-stopped
+
+networks:
+  range:
+    name: caic_rt_range
+    ipam:
+      config:
+        - subnet: 10.13.2.0/24
+          gateway: 10.13.2.1

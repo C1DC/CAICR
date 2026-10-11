@@ -12,13 +12,13 @@ Five intensive days · 11 modules · *Generated 2026-10-11*
 
 | Measure | Count |
 |---------|-------|
-| Modules (incl. Day-1 orientation) | 11 |
-| Teaching lessons | 11 |
-| Total lesson word count | ~50,687 words |
-| In-lesson diagrams (SVG + ASCII) | 25 |
-| Hands-on graded labs | 10 |
-| Total graded lab tasks (checks) | 154 |
-| Deliverable worksheet templates | 14 |
+| Modules (incl. Day-1 orientation) | 12 |
+| Teaching lessons | 12 |
+| Total lesson word count | ~53,017 words |
+| In-lesson diagrams (SVG + ASCII) | 26 |
+| Hands-on graded labs | 11 |
+| Total graded lab tasks (checks) | 164 |
+| Deliverable worksheet templates | 15 |
 | Module knowledge-check quizzes | 11 (33 questions) |
 | Final exam questions | 12 |
 | Baseline diagnostic questions | 6 |
@@ -32,6 +32,7 @@ Every lab is **per-student randomised** (each student gets unique flags, credent
 | Module | Day | Title | Lesson | Lab (graded tasks) | Deliverables |
 |--------|-----|-------|-------:|--------------------|--------------|
 | **M0** | 1 | Orientation, Kali Linux & the Command Line | 3,454 w | — | — |
+| **RT** | 1 | Red Team Primer — Your First Hack | 2,330 w | 10 tasks | 1 template(s) |
 | **M1** | 1 | Threat Landscape & Cyber Threat Intelligence | 5,617 w | 19 tasks | 1 template(s) |
 | **M2** | 1 | Institutional Cyber Risk & Digital Resilience | 3,253 w | 17 tasks | 2 template(s) |
 | **M3** | 2 | Network, Endpoint & Identity Security | 6,654 w | 16 tasks | 1 template(s) |
@@ -65,6 +66,52 @@ Every lab is **per-student randomised** (each student gets unique flags, credent
 *Plus learning aids in every lesson: Key takeaways, Check yourself, Glossary.*
 
 **Frameworks / technique IDs referenced:** T1046
+
+---
+
+### RT — Red Team Primer — Your First Hack
+*Day 1*
+
+**Format:** ~2,330-word lesson · 1 diagram(s) · 7 teaching callouts · 1 worked command/example blocks.
+
+**Topics taught (the lesson's own chapters):**
+
+- Why We Start by Attacking
+- Red, Blue & Purple — and Where "Ethical Hacking" Fits
+- The Anatomy of an Attack
+- Authorisation Is Everything
+- Your First-Hack Toolkit
+- The Worked Intrusion — "Operation First Blood"
+- Flip It — How Each Step Is Stopped
+
+*Plus learning aids in every lesson: Key takeaways, Check yourself, Glossary.*
+
+**Frameworks / technique IDs referenced:** T1078
+
+**Hands-on lab — Operation First Blood — Your First Live Intrusion**  
+*Live isolated range on `10.13.2.0/24` · ~75 min · 10 graded tasks · tools: nmap, gobuster, curl, ssh, sudo*
+
+> Break into a live internal server end to end — the real thing, on an isolated range you're authorised to attack. Scan it, discover a web service, loot a credential a careless admin left exposed, use it to get a foothold over SSH, capture the user flag, then exploit a sudo misconfiguration to escalate to root and capture the root flag. Finally, flip to defender: name what would have broken each step of the chain. This is the whole attacker lifecycle in 75 minutes.
+
+Targets:
+- `10.13.2.10` **intranet** — Volta internal server — web (:80) + SSH (:22). Your authorised target.
+
+Graded tasks (10 — the student is assessed on each; «your value» marks a per-student randomised answer):
+
+1. The target's web and SSH services are reachable
+2. Fingerprint the web service (nmap -sV -p80 10.13.2.10). What server software is it?
+3. The web root hides a directory an admin forgot to move. What path is it? (robots.txt hints; gobuster confirms)
+4. That directory leaks an ops handover note with SSH credentials. What is the SSH username?
+5. And the SSH password in that note?
+6. SSH in with those credentials (ssh webadmin@10.13.2.10). What flag is in user.txt in the home directory?
+7. Run 'sudo -l'. It shows webadmin may run a shell as root with NO password. What is the privilege-escalation method?
+8. Escalate to root (e.g. 'sudo /bin/ash') and read /root/root.txt. What is the root flag?
+9. Which MITRE ATT&CK technique covers getting in with the leaked, legitimate credentials?
+10. Name ONE control that would have broken this chain.
+
+*Per-student randomised variables (3): root_flag, ssh_pass, user_flag.*
+
+**Deliverable template(s):** `rt-first-hack-report.md`
 
 ---
 

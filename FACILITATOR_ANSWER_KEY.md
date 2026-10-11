@@ -83,6 +83,30 @@
 17. The board buys cyber insurance for the residual ransomware risk. Which of the four risk treatments is that?
    → **transfer**  _(also: transference, risk transfer)_
 
+## RT — Operation First Blood — Your First Live Intrusion
+*Day 1 · 10 checks · 10 points · tools: nmap, gobuster, curl, ssh, sudo*
+
+1. The target's web and SSH services are reachable
+   → _(automatic script check — verifies live state)_
+2. Fingerprint the web service (nmap -sV -p80 10.13.2.10). What server software is it?
+   → **darkhttpd**  _(also: dark httpd)_
+3. The web root hides a directory an admin forgot to move. What path is it? (robots.txt hints; gobuster confirms)
+   → **/backup/**  _(also: /backup, backup, backup/)_
+4. That directory leaks an ops handover note with SSH credentials. What is the SSH username?
+   → **webadmin**
+5. And the SSH password in that note?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+6. SSH in with those credentials (ssh webadmin@10.13.2.10). What flag is in user.txt in the home directory?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+7. Run 'sudo -l'. It shows webadmin may run a shell as root with NO password. What is the privilege-escalation method?
+   → **sudo**  _(also: sudo misconfiguration, sudo misconfig, sudo -l, sudo to root, sudo shell, nopasswd sudo, sudo ash, abuse sudo, sudo privilege escalation)_
+8. Escalate to root (e.g. 'sudo /bin/ash') and read /root/root.txt. What is the root flag?
+   → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
+9. Which MITRE ATT&CK technique covers getting in with the leaked, legitimate credentials?
+   → **T1078**  _(also: valid accounts, t1078 valid accounts)_
+10. Name ONE control that would have broken this chain.
+   → **mfa**  _(also: multi-factor, multi factor authentication, phishing-resistant mfa, least privilege, remove sudo, restrict sudo, fix sudo, remove the sudo misconfiguration, don't store credentials, do not store credentials, secrets management, remove the backup, strong unique password, unique password, password manager, take the backup off the web root, network segmentation, key-based ssh, disable password auth)_
+
 ## M3 — Network Compromise Investigation — Nmap, NSE & Wireshark
 *Day 2 · 16 checks · 16 points · tools: nmap, nmap NSE, wireshark, tcpdump, netstat*
 

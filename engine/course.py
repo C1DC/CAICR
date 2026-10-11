@@ -6,6 +6,7 @@ from __future__ import annotations
 # (id, day, title, has_lab)
 COURSE_MAP = [
     ("m0",  1, "Orientation, Kali Linux & the Command Line", False),
+    ("rt",  1, "Red Team Primer — Your First Hack", True),
     ("m1",  1, "Threat Landscape & Cyber Threat Intelligence", True),
     ("m2",  1, "Institutional Cyber Risk & Digital Resilience", True),
     ("m3",  2, "Network, Endpoint & Identity Security", True),

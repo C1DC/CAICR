@@ -18,7 +18,7 @@ for a in "$@"; do
   case "$a" in
     --prep) PREP=1 ;;
     --no-browser) NOBROWSER="--no-browser" ;;
-    m[0-9]*) LAB="$a" ;;
+    m[0-9]*|rt) LAB="$a" ;;
     -h|--help) grep '^#' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) printf "\033[33mignoring unknown argument: %s\033[0m\n" "$a" ;;
   esac

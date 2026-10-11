@@ -30,7 +30,7 @@ class TestManifests(unittest.TestCase):
     def test_all_labs_discover_and_validate(self):
         labs = manifest.discover_labs()
         ids = {l.id for l in labs}
-        self.assertEqual(ids, {"m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10"})
+        self.assertEqual(ids, {"rt", "m1", "m2", "m3", "m4", "m5", "m6", "m7", "m8", "m9", "m10"})
 
     def test_every_lab_has_checks_and_points(self):
         for lab in manifest.discover_labs():
@@ -266,9 +266,10 @@ class TestLessonsHtml(unittest.TestCase):
 
 class TestWebApp(unittest.TestCase):
     def test_course_data(self):
-        # 10 numbered modules (m1..m10) plus the m0 orientation session
-        self.assertEqual(len(course.COURSE_MAP), 11)
+        # m0 orientation + the rt red-team primer + 10 numbered modules (m1..m10)
+        self.assertEqual(len(course.COURSE_MAP), 12)
         self.assertEqual(course.COURSE_MAP[0][0], "m0")
+        self.assertEqual(course.COURSE_MAP[1][0], "rt")
         self.assertTrue(course.TOOLS and course.COMMANDS)
 
     def test_module_rows_and_bootstrap(self):
