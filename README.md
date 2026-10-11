@@ -5,6 +5,9 @@ The learning environment for the **Professional Certificate in Cybersecurity, AI
 & Digital Resilience** — a 5-day intensive course run by KAIPTC (Kofi Annan
 International Peacekeeping Training Centre), Accra, Ghana.
 
+> **Students:** a simple step-by-step install handout (incl. the private-repo
+> access token) is in **[`INSTALL.md`](INSTALL.md)**.
+
 ## Install on a student Kali PC (from GitHub)
 
 On a fresh Kali machine with **Docker** installed and internet available once:
