@@ -273,6 +273,22 @@ class TestWebApp(unittest.TestCase):
         self.assertEqual(course.COURSE_MAP[2][0], "js")
         self.assertTrue(course.TOOLS and course.COMMANDS)
 
+    def test_resources_well_formed(self):
+        res = course.RESOURCES
+        self.assertGreaterEqual(len(res), 30, "expected a substantial resource list")
+        names = set()
+        for r in res:
+            for key in ("name", "cat", "url", "desc"):
+                self.assertIn(key, r, f"resource missing '{key}': {r.get('name')}")
+                self.assertTrue(str(r[key]).strip(), f"empty '{key}' in {r.get('name')}")
+            self.assertTrue(r["url"].startswith("https://"), f"{r['name']} url not https")
+            self.assertNotIn(r["name"], names, f"duplicate resource {r['name']}")
+            names.add(r["name"])
+        # must be surfaced to the browser
+        from engine import webapp
+        boot = webapp._bootstrap()
+        self.assertEqual(len(boot["resources"]), len(res))
+
     def test_module_rows_and_bootstrap(self):
         from engine import webapp
         rows = webapp._module_rows()

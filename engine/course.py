@@ -795,6 +795,268 @@ TOOLS = [
      "learn": "github.com/simsong/bulk_extractor"},
 ]
 
+# ───────────────────────────── Online resources ─────────────────────────────
+# Powerful websites and online services real security professionals use every
+# day — the "where" to pair with the tools above. These are external sites
+# (students explore them in their own time, on their own accounts). Many are the
+# very services attackers also use for recon, so the ETHICS line is the same as
+# the labs: look up YOUR OWN assets, or public/sanctioned test data — never probe
+# or target systems you do not own or have written permission to test (Act 1038).
+# Fields: name, cat, url, desc, use (how a student uses it), tag (free/paid note).
+RESOURCES = [
+    # ── Breach & credential exposure ─────────────────────────────────────────
+    {"name": "Have I Been Pwned", "cat": "Breach & Credential Exposure",
+     "url": "https://haveibeenpwned.com", "tag": "Free",
+     "desc": "The definitive breach-notification service. Enter an email or phone and it "
+             "tells you which known data breaches it appeared in. Its 'Pwned Passwords' "
+             "set (billions of leaked passwords) powers safe password checks everywhere.",
+     "use": "Check if your staff/customer emails are in breaches; use the Pwned Passwords "
+            "API to block already-leaked passwords at sign-up. A real control, not a toy."},
+    {"name": "DeHashed", "cat": "Breach & Credential Exposure",
+     "url": "https://www.dehashed.com", "tag": "Paid",
+     "desc": "Searchable index of leaked credentials and breach records across many fields "
+             "(email, username, IP, name). Used by investigators and red teams for OSINT.",
+     "use": "Investigate exposure of a domain's accounts after a breach — with authorisation."},
+    {"name": "CrackStation", "cat": "Breach & Credential Exposure",
+     "url": "https://crackstation.net", "tag": "Free",
+     "desc": "Free lookup of unsalted password hashes against a massive pre-computed table. "
+             "Shows instantly why unsalted hashes (MD5/SHA1) are worthless protection.",
+     "use": "During a password-audit, paste a captured hash to see if it cracks trivially — "
+            "proof your org must salt + use slow hashes (bcrypt/argon2)."},
+
+    # ── Malware, file & URL analysis ─────────────────────────────────────────
+    {"name": "VirusTotal", "cat": "Malware, File & URL Analysis",
+     "url": "https://www.virustotal.com", "tag": "Free / Premium",
+     "desc": "Scan any file, URL, domain or hash against 70+ antivirus engines and a huge "
+             "community intelligence graph. The first stop for 'is this thing malicious?'",
+     "use": "Paste a suspicious attachment's hash or a shady link; read the detections and "
+            "pivot on related files/domains. Never upload confidential files — they become shareable."},
+    {"name": "Any.Run", "cat": "Malware, File & URL Analysis",
+     "url": "https://any.run", "tag": "Free / Paid",
+     "desc": "Interactive online malware sandbox — detonate a sample in a live VM and watch, "
+             "in real time, what it drops, the processes it spawns and the C2 it calls.",
+     "use": "Safely observe ransomware/phishing-doc behaviour and extract IOCs for your SIEM."},
+    {"name": "Hybrid Analysis", "cat": "Malware, File & URL Analysis",
+     "url": "https://www.hybrid-analysis.com", "tag": "Free",
+     "desc": "Free automated malware sandbox (CrowdStrike Falcon) producing a detailed "
+             "behavioural report, dropped files, network indicators and a verdict.",
+     "use": "Submit a suspicious binary for a full behaviour report without risking a real machine."},
+    {"name": "urlscan.io", "cat": "Malware, File & URL Analysis",
+     "url": "https://urlscan.io", "tag": "Free",
+     "desc": "Visits a URL in a sandboxed browser and records everything it does — the DOM, "
+             "resources loaded, redirects, screenshots and the domains it contacts.",
+     "use": "Investigate a phishing link safely; see the fake login page and where it posts creds."},
+    {"name": "CyberChef", "cat": "Malware, File & URL Analysis",
+     "url": "https://gchq.github.io/CyberChef/", "tag": "Free",
+     "desc": "GCHQ's 'cyber swiss-army knife' — chain 300+ operations to decode, decrypt, "
+             "deobfuscate, parse and transform data entirely in your browser (offline-capable).",
+     "use": "Decode Base64/hex, unpack obfuscated phishing scripts, parse timestamps, extract "
+            "IOCs — the analyst's everyday scratchpad."},
+
+    # ── OSINT & reconnaissance ───────────────────────────────────────────────
+    {"name": "Shodan", "cat": "OSINT & Reconnaissance",
+     "url": "https://www.shodan.io", "tag": "Free / Paid",
+     "desc": "The search engine for internet-connected devices. Finds exposed servers, "
+             "webcams, databases, industrial controllers and open ports worldwide, with banners.",
+     "use": "Search your own org's IP ranges to find what you've accidentally exposed "
+            "(open RDP, databases) before attackers do. Only act on assets you own."},
+    {"name": "Censys", "cat": "OSINT & Reconnaissance",
+     "url": "https://search.censys.io", "tag": "Free / Paid",
+     "desc": "Continuously scans the internet and indexes hosts, certificates and services. "
+             "A rigorous alternative/companion to Shodan for attack-surface discovery.",
+     "use": "Map your external attack surface and spot expired/misissued certificates."},
+    {"name": "crt.sh", "cat": "OSINT & Reconnaissance",
+     "url": "https://crt.sh", "tag": "Free",
+     "desc": "Searches public Certificate Transparency logs. Because every TLS certificate is "
+             "logged, it quietly reveals an organisation's subdomains and internal hostnames.",
+     "use": "Enumerate a domain's subdomains (search %25.yourdomain.com) to find forgotten assets."},
+    {"name": "DNSDumpster", "cat": "OSINT & Reconnaissance",
+     "url": "https://dnsdumpster.com", "tag": "Free",
+     "desc": "Free domain-recon that maps a target's DNS records, subdomains and hosting into "
+             "a visual graph — a fast picture of an organisation's internet footprint.",
+     "use": "Build a map of your own domain's exposure in seconds."},
+    {"name": "Wayback Machine", "cat": "OSINT & Reconnaissance",
+     "url": "https://web.archive.org", "tag": "Free",
+     "desc": "The Internet Archive's historical snapshots of web pages going back decades. "
+             "Recovers removed pages, old endpoints, leaked docs and prior site versions.",
+     "use": "Find old admin pages or exposed files that were 'deleted' but still archived."},
+    {"name": "GreyNoise", "cat": "OSINT & Reconnaissance",
+     "url": "https://viz.greynoise.io", "tag": "Free / Paid",
+     "desc": "Tells you whether an IP hammering your logs is mass internet background-noise or "
+             "something targeting you specifically — huge for triaging alerts.",
+     "use": "Look up a noisy source IP to decide 'ignore the scanner' vs 'investigate now'."},
+    {"name": "OSINT Framework", "cat": "OSINT & Reconnaissance",
+     "url": "https://osintframework.com", "tag": "Free",
+     "desc": "A giant, categorised directory of OSINT tools and sources (emails, usernames, "
+             "domains, social media, images). The map of the whole OSINT landscape.",
+     "use": "Starting point when you need 'a tool to find X' — browse the category and go."},
+
+    # ── Threat intelligence ──────────────────────────────────────────────────
+    {"name": "MITRE ATT&CK", "cat": "Threat Intelligence & Frameworks",
+     "url": "https://attack.mitre.org", "tag": "Free",
+     "desc": "The global knowledge base of real adversary tactics and techniques (TTPs), from "
+             "initial access to impact. The common language SOCs, red teams and vendors share.",
+     "use": "Map any attack or detection to a technique ID (e.g. T1078) so everyone understands it."},
+    {"name": "abuse.ch (MalwareBazaar / URLhaus / ThreatFox)", "cat": "Threat Intelligence & Frameworks",
+     "url": "https://abuse.ch", "tag": "Free",
+     "desc": "A suite of community threat-intel feeds: malware samples (MalwareBazaar), malicious "
+             "URLs (URLhaus), IOCs (ThreatFox) and botnet C2 (Feodo Tracker). Free and respected.",
+     "use": "Pull fresh IOCs into your blocklists/SIEM, or identify a sample by its hash."},
+    {"name": "AbuseIPDB", "cat": "Threat Intelligence & Frameworks",
+     "url": "https://www.abuseipdb.com", "tag": "Free",
+     "desc": "A crowd-sourced database of abusive IP addresses with a confidence score, and a "
+             "place to report attackers hitting your own systems.",
+     "use": "Check a suspicious IP's reputation; report brute-force sources to protect others."},
+    {"name": "AlienVault OTX", "cat": "Threat Intelligence & Frameworks",
+     "url": "https://otx.alienvault.com", "tag": "Free",
+     "desc": "Open Threat Exchange — a large open community sharing 'pulses' of IOCs tied to "
+             "campaigns and malware families.",
+     "use": "Subscribe to pulses relevant to your sector (e.g. banking) for timely indicators."},
+    {"name": "CISA Known Exploited Vulnerabilities (KEV)", "cat": "Threat Intelligence & Frameworks",
+     "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog", "tag": "Free",
+     "desc": "The authoritative list of vulnerabilities proven to be exploited in the wild. If a "
+             "CVE is on the KEV list, patch it now — attackers already are.",
+     "use": "Prioritise patching: cross-check your scan results against the KEV catalogue first."},
+    {"name": "Cisco Talos Intelligence", "cat": "Threat Intelligence & Frameworks",
+     "url": "https://talosintelligence.com", "tag": "Free",
+     "desc": "Reputation lookup for IPs, domains and email senders, plus deep threat research "
+             "from one of the largest commercial intel teams.",
+     "use": "Check a sender domain's email reputation when investigating phishing/BEC."},
+
+    # ── Vulnerability intelligence ───────────────────────────────────────────
+    {"name": "NVD — National Vulnerability Database", "cat": "Vulnerability Intelligence",
+     "url": "https://nvd.nist.gov", "tag": "Free",
+     "desc": "NIST's authoritative CVE database with CVSS severity scores, affected products "
+             "and references. The reference you cite in a vulnerability report.",
+     "use": "Look up a CVE from your scanner to get its CVSS score and remediation guidance (M4)."},
+    {"name": "CVE.org (MITRE)", "cat": "Vulnerability Intelligence",
+     "url": "https://www.cve.org", "tag": "Free",
+     "desc": "The official source and registry for CVE identifiers — the canonical naming system "
+             "for publicly known vulnerabilities.",
+     "use": "Confirm the official description and references for a CVE you're tracking."},
+    {"name": "Exploit-DB", "cat": "Vulnerability Intelligence",
+     "url": "https://www.exploit-db.com", "tag": "Free",
+     "desc": "The largest public archive of exploits and proof-of-concept code, maintained by "
+             "OffSec. Also hosts the Google Hacking Database (GHDB).",
+     "use": "Understand the real impact of a CVE by seeing whether a working exploit exists "
+            "(so you can argue the urgency of patching). Ethics: study, don't misuse."},
+    {"name": "Packet Storm", "cat": "Vulnerability Intelligence",
+     "url": "https://packetstormsecurity.com", "tag": "Free",
+     "desc": "Long-running repository of exploits, advisories, tools and security news.",
+     "use": "Research advisories and tooling around a specific product or vulnerability."},
+
+    # ── Web app testing & posture checks ─────────────────────────────────────
+    {"name": "OWASP", "cat": "Web App Security",
+     "url": "https://owasp.org", "tag": "Free",
+     "desc": "The Open Worldwide Application Security Project — home of the OWASP Top 10, the "
+             "Cheat Sheet Series, the Testing Guide and Juice Shop. The web-security bible.",
+     "use": "Reference the Top 10 and cheat sheets when assessing or fixing a web app (JS lab, M4)."},
+    {"name": "Qualys SSL Labs", "cat": "Web App Security",
+     "url": "https://www.ssllabs.com/ssltest/", "tag": "Free",
+     "desc": "Grades a public website's TLS/SSL configuration A+ to F, flagging weak ciphers, "
+             "old protocols and certificate problems.",
+     "use": "Test your own site's HTTPS and fix anything below an A. Only scan domains you own."},
+    {"name": "SecurityHeaders.com", "cat": "Web App Security",
+     "url": "https://securityheaders.com", "tag": "Free",
+     "desc": "Grades the HTTP security headers a site sends (CSP, HSTS, X-Frame-Options…) and "
+             "explains what each one defends against.",
+     "use": "Audit your web app's headers and add the missing protections."},
+    {"name": "BuiltWith / Wappalyzer", "cat": "Web App Security",
+     "url": "https://builtwith.com", "tag": "Free / Paid",
+     "desc": "Fingerprints the technology stack a website runs — frameworks, CMS, analytics, "
+             "servers — useful for recon and for knowing what you must keep patched.",
+     "use": "Identify what software a site runs (and therefore what CVEs apply)."},
+
+    # ── Pentest methodology & cheat sheets ───────────────────────────────────
+    {"name": "HackTricks", "cat": "Methodology & Cheat Sheets",
+     "url": "https://book.hacktricks.xyz", "tag": "Free",
+     "desc": "An enormous, practical pentest/CTF methodology encyclopedia — step-by-step for "
+             "enumerating and exploiting almost any service, OS or cloud.",
+     "use": "Your go-to playbook when you're stuck on 'I found service X, now what?'"},
+    {"name": "GTFOBins", "cat": "Methodology & Cheat Sheets",
+     "url": "https://gtfobins.github.io", "tag": "Free",
+     "desc": "A curated list of legitimate Unix binaries that can be abused to bypass local "
+             "security — exactly the sudo/privilege-escalation trick you used in the RT lab.",
+     "use": "Given a binary you can run as root (e.g. via sudo), look up how it escalates — and "
+            "then remove that capability as a defender."},
+    {"name": "LOLBAS", "cat": "Methodology & Cheat Sheets",
+     "url": "https://lolbas-project.github.io", "tag": "Free",
+     "desc": "The Windows equivalent of GTFOBins — 'living off the land' binaries attackers use "
+             "to blend in using tools already present on the system.",
+     "use": "Learn what to hunt for in Windows logs when an attacker avoids dropping malware."},
+    {"name": "PayloadsAllTheThings", "cat": "Methodology & Cheat Sheets",
+     "url": "https://github.com/swisskyrepo/PayloadsAllTheThings", "tag": "Free",
+     "desc": "A huge community repository of attack payloads and bypasses for every web vuln "
+             "class (SQLi, XSS, SSRF, auth bypass) — with the defensive notes too.",
+     "use": "Find and understand injection payloads (and the fixes) for the JS lab and M4."},
+    {"name": "Explainshell", "cat": "Methodology & Cheat Sheets",
+     "url": "https://explainshell.com", "tag": "Free",
+     "desc": "Paste any Linux command line and it annotates every flag and argument with the "
+             "matching man-page text. Brilliant for the Day-1 command-line primer.",
+     "use": "Decode a scary one-liner before you run it — learn exactly what each part does."},
+
+    # ── Hands-on practice (legal, sanctioned) ────────────────────────────────
+    {"name": "PortSwigger Web Security Academy", "cat": "Hands-On Practice (Legal)",
+     "url": "https://portswigger.net/web-security", "tag": "Free",
+     "desc": "The best free web-security training anywhere, from the makers of Burp Suite — "
+             "hundreds of hands-on labs with full explanations, from beginner to expert.",
+     "use": "After the JS lab, work the SQLi and access-control labs here to go deeper — free."},
+    {"name": "TryHackMe", "cat": "Hands-On Practice (Legal)",
+     "url": "https://tryhackme.com", "tag": "Free / Paid",
+     "desc": "Guided, gamified cyber training in the browser — beginner-friendly rooms that walk "
+             "you through attacks and defences on throwaway machines.",
+     "use": "Keep practising after the course on sanctioned targets, with hints and paths."},
+    {"name": "Hack The Box", "cat": "Hands-On Practice (Legal)",
+     "url": "https://www.hackthebox.com", "tag": "Free / Paid",
+     "desc": "Realistic vulnerable machines and challenges for offensive practice; a recognised "
+             "proving ground for aspiring penetration testers.",
+     "use": "Build and prove hands-on skill on legal targets as you grow past the basics."},
+    {"name": "OverTheWire (Wargames)", "cat": "Hands-On Practice (Legal)",
+     "url": "https://overthewire.org/wargames/", "tag": "Free",
+     "desc": "Classic SSH-based wargames (start with 'Bandit') that teach Linux and security "
+             "fundamentals one small puzzle at a time.",
+     "use": "Sharpen the exact command-line and Linux skills from the Day-1 orientation."},
+    {"name": "VulnHub", "cat": "Hands-On Practice (Legal)",
+     "url": "https://www.vulnhub.com", "tag": "Free",
+     "desc": "Downloadable deliberately-vulnerable virtual machines you can hack entirely "
+             "offline on your own hardware — perfect for a home lab.",
+     "use": "Build an offline practice lab like this one, with endless free targets."},
+    {"name": "CyberDefenders / LetsDefend", "cat": "Hands-On Practice (Legal)",
+     "url": "https://cyberdefenders.org", "tag": "Free / Paid",
+     "desc": "Blue-team practice — real investigation challenges with PCADs, memory images and "
+             "SIEM data. The defensive counterpart to offensive CTF sites.",
+     "use": "Practise the SOC/DFIR skills from M3–M6 on realistic incident data."},
+
+    # ── Ghana / national ─────────────────────────────────────────────────────
+    {"name": "Ghana Cyber Security Authority (CSA)", "cat": "Ghana & National",
+     "url": "https://www.csa.gov.gh", "tag": "Official",
+     "desc": "Ghana's national cybersecurity regulator under Act 1038 — the national CERT, "
+             "incident reporting portal, directives and the licensing regime.",
+     "use": "Know how and when to report an incident; follow CSA directives for your sector."},
+    {"name": "Data Protection Commission, Ghana", "cat": "Ghana & National",
+     "url": "https://www.dataprotection.org.gh", "tag": "Official",
+     "desc": "Ghana's DPC, the regulator for the Data Protection Act, 2012 (Act 843) — "
+             "registration of data controllers and personal-data obligations.",
+     "use": "Check your organisation's data-protection registration and breach duties (M8)."},
+
+    # ── Staying current ──────────────────────────────────────────────────────
+    {"name": "SANS Internet Storm Center", "cat": "News & Staying Current",
+     "url": "https://isc.sans.edu", "tag": "Free",
+     "desc": "A respected daily diary of emerging threats and analysis from the SANS handler "
+             "community — early warning of what's being exploited right now.",
+     "use": "A 5-minute daily read to stay ahead of active threats."},
+    {"name": "Krebs on Security", "cat": "News & Staying Current",
+     "url": "https://krebsonsecurity.com", "tag": "Free",
+     "desc": "In-depth investigative reporting on breaches, cybercrime and fraud by journalist "
+             "Brian Krebs — often where major incidents break first.",
+     "use": "Understand how real breaches and fraud actually unfold, in plain language."},
+    {"name": "The Hacker News", "cat": "News & Staying Current",
+     "url": "https://thehackernews.com", "tag": "Free",
+     "desc": "A high-volume, accessible security news site covering new vulnerabilities, "
+             "breaches and tools as they drop.",
+     "use": "Skim headlines to spot a CVE or campaign that affects your stack early."},
+]
+
 # Linux / Kali command reference (group, command, description). Mirrors the
 # Day-1 orientation lesson (m0) so students also find it under the Commands view.
 LINUX_COMMANDS = [

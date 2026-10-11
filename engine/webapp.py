@@ -16,7 +16,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
 from . import __version__, certificate, dockerctl, grade as grading, paths, quiz, reference, state, verify
-from .course import COMMANDS, COURSE_MAP, DAY_TITLES, LINUX_COMMANDS, TOOLS
+from .course import COMMANDS, COURSE_MAP, DAY_TITLES, LINUX_COMMANDS, RESOURCES, TOOLS
 from .manifest import ManifestError, discover_labs, load_one
 from .mdhtml import md_to_html
 
@@ -142,6 +142,7 @@ def _bootstrap() -> dict:
         "dayTitles": DAY_TITLES,
         "modules": mods,
         "tools": TOOLS,
+        "resources": RESOURCES,
         "commands": [{"group": g, "cmd": c, "desc": d} for g, c, d in COMMANDS],
         "linux": [{"group": g, "cmd": c, "desc": d} for g, c, d in LINUX_COMMANDS],
         "reference": reference.discover(),

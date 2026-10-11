@@ -51,6 +51,7 @@ function paletteItems() {
     t: t.name, s: t.cat + " · tool", ic: "◉", k: "tool",
     go: () => { location.hash = "materials"; setTimeout(() => { const el = [...document.querySelectorAll(".toolrow summary")].find(s => s.textContent.trim().startsWith(t.name)); if (el) { el.parentElement.open = true; el.scrollIntoView({ block: "center" }); } }, 140); }
   }));
+  (BOOT.resources || []).forEach(r => items.push({ t: r.name, s: r.cat + " · site", ic: "🔗", k: "link", go: () => window.open(r.url, "_blank", "noopener") }));
   (BOOT.reference || []).forEach(t => items.push({ t: t.title, s: "Reference", ic: "❖", k: "ref", go: () => location.hash = "reference/" + t.id }));
   (BOOT.commands || []).forEach(c => items.push({ t: c.cmd, s: c.desc, ic: "⌨", k: "copy", go: () => copy(c.cmd) }));
   (BOOT.linux || []).forEach(c => items.push({ t: c.cmd, s: c.desc + " · Linux", ic: "▶_", k: "copy", go: () => copy(c.cmd) }));
@@ -485,12 +486,30 @@ function toolDetail(t) {
     </p>
   </div>`;
 }
+function resourcesSection(list) {
+  if (!list || !list.length) return "";
+  const cats = [...new Set(list.map(r => r.cat))];
+  return cats.map(cat => `
+    <div class="res-cat">${esc(cat)}</div>
+    <div class="grid cards-2">
+      ${list.filter(r => r.cat === cat).map(r => `
+        <div class="card resrow" data-hay="${esc((r.name + " " + r.cat + " " + (r.desc||"") + " " + (r.use||"")).toLowerCase())}">
+          <div class="row" style="justify-content:space-between;align-items:center;gap:8px">
+            <a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer"><strong>${esc(r.name)}</strong> ↗</a>
+            ${r.tag ? `<span class="tool-cat">${esc(r.tag)}</span>` : ""}
+          </div>
+          <div class="muted" style="font-size:13px;margin-top:6px">${esc(r.desc || "")}</div>
+          ${r.use ? `<div class="dim" style="font-size:12.5px;margin-top:6px"><strong>Use it to:</strong> ${esc(r.use)}</div>` : ""}
+          <div class="dim" style="font-size:11.5px;margin-top:8px"><a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.url)}</a></div>
+        </div>`).join("")}
+    </div>`).join("");
+}
 function vMaterials() {
   setActive("materials"); crumb([{ t: "Tools & Materials" }]);
   const cats = [...new Set(BOOT.tools.map(t => t.cat))];
   view.innerHTML = `
   <p class="muted">The real toolkit — what each tool is, how to use it, and the commands that matter. Everything here you can run right now in the <a onclick="location.hash='terminal'">Terminal</a>.</p>
-  <input id="toolSearch" placeholder="Search tools (name, category, command)…"
+  <input id="toolSearch" placeholder="Search tools &amp; resources (name, category, command, site)…"
     style="width:100%;padding:10px 13px;margin:6px 0 14px;background:var(--panel2);border:1px solid var(--border2);border-radius:9px;color:var(--fg);font-size:14px">
   <div id="toolList">
     ${BOOT.tools.map(t => `
@@ -498,6 +517,12 @@ function vMaterials() {
         <summary><strong>${esc(t.name)}</strong><span class="tool-cat">${esc(t.cat)}</span></summary>
         <div class="inner">${toolDetail(t)}</div>
       </details>`).join("")}
+  </div>
+
+  <div class="section-title">Online services &amp; resources</div>
+  <p class="muted">Powerful websites real security professionals use every day — breach checks, malware sandboxes, threat intel, vulnerability databases and legal practice ranges. Explore them in your own time to go far beyond this course. <strong>Ethics:</strong> many double as attacker recon — only look up assets you own or sanctioned/public test data (Act 1038). Links open in a new tab.</p>
+  <div id="resList">
+    ${resourcesSection(BOOT.resources || [])}
   </div>
 
   <div class="section-title">Deliverable templates</div>
@@ -513,6 +538,7 @@ function vMaterials() {
   if (search) search.oninput = () => {
     const q = search.value.toLowerCase();
     view.querySelectorAll(".toolrow").forEach(r => { r.style.display = r.dataset.hay.includes(q) ? "block" : "none"; });
+    view.querySelectorAll(".resrow").forEach(r => { r.style.display = r.dataset.hay.includes(q) ? "" : "none"; });
   };
 }
 
