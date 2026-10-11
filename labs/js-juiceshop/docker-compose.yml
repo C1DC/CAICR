@@ -1,0 +1,25 @@
+# Web Attack Arena — OWASP Juice Shop.
+# A real, deliberately-vulnerable modern web app (Angular + Node/Express), the
+# world's standard web-pentest training target. This is the Day-1 "arena":
+# ./start.sh brings it up automatically so a hackable server is always waiting.
+#
+# The image is the official upstream (bkimminich/juice-shop). No ports are
+# published to the host LAN — it is reachable only on the private lab range at
+# http://10.13.8.10:3000, exactly like every other CAIC target.
+name: caic-js
+
+services:
+  juice-shop:
+    image: bkimminich/juice-shop:v20.2.0
+    environment:
+      NODE_ENV: unsafe        # enable the full challenge set (incl. the scoreboard)
+    networks: { arena: { ipv4_address: 10.13.8.10 } }
+    restart: unless-stopped
+
+networks:
+  arena:
+    name: caic_js_arena
+    ipam:
+      config:
+        - subnet: 10.13.8.0/24
+          gateway: 10.13.8.1

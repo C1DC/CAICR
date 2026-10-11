@@ -1,0 +1,97 @@
+[lab]
+id = "js"
+module = "JS"
+day = 1
+title = "Web Attack Arena — Break Into OWASP Juice Shop"
+autostart = true          # the Day-1 arena: brought up automatically by ./start.sh
+tools = ["browser", "curl", "nmap", "burpsuite"]
+estimated_minutes = 60
+briefing = "briefing.md"
+objective = """
+Hack a real, deliberately-vulnerable web application the way attackers hit \
+institutional portals every day. OWASP Juice Shop is the world's most famous \
+training target — a modern Angular + Node/Express single-page app riddled with \
+the OWASP Top 10. Browse it, fingerprint its stack, find the hidden challenge \
+scoreboard, then perform a classic SQL-injection login bypass to log in as the \
+administrator without a password — the #1 way public web apps get breached \
+(MITRE ATT&CK T1190). Finally, flip to defender and name the one-line code fix. \
+The server is already running the moment you open the lab — no setup."""
+
+[network]
+name = "caic_js_arena"
+subnet = "10.13.8.0/24"
+ready = ["10.13.8.10:3000"]
+
+[[targets]]
+name = "juice-shop"
+ip = "10.13.8.10"
+role = "OWASP Juice Shop web app — http://10.13.8.10:3000  (your authorised target)"
+
+# ── 1. Recon: get on the app and fingerprint it ─────────────────────────────
+[[check]]
+id = "target_up"
+type = "script"
+prompt = "The Juice Shop web app is reachable on 10.13.8.10:3000"
+points = 1
+
+[[check]]
+id = "app_name"
+type = "string_any"
+prompt = "Open http://10.13.8.10:3000 in your browser. What is this vulnerable application called?"
+accept = ["owasp juice shop", "juice shop", "juice-shop", "juiceshop", "the juice shop"]
+hint = "Look at the page title / top-left logo. It is a well-known OWASP project."
+
+[[check]]
+id = "app_version"
+type = "string_any"
+prompt = "The app leaks its exact version through an admin REST endpoint. Find it: what version is running?"
+accept = ["20.2.0", "v20.2.0", "20.2"]
+hint = "A version-disclosure endpoint: curl -s http://10.13.8.10:3000/rest/admin/application-version"
+
+[[check]]
+id = "scoreboard"
+type = "string_any"
+prompt = "Juice Shop hides a challenge scoreboard that is not linked in the menu. What is its route/path?"
+accept = ["score-board", "/#/score-board", "/score-board", "scoreboard", "#/score-board"]
+hint = "It is deliberately hidden. Browse to http://10.13.8.10:3000/#/score-board (or read the JavaScript bundle)."
+
+# ── 2. Exploit: SQL-injection login bypass ──────────────────────────────────
+[[check]]
+id = "sqli_payload"
+type = "string_any"
+prompt = "On the Login page, inject SQL into the EMAIL field to log in as the first user WITHOUT a password. What payload works?"
+accept = ["' or 1=1--", "' or 1=1-- -", "'or 1=1--", "' or 1=1 --", "' or '1'='1", "' or '1'='1'--",
+          "' or '1'='1' --", "' or true--", "' or 1=1#", "admin' --", "admin'--", "' or 1=1-- -"]
+hint = "Classic auth bypass: put  ' or 1=1--  in the email field and any text in the password. The -- comments out the rest of the query."
+
+[[check]]
+id = "admin_email"
+type = "string_any"
+prompt = "That bypass logs you in as the administrator. What is the admin account's email address?"
+accept = ["admin@juice-sh.op"]
+hint = "After the bypass you are 'admin@juice-sh.op' — or find it in the product reviews / the users table."
+
+# ── 3. Flip to defender ─────────────────────────────────────────────────────
+[[check]]
+id = "vuln_class"
+type = "string_any"
+prompt = "What class of web vulnerability did the login bypass exploit? (use the OWASP Top 10 name)"
+accept = ["sql injection", "sqli", "injection", "a03", "a03:2021", "a03 injection", "a03:2021 injection"]
+hint = "It is #3 on the 2021 OWASP Top 10 — untrusted input placed straight into a database query."
+
+[[check]]
+id = "fix"
+type = "string_any"
+prompt = "Name the primary code-level fix that would have stopped this injection."
+accept = ["parameterized queries", "parameterised queries", "prepared statements", "parameterized statements",
+          "parameterised statements", "bind variables", "use prepared statements", "use parameterized queries",
+          "orm", "parameterization", "parameterisation", "bound parameters"]
+hint = "Never concatenate user input into SQL. Use parameterised queries / prepared statements so input can never become code."
+
+[[check]]
+id = "attack_technique"
+type = "string_any"
+prompt = "Which MITRE ATT&CK technique covers breaking in by exploiting an internet-facing web app like this?"
+accept = ["T1190", "exploit public-facing application", "t1190 exploit public-facing application",
+          "t1190 exploit public facing application", "exploit public facing application"]
+hint = "Initial Access → exploiting a public-facing application."

@@ -72,6 +72,19 @@ def build(lab: Lab) -> None:
         raise DockerError(f"compose build failed for {lab.id} (exit {r.returncode})")
 
 
+def pull(lab: Lab) -> None:
+    """Pull any pre-built (image:-only) services this lab references, e.g. the
+    OWASP Juice Shop arena. No-op for services that only `build:`. Needs
+    internet; used by `labctl prep`."""
+    r = _compose(lab, "pull", "--ignore-buildable", capture=True)
+    if r.returncode != 0:
+        # older compose has no --ignore-buildable; retry plain pull
+        r = _compose(lab, "pull", capture=True)
+    if r.returncode != 0:
+        last = (r.stderr or "").strip().splitlines()[-1:] or ["pull failed"]
+        raise DockerError(f"compose pull failed for {lab.id}: {last[0]}")
+
+
 def up(lab: Lab, env: dict | None = None) -> None:
     r = _compose(lab, "up", "-d", "--remove-orphans", capture=True, env=env)
     if r.returncode != 0:

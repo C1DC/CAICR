@@ -537,7 +537,10 @@ def cmd_prep(args) -> int:
         ui.header(f"{lab.module}: {lab.title}")
         try:
             dockerctl.build(lab)
-            ui.ok(f"{lab.id} images built.")
+            # Also pull any pre-built upstream images (e.g. the Juice Shop arena)
+            # that `build` does not fetch, so they are cached for offline use.
+            dockerctl.pull(lab)
+            ui.ok(f"{lab.id} images ready.")
         except dockerctl.DockerError as exc:
             ui.fail(str(exc))
             failed.append(lab.id)
@@ -547,6 +550,51 @@ def cmd_prep(args) -> int:
         return 1
     ui.ok("All lab images are built and cached. You can now run offline.")
     return 0
+
+
+def cmd_arena(args) -> int:
+    """Bring the always-on 'arena' targets (labs flagged autostart) up or down.
+    Called automatically by ./start.sh so a hackable server is ready the moment
+    the GUI opens. Non-fatal: a failure here must never block the web app."""
+    action = getattr(args, "action", "up") or "up"
+    arena = [l for l in discover_labs() if getattr(l, "autostart", False) and l.has_targets]
+    if not arena:
+        ui.info("No arena targets are configured.")
+        return 0
+    pf = dockerctl.preflight()
+    if not pf.ok:
+        ui.warn("Docker is not ready — skipping arena autostart. "
+                "The GUI still works; start targets later with: labctl start <lab>")
+        return 0
+    from . import seed
+    rc = 0
+    for lab in arena:
+        try:
+            if action == "down":
+                dockerctl.down(lab)
+                ui.ok(f"arena down: {lab.id}")
+                continue
+            if action == "status":
+                word = "up" if dockerctl.is_running(lab) else "down"
+                ui.info(f"{lab.id}: {word}  ({lab.title})")
+                continue
+            # default: up (idempotent — compose up on an already-running stack is a no-op)
+            if dockerctl.is_running(lab):
+                ui.ok(f"arena already up: {lab.id} → {', '.join(lab.ready) or lab.subnet}")
+                continue
+            ui.info(f"Starting arena target {lab.id} ({lab.title})…")
+            vals = seed.compute(lab)
+            seed.prepare(lab, vals)
+            dockerctl.up(lab, env=seed.env_for(vals))
+            dockerctl.wait_ready(lab, timeout=float(getattr(args, "timeout", 90)))
+            state.mark_started(lab.id)
+            ui.ok(f"arena up: {lab.id} → http://{lab.targets[0].ip}:"
+                  f"{(lab.ready[0].rsplit(':',1)[1] if lab.ready else '')}"
+                  if lab.targets else f"arena up: {lab.id}")
+        except Exception as exc:  # noqa: BLE001 — must not break startup
+            ui.warn(f"could not bring up arena target {lab.id}: {exc}")
+            rc = 0  # still non-fatal
+    return rc
 
 
 def cmd_reset_progress(args) -> int:
@@ -644,6 +692,10 @@ def build_parser() -> argparse.ArgumentParser:
     srv.add_argument("--port", type=int, default=8899, help="port (default 8899)")
     srv.add_argument("--no-browser", action="store_true", help="don't open a browser")
     add("prep", cmd_prep, "pre-build all lab images for offline use (run once)")
+    ar = add("arena", cmd_arena, "start/stop the always-on arena targets (auto-run by ./start.sh)", lab="none")
+    ar.add_argument("action", nargs="?", choices=["up", "down", "status"], default="up",
+                    help="up (default) | down | status")
+    ar.add_argument("--timeout", type=int, default=90, help="seconds to wait for readiness")
     add("progress", cmd_progress, "show your overall course progress", lab="none")
     add("doctor", cmd_doctor, "check docker + tools are ready", lab="none")
     who = add("whoami", cmd_whoami, "show/set your student name", lab="none")

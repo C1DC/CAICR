@@ -5,8 +5,8 @@
 #   bash scripts/package.sh
 #
 # It produces, under dist/:
-#   caic-lab-images.tar.gz   the 4 built Docker images (so student machines need
-#                            no internet to run the labs)
+#   caic-lab-images.tar.gz   every lab Docker image incl. the OWASP Juice Shop
+#                            arena (so student machines need no internet to run)
 #   caic-cyberlab.tar.gz     the project (code, lessons, labs, worksheets, docs)
 #   INSTALL-OFFLINE.txt      copy-paste install steps for each student machine
 #
@@ -17,7 +17,10 @@ cd "$ROOT"
 DIST="$ROOT/dist"
 mkdir -p "$DIST"
 
-IMAGES=(caic-target:1.0 caic-labdns:1.0 caic-m4web:1.0 caic-aisandbox:1.0)
+# Every image the labs launch, including the RT intrusion target and the
+# always-on OWASP Juice Shop web-attack arena. Keep in sync with labs/*/.
+IMAGES=(caic-target:1.0 caic-labdns:1.0 caic-m4web:1.0 caic-aisandbox:1.0 \
+        caic-rtweb:1.0 bkimminich/juice-shop:v20.2.0)
 
 say() { printf '\n\033[1;35m▶ %s\033[0m\n' "$*"; }
 ok()  { printf '  \033[32m✔\033[0m %s\n' "$*"; }

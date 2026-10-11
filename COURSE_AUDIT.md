@@ -12,13 +12,13 @@ Five intensive days · 11 modules · *Generated 2026-10-11*
 
 | Measure | Count |
 |---------|-------|
-| Modules (incl. Day-1 orientation) | 12 |
-| Teaching lessons | 12 |
-| Total lesson word count | ~55,476 words |
-| In-lesson diagrams (SVG + ASCII) | 28 |
-| Hands-on graded labs | 11 |
-| Total graded lab tasks (checks) | 164 |
-| Deliverable worksheet templates | 15 |
+| Modules (incl. Day-1 orientation) | 13 |
+| Teaching lessons | 13 |
+| Total lesson word count | ~56,899 words |
+| In-lesson diagrams (SVG + ASCII) | 29 |
+| Hands-on graded labs | 12 |
+| Total graded lab tasks (checks) | 173 |
+| Deliverable worksheet templates | 16 |
 | Module knowledge-check quizzes | 11 (33 questions) |
 | Final exam questions | 12 |
 | Baseline diagnostic questions | 6 |
@@ -33,6 +33,7 @@ Every lab is **per-student randomised** (each student gets unique flags, credent
 |--------|-----|-------|-------:|--------------------|--------------|
 | **M0** | 1 | Orientation, Kali Linux & the Command Line | 5,913 w | — | — |
 | **RT** | 1 | Red Team Primer — Your First Hack | 2,330 w | 10 tasks | 1 template(s) |
+| **JS** | 1 | Web Attack Arena — OWASP Juice Shop | 1,423 w | 9 tasks | 1 template(s) |
 | **M1** | 1 | Threat Landscape & Cyber Threat Intelligence | 5,617 w | 19 tasks | 1 template(s) |
 | **M2** | 1 | Institutional Cyber Risk & Digital Resilience | 3,253 w | 17 tasks | 2 template(s) |
 | **M3** | 2 | Network, Endpoint & Identity Security | 6,654 w | 16 tasks | 1 template(s) |
@@ -117,6 +118,46 @@ Graded tasks (10 — the student is assessed on each; «your value» marks a per
 *Per-student randomised variables (3): root_flag, ssh_pass, user_flag.*
 
 **Deliverable template(s):** `rt-first-hack-report.md`
+
+---
+
+### JS — Web Attack Arena — OWASP Juice Shop
+*Day 1*
+
+**Format:** ~1,423-word lesson · 1 diagram(s) · 3 teaching callouts · 1 worked command/example blocks.
+
+**Topics taught (the lesson's own chapters):**
+
+- Why the Web App Is the Front Door
+- How SQL Injection Works
+- Hands-On: Break In (follow along)
+- Flip to Defender — The Fix
+
+*Plus learning aids in every lesson: Key takeaways, Check yourself, Glossary.*
+
+**Frameworks / technique IDs referenced:** T1190
+
+**Hands-on lab — Web Attack Arena — Break Into OWASP Juice Shop**  
+*Live isolated range on `10.13.8.0/24` · ~60 min · 9 graded tasks · tools: browser, curl, nmap, burpsuite*
+
+> Hack a real, deliberately-vulnerable web application the way attackers hit institutional portals every day. OWASP Juice Shop is the world's most famous training target — a modern Angular + Node/Express single-page app riddled with the OWASP Top 10. Browse it, fingerprint its stack, find the hidden challenge scoreboard, then perform a classic SQL-injection login bypass to log in as the administrator without a password — the #1 way public web apps get breached (MITRE ATT&CK T1190). Finally, flip to defender and name the one-line code fix. The server is already running the moment you open the lab — no setup.
+
+Targets:
+- `10.13.8.10` **juice-shop** — OWASP Juice Shop web app — http://10.13.8.10:3000  (your authorised target)
+
+Graded tasks (9 — the student is assessed on each; «your value» marks a per-student randomised answer):
+
+1. The Juice Shop web app is reachable on 10.13.8.10:3000
+2. Open http://10.13.8.10:3000 in your browser. What is this vulnerable application called?
+3. The app leaks its exact version through an admin REST endpoint. Find it: what version is running?
+4. Juice Shop hides a challenge scoreboard that is not linked in the menu. What is its route/path?
+5. On the Login page, inject SQL into the EMAIL field to log in as the first user WITHOUT a password. What payload works?
+6. That bypass logs you in as the administrator. What is the admin account's email address?
+7. What class of web vulnerability did the login bypass exploit? (use the OWASP Top 10 name)
+8. Name the primary code-level fix that would have stopped this injection.
+9. Which MITRE ATT&CK technique covers breaking in by exploiting an internet-facing web app like this?
+
+**Deliverable template(s):** `js-webapp-pentest.md`
 
 ---
 

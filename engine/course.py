@@ -7,6 +7,7 @@ from __future__ import annotations
 COURSE_MAP = [
     ("m0",  1, "Orientation, Kali Linux & the Command Line", False),
     ("rt",  1, "Red Team Primer — Your First Hack", True),
+    ("js",  1, "Web Attack Arena — OWASP Juice Shop", True),
     ("m1",  1, "Threat Landscape & Cyber Threat Intelligence", True),
     ("m2",  1, "Institutional Cyber Risk & Digital Resilience", True),
     ("m3",  2, "Network, Endpoint & Identity Security", True),
