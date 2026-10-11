@@ -37,6 +37,17 @@ TOOLS = [
              "checks for specific vulnerabilities and misconfigurations.",
      "usage": "Start broad (host discovery), then narrow to services on the hosts "
               "that matter. Save output as evidence. Authorised targets only.",
+     "how": "Nmap sends crafted probe packets and reads the replies. A SYN scan sends "
+            "a TCP SYN: a SYN-ACK back means the port is OPEN, a RST means CLOSED, and "
+            "silence means FILTERED (a firewall dropped it). Version detection then "
+            "talks to each open port and matches the banner against a database to name "
+            "the software and version.",
+     "workflow": [
+        "Discover live hosts: `nmap -sn 10.13.3.0/24`.",
+        "Enumerate services on the ones that matter: `nmap -sV -p- <host>`.",
+        "Investigate a specific weakness with a targeted NSE script (e.g. ftp-anon).",
+        "Save everything as evidence: add `-oA scanname`.",
+        "Read the VERSION column — that's where the finding (old/unauth service) is."],
      "commands": [
         {"cmd": "nmap -sn 10.13.3.0/24", "desc": "Ping sweep — which hosts are alive (no port scan)."},
         {"cmd": "nmap -sV -p 1-1000 10.13.3.10", "desc": "Scan top 1000 ports with service/version detection."},
@@ -54,6 +65,16 @@ TOOLS = [
      "usage": "Open a .pcap, apply a DISPLAY filter to cut noise, then follow "
               "streams. Hunt for C2 beaconing (same destination, fixed interval), "
               "DNS anomalies and cleartext credentials.",
+     "how": "Wireshark captures raw frames and dissects each one through every "
+            "protocol layer, then reassembles related packets into conversations. "
+            "A capture filter decides what is recorded (and is lost if omitted); a "
+            "display filter is a non-destructive view over what you already captured.",
+     "workflow": [
+        "Open the capture; apply a display filter like `dns` to cut the noise.",
+        "Spot the one host repeatedly resolving an odd domain — watch the time delta (a beacon is regular).",
+        "Right-click a packet → Follow → TCP Stream to read a whole conversation (where cleartext creds fall out).",
+        "Use Statistics → Conversations (sort by bytes) to find a big exfil, or Protocol Hierarchy for what's in the capture.",
+        "Export objects / note the indicators for your report."],
      "commands": [
         {"cmd": "wireshark capture.pcap &", "desc": "Open a capture in the GUI."},
         {"cmd": "dns", "desc": "Display filter: show only DNS (spot beaconing)."},
@@ -214,6 +235,17 @@ TOOLS = [
              "vulnerability is genuinely exploitable.",
      "usage": "In msfconsole, search for a module, set its options (RHOSTS, "
               "payload), and run — on authorised targets only.",
+     "how": "Metasploit separates the exploit (the flaw it abuses) from the payload "
+            "(what runs after) from the options (target, port, listener). You pick an "
+            "exploit module, attach a payload (e.g. Meterpreter — an in-memory agent), "
+            "set RHOSTS/LHOST, and run; a handler catches the resulting session for "
+            "post-exploitation. The same model powers its scanner and post modules.",
+     "workflow": [
+        "`msfconsole -q`, then `search` for a module matching the service/CVE you found.",
+        "`use <module>`; `show options` to see what it needs.",
+        "`set RHOSTS <target>` (and payload/LHOST for exploits); `check` if supported.",
+        "`run` — on confirmed-authorised targets only.",
+        "On success, `sessions -i <id>` to interact; use post modules to gather evidence."],
      "commands": [
         {"cmd": "msfconsole -q", "desc": "Start the console (quiet)."},
         {"cmd": "search type:exploit apache", "desc": "Find modules by keyword."},
@@ -341,6 +373,424 @@ TOOLS = [
         {"cmd": "md5sum / sha1sum file", "desc": "Other algorithms (SHA-256 is preferred today)."}],
      "tips": ["Prefer SHA-256 — MD5 and SHA-1 are broken for collision resistance.",
               "A matching before/after hash is what makes your findings defensible."]},
+
+    # ── Powerful tools for the career ahead (deep "learn it here" entries) ──
+    {"name": "Maltego", "cat": "OSINT & Link Analysis", "modules": "Extends M1 (OSINT)",
+     "desc": "The industry-standard graph tool for open-source intelligence and link "
+             "analysis. You start from one 'entity' (a person, domain, email, company, "
+             "IP) and run 'transforms' that discover related entities, drawing the whole "
+             "web of connections as a visual graph you can keep pivoting on.",
+     "how": "Everything is an entity (a node) and a transform (an automated query that "
+            "takes an entity and returns related ones — e.g. 'domain → DNS names', "
+            "'email → breaches', 'person → social profiles'). Transforms call data "
+            "sources (public records, DNS, breach data, your own) and plot the results, "
+            "so one click fans out dozens of new leads you can transform again.",
+     "usage": "Install the free Community Edition, register a free account, drop your "
+              "starting entity on the graph, right-click it and run transforms, then "
+              "pivot on whatever looks interesting. Investigate only what you're "
+              "authorised to.",
+     "workflow": [
+        "Open Maltego CE and start a new graph.",
+        "Drag an entity from the palette (e.g. Domain) and set it to your target, e.g. lab-corp.com.gh.",
+        "Right-click → run a transform set (e.g. 'DNS from Domain', 'To Email addresses').",
+        "New entities appear linked to the first — right-click those and transform again to go deeper.",
+        "Select nodes to see properties; use the layout buttons to make the picture readable.",
+        "Export the graph/report as your OSINT evidence."],
+     "commands": [
+        {"cmd": "(GUI tool — no CLI)", "desc": "Maltego is graph-driven; you work in its canvas."},
+        {"cmd": "Right-click entity → Run Transform", "desc": "The core action: expand an entity into related ones."},
+        {"cmd": "Machines → run a Machine", "desc": "Chain many transforms automatically (e.g. 'Footprint L1')."}],
+     "tips": ["The free Community Edition is enough to learn the whole model.",
+              "Think in 'entity → transform → new entities'; that loop is the entire tool.",
+              "It visualises the same passive-recon you do by hand in M1 with dig/whois/theHarvester."],
+     "install": "Download Maltego CE from maltego.com (also ships on Kali). Register a free Community account on first launch.",
+     "learn": "docs.maltego.com"},
+
+    {"name": "SpiderFoot", "cat": "OSINT Automation", "modules": "Extends M1 (OSINT)",
+     "desc": "An automation engine that runs a target through 200+ OSINT data sources at "
+             "once — DNS, WHOIS, breach data, certificates, dark-web mentions, open "
+             "ports — and correlates everything into one searchable result set, through "
+             "a clean web UI.",
+     "how": "You give it a 'seed' (domain, IP, email, name). Its modules each query one "
+            "data source; results from one module become inputs to others, so it "
+            "spiders outward automatically and links findings (this IP → this domain → "
+            "this breach) without you running each query by hand.",
+     "usage": "Start the web server, open the UI, create a scan with your seed and a use "
+              "case (e.g. 'Footprint' / 'Investigate'), run it, then browse the "
+              "correlations and export.",
+     "workflow": [
+        "Run `spiderfoot -l 127.0.0.1:5001` and open the URL in a browser.",
+        "New Scan → enter the target seed → pick a use case (Footprint for breadth).",
+        "Start the scan and watch modules populate results live.",
+        "Browse by data type (Emails, Hosts, Vulnerabilities…) or the correlation view.",
+        "Export CSV/GEXF for your report."],
+     "commands": [
+        {"cmd": "spiderfoot -l 127.0.0.1:5001", "desc": "Start the web UI on localhost:5001."},
+        {"cmd": "spiderfoot -s example.com -t DOMAIN_NAME", "desc": "Run a scan from the command line."},
+        {"cmd": "spiderfoot -M", "desc": "List all available modules."}],
+     "tips": ["Great first OSINT tool — the web UI makes the whole discipline visible.",
+              "Turn off intrusive modules for purely passive recon.",
+              "'Investigate' and 'Footprint' use cases are the two you'll start with."],
+     "install": "Pre-installed on Kali, or: pip install spiderfoot / clone github.com/smicallef/spiderfoot.",
+     "learn": "github.com/smicallef/spiderfoot"},
+
+    {"name": "Recon-ng", "cat": "OSINT Framework", "modules": "Extends M1 (OSINT)",
+     "desc": "A reconnaissance framework that feels like Metasploit but for OSINT: a "
+             "modular console where you load modules, set options and run them, with all "
+             "results stored in a workspace database you can report on.",
+     "how": "Everything lives in a workspace (a SQLite DB). You add a 'seed' to a table "
+            "(e.g. domains), load a module (e.g. hackertarget host lookup), set its "
+            "source to that table, and run — results are written back to tables "
+            "(hosts, contacts, credentials) that feed the next module.",
+     "usage": "Create a workspace, add seeds, use the marketplace to install modules, "
+              "load + run them, then generate a report.",
+     "workflow": [
+        "`recon-ng` → `workspaces create lab-corp`.",
+        "`marketplace install all` (or install the specific modules you need).",
+        "`db insert domains` → add lab-corp.com.gh.",
+        "`modules load recon/domains-hosts/hackertarget` → `run`.",
+        "`show hosts` to see results; `modules load reporting/html` → `run` for a report."],
+     "commands": [
+        {"cmd": "workspaces create <name>", "desc": "Isolate an investigation in its own DB."},
+        {"cmd": "marketplace search / install", "desc": "Find and install modules."},
+        {"cmd": "modules load <path> ; options set ; run", "desc": "The load → configure → run loop."},
+        {"cmd": "show hosts / contacts", "desc": "View what's been gathered so far."}],
+     "tips": ["If you know Metasploit's console, Recon-ng is instantly familiar.",
+              "Some modules need free API keys (`keys add ...`); many work without.",
+              "The workspace DB means you can stop and resume an investigation."],
+     "install": "Pre-installed on Kali, or clone github.com/lanmaster53/recon-ng.",
+     "learn": "github.com/lanmaster53/recon-ng/wiki"},
+
+    {"name": "Shodan", "cat": "Attack-Surface Search", "modules": "Extends M1 (recon)",
+     "desc": "A search engine for internet-connected devices. It continuously scans the "
+             "whole internet and indexes what each IP exposes — banners, services, "
+             "versions, certificates — so you can search for exposed assets the way "
+             "Google searches web pages.",
+     "how": "Shodan's scanners connect to ports across the internet and record the "
+            "service banner each returns. You query that index with filters (port, "
+            "product, country, org), and it returns the matching hosts — a defender's "
+            "early-warning tool for finding their own exposed assets before attackers do.",
+     "usage": "Use the website or the CLI with a free API key. VIEW ONLY — Shodan shows "
+              "you what is already public; never connect to or attack anything you find "
+              "that you don't own (Act 1038).",
+     "workflow": [
+        "Make a free account at shodan.io; copy your API key.",
+        "`shodan init <API_KEY>` once.",
+        "Search your OWN org's IP range / domain to see what you expose.",
+        "Filter down (port:, product:, org:, country:GH) to find the risky exposures.",
+        "Feed findings into your own asset inventory and remediation list."],
+     "commands": [
+        {"cmd": "shodan init <API_KEY>", "desc": "Store your API key once."},
+        {"cmd": "shodan host 8.8.8.8", "desc": "Everything Shodan knows about one IP."},
+        {"cmd": "shodan search \"port:3389 country:GH\"", "desc": "Find exposed RDP in a country (example)."},
+        {"cmd": "shodan domain example.com", "desc": "Subdomains and exposed services for a domain."}],
+     "tips": ["Use it to audit YOUR OWN exposure monthly — before someone else does.",
+              "It only reports what's already public; looking is fine, touching is not.",
+              "Censys is a close alternative with similar power."],
+     "install": "Website: shodan.io. CLI: pip install shodan (needs a free API key).",
+     "learn": "help.shodan.io"},
+
+    {"name": "OWASP Amass", "cat": "Attack-Surface Mapping", "modules": "Extends M1/M3",
+     "desc": "The leading open-source tool for mapping an organisation's external "
+             "attack surface — especially subdomain discovery — by combining dozens of "
+             "passive sources with optional active DNS techniques.",
+     "how": "Passive mode asks many third-party data sources (certificate logs, search "
+            "engines, DNS databases) for names under a domain and merges them. Active "
+            "mode additionally resolves and brute-forces names and can attempt zone "
+            "transfers — so you move from 'what others already know' to 'what actually "
+            "resolves right now'.",
+     "usage": "Start passive (no packets to the target), review the names, then go "
+              "active only against assets you're authorised to test.",
+     "workflow": [
+        "`amass enum -passive -d example.com` to gather names quietly.",
+        "Review the list — unexpected subdomains (vpn., dev., old.) are the gold.",
+        "`amass enum -active -d example.com` (authorised targets) to confirm what resolves.",
+        "`amass viz` to produce a graph of the discovered surface."],
+     "commands": [
+        {"cmd": "amass enum -passive -d example.com", "desc": "Passive subdomain discovery (quiet)."},
+        {"cmd": "amass enum -active -d example.com", "desc": "Active resolution + brute force (authorised only)."},
+        {"cmd": "amass intel -org 'Acme'", "desc": "Find domains/ranges belonging to an org."},
+        {"cmd": "amass db -names -d example.com", "desc": "Show results stored from earlier runs."}],
+     "tips": ["Passive first, always — it's recon nobody can see.",
+              "Forgotten subdomains are the classic foothold; this is how you find yours.",
+              "Pairs naturally with the DNS work you do in M1."],
+     "install": "Pre-installed on Kali, or: github.com/owasp-amass/amass (releases).",
+     "learn": "github.com/owasp-amass/amass"},
+
+    {"name": "OWASP ZAP", "cat": "Web App Testing", "modules": "Extends M4 (web)",
+     "desc": "The free, open-source web-application security scanner from OWASP — a "
+             "full-featured alternative to Burp Suite. It acts as an intercepting proxy "
+             "and can passively and actively scan a web app for vulnerabilities.",
+     "how": "You browse the target through ZAP, which sits as a proxy between your "
+            "browser and the app, recording every request/response. It passively flags "
+            "issues as you browse, can 'spider' the app to map every page, and can "
+            "'active-scan' by replaying requests with malicious payloads to confirm "
+            "flaws like XSS and SQLi.",
+     "usage": "Point your browser's proxy at ZAP (or use its built-in browser), browse "
+              "the authorised app, let it spider, then run an active scan and triage the "
+              "alerts.",
+     "workflow": [
+        "Launch ZAP → 'Automated Scan' with the target URL for a quick pass.",
+        "Or: set your browser proxy to ZAP, browse the app so ZAP learns the pages.",
+        "Right-click the site → Spider to map it; review passive alerts.",
+        "Right-click → Active Scan to confirm injectable issues (authorised only).",
+        "Work the Alerts tab by risk; export the report."],
+     "commands": [
+        {"cmd": "zaproxy", "desc": "Launch the ZAP GUI."},
+        {"cmd": "zap.sh -quickurl http://target -quickout report.html", "desc": "Headless quick scan to a report."},
+        {"cmd": "(GUI) Automated Scan", "desc": "Point-and-shoot scan of a URL."}],
+     "tips": ["Free and beginner-friendly — the best way to learn proxy-based web testing.",
+              "Passive scanning (just browsing through ZAP) is safe and surprisingly revealing.",
+              "Only active-scan targets you own or are authorised to test."],
+     "install": "Pre-installed on Kali (zaproxy), or download from zaproxy.org.",
+     "learn": "zaproxy.org/docs"},
+
+    {"name": "Ghidra", "cat": "Reverse Engineering", "modules": "Beyond M6 (malware RE)",
+     "desc": "A free, powerful software reverse-engineering suite released by the NSA. "
+             "It disassembles and decompiles binaries (malware, firmware, unknown "
+             "executables) so you can read what they actually do — with a remarkably "
+             "good C-like decompiler.",
+     "how": "You import a binary; Ghidra analyses it, identifies functions, and produces "
+            "both assembly and a readable decompiled C view side by side. You navigate "
+            "the call graph, rename variables/functions as you understand them, and "
+            "follow strings and imports to find the interesting behaviour (network "
+            "calls, file writes, persistence).",
+     "usage": "Create a project, import the sample, let auto-analysis run, then start "
+              "from strings/imports and read the decompiler. Analyse malware only in an "
+              "isolated VM.",
+     "workflow": [
+        "New Project → import the binary → let auto-analysis complete.",
+        "Open the Symbol Tree / Strings window to find interesting anchors (URLs, 'CreateService').",
+        "Double-click a string's reference to jump to the function that uses it.",
+        "Read the Decompiler pane; rename functions/variables as meaning emerges.",
+        "Trace from main() or from the suspicious API calls to understand the logic."],
+     "commands": [
+        {"cmd": "ghidraRun", "desc": "Launch Ghidra."},
+        {"cmd": "(GUI) File → Import File", "desc": "Load a binary into a project."},
+        {"cmd": "(GUI) Window → Decompiler", "desc": "The readable C-like view of a function."}],
+     "tips": ["The decompiler makes RE approachable without years of assembly.",
+              "ALWAYS reverse malware in an isolated, snapshotted VM with no network.",
+              "Start from strings and imports — they point straight at the behaviour."],
+     "install": "Download from ghidra-sre.org (needs a JDK). Also packaged on Kali.",
+     "learn": "ghidra-sre.org"},
+
+    {"name": "Suricata", "cat": "Intrusion Detection (IDS/IPS)", "modules": "Extends M3/M4 (detection)",
+     "desc": "A high-performance open-source IDS/IPS and network-security-monitoring "
+             "engine. It inspects live or captured traffic against rules and raises "
+             "alerts — the engine behind the detection you design in M3/M4.",
+     "how": "Suricata reads packets (from an interface or a pcap), reassembles flows, "
+            "and matches them against signature rules (and protocol logic). A rule says "
+            "'alert if a DNS query ends in .ddns.net from an internal host more than N "
+            "times' — when traffic matches, it logs an alert (eve.json) you can ship to "
+            "a SIEM.",
+     "usage": "Run it over a pcap to test rules offline, or on an interface for live "
+              "monitoring; write/enable rules for the behaviours you care about.",
+     "workflow": [
+        "Write or enable rules in /etc/suricata/rules (e.g. the C2-beacon rule from M3).",
+        "Test against a capture: `suricata -r capture.pcap -l ./out`.",
+        "Read ./out/eve.json (or fast.log) for the alerts that fired.",
+        "Tune the rule (thresholds, allow-lists) to cut false positives.",
+        "Deploy on a span/tap interface for live detection; forward eve.json to Wazuh/ELK."],
+     "commands": [
+        {"cmd": "suricata -r capture.pcap -l ./out", "desc": "Run rules against a saved capture."},
+        {"cmd": "suricata -i eth0", "desc": "Live monitoring on an interface."},
+        {"cmd": "suricata -T", "desc": "Test the configuration and rules for errors."},
+        {"cmd": "jq . out/eve.json", "desc": "Read the JSON event/alert log."}],
+     "tips": ["Testing rules against a pcap is the fastest way to learn detection engineering.",
+              "Behaviour-based rules (a beacon pattern) beat single-IP rules — Pyramid of Pain.",
+              "Snort is the close cousin with similar rule syntax."],
+     "install": "Pre-installed on Kali, or: apt install suricata; rules via suricata-update.",
+     "learn": "docs.suricata.io"},
+
+    {"name": "Greenbone / OpenVAS", "cat": "Vulnerability Scanning", "modules": "Extends M4",
+     "desc": "A full open-source vulnerability scanner (the Greenbone Community Edition, "
+             "formerly OpenVAS). It probes hosts against a huge, updated feed of "
+             "vulnerability tests and produces prioritised, CVSS-scored reports — the "
+             "tool behind the 'discover' step of the M4 vulnerability-management loop.",
+     "how": "A scanner engine runs tens of thousands of network vulnerability tests "
+            "(NVTs) against each target — checking versions, configurations and known "
+            "CVEs — and a manager stores the results, scores them with CVSS and renders "
+            "reports. You drive it from a web UI (the Greenbone Security Assistant).",
+     "usage": "Set up a scan target (authorised IPs), run a Full and Fast scan, then "
+              "triage the report with the M4 model (CVSS + KEV + exposure).",
+     "workflow": [
+        "Open the Greenbone web UI; create a Target (your authorised IP range).",
+        "Create a Task using the 'Full and Fast' scan config → start it.",
+        "When done, open the report; sort findings by severity.",
+        "Re-prioritise with context: internet-facing? in CISA KEV? critical asset? (M4).",
+        "Export the report into your remediation register and re-scan after fixing (verify)."],
+     "commands": [
+        {"cmd": "gvm-setup / gvm-start", "desc": "Set up and start the Greenbone stack."},
+        {"cmd": "(web UI) Scans → Tasks → New", "desc": "Create and launch a scan."},
+        {"cmd": "(web UI) Scans → Reports", "desc": "Review CVSS-scored findings."}],
+     "tips": ["Scanning finds the flaws; the skill (M4) is prioritising them by context.",
+              "Credentialed scans find far more than unauthenticated ones.",
+              "Only scan assets you own or are authorised to test."],
+     "install": "Pre-installed on Kali (run `gvm-setup`), or Greenbone CE from greenbone.net.",
+     "learn": "greenbone.net / docs.greenbone.net"},
+
+    {"name": "YARA", "cat": "Malware Identification", "modules": "Beyond M6 (threat hunting)",
+     "desc": "A pattern-matching tool that lets analysts write rules to identify and "
+             "classify files (especially malware) by textual or binary patterns. "
+             "'The pattern-matching Swiss army knife for malware researchers.'",
+     "how": "You write a rule describing strings and/or byte sequences and a condition "
+            "('any 2 of these strings', 'this header at offset 0'). YARA scans files or "
+            "memory and flags anything whose content satisfies a rule — so one good rule "
+            "catches a whole malware family across samples.",
+     "usage": "Write or download rules, then scan files, directories or a memory image "
+              "to hunt for known-bad patterns.",
+     "workflow": [
+        "Identify tell-tale strings/bytes in a known sample (e.g. its C2 URL, a mutex).",
+        "Write a .yar rule: a `strings:` block + a `condition:`.",
+        "Scan with `yara rule.yar suspicious/` across files or a memory dump.",
+        "Refine the condition to avoid false positives, then share the rule with your team."],
+     "commands": [
+        {"cmd": "yara rule.yar /path/to/scan", "desc": "Scan files/dirs against a rule."},
+        {"cmd": "yara -r rules/ samples/", "desc": "Recursively apply many rules."},
+        {"cmd": "yara rule.yar 1234", "desc": "Scan a running process by PID (memory)."}],
+     "tips": ["YARA rules turn 'I've seen this once' into 'we detect it everywhere'.",
+              "Huge free rule sets exist (e.g. the YARA-Rules project) to learn from.",
+              "Pairs with M6 memory forensics — scan memory.raw for known families."],
+     "install": "Pre-installed on Kali, or: apt install yara / pip install yara-python.",
+     "learn": "virustotal.github.io/yara"},
+
+    {"name": "MISP", "cat": "Threat Intelligence Platform", "modules": "Extends M1 (CTI)",
+     "desc": "The leading open-source Threat-Intelligence Platform. Institutions use it "
+             "to store, structure and SHARE indicators of compromise (IPs, domains, "
+             "hashes, TTPs) as 'events', and to feed those indicators automatically into "
+             "their defences.",
+     "how": "Analysts record an incident as an event containing attributes (the IOCs) "
+            "and context (ATT&CK techniques, confidence). MISP correlates attributes "
+            "across events (so you see 'this IP appears in three campaigns'), and "
+            "communities share events with each other via synchronised feeds and an API "
+            "that pushes IOCs to firewalls/SIEMs.",
+     "usage": "Browse/search events, add your own with their IOCs and ATT&CK tags, and "
+              "subscribe to trusted feeds; let correlations and the API do the rest.",
+     "workflow": [
+        "Log in to your MISP; search existing events for an indicator you're triaging.",
+        "Create an Event for a new incident; add attributes (the IOCs) and galaxy tags (ATT&CK).",
+        "Review auto-correlations linking your IOCs to other events.",
+        "Publish/share with your community; export IOCs (STIX/CSV) or push via API to defences."],
+     "commands": [
+        {"cmd": "(web UI) Add Event → add Attributes", "desc": "Record an incident and its IOCs."},
+        {"cmd": "(web UI) Galaxies", "desc": "Tag with ATT&CK techniques / threat actors."},
+        {"cmd": "PyMISP (API)", "desc": "Automate IOC ingest/export into your tooling."}],
+     "tips": ["This is what 'a threat-intel platform' in M1 actually looks like in practice.",
+              "The value grows with sharing — join sector/CERT communities.",
+              "Tag everything with ATT&CK so indicators carry behaviour, not just values."],
+     "install": "Try the demo at misp-project.org; deploy via the official docker/VM images.",
+     "learn": "misp-project.org"},
+
+    {"name": "Gophish", "cat": "Phishing Simulation (authorised)", "modules": "Extends M5 (awareness)",
+     "desc": "An open-source phishing-simulation framework used by security teams to run "
+             "AUTHORISED phishing-awareness campaigns against their own staff and measure "
+             "who clicks — turning M5's human-factor lessons into a measurable control.",
+     "how": "You build a campaign from four pieces: a sending profile (SMTP), an email "
+            "template, a landing page, and a target group. Gophish sends the emails, "
+            "tracks opens/clicks/submissions via a unique link per recipient, and shows "
+            "the results on a dashboard — so you can report the phishing-failure-rate "
+            "metric from M9.",
+     "usage": "Only ever against your OWN organisation with leadership sign-off. Build "
+              "the four pieces, launch, and report the click/submit rates to drive "
+              "training.",
+     "workflow": [
+        "Start gophish; log in to the admin UI.",
+        "Create a Sending Profile (your test SMTP), an Email Template and a Landing Page.",
+        "Import your staff list as a Users & Groups entry.",
+        "Launch a Campaign; watch opens/clicks/credential-submits on the dashboard.",
+        "Report the failure rate and feed it into awareness training (M5/M9)."],
+     "commands": [
+        {"cmd": "./gophish", "desc": "Start the server; open the admin UI (default :3333)."},
+        {"cmd": "(web UI) Campaigns → New", "desc": "Assemble and launch a simulation."},
+        {"cmd": "(web UI) Dashboard", "desc": "Opens / clicks / submitted-data per recipient."}],
+     "tips": ["AUTHORISED internal use only — phishing your own staff needs written sign-off; anything else is illegal.",
+              "The goal is a trend you drive DOWN over time, not to shame people.",
+              "Pair with a short just-in-time training page for anyone who clicks."],
+     "install": "Download the release binary from getgophish.com (single binary).",
+     "learn": "docs.getgophish.com"},
+
+    {"name": "BloodHound", "cat": "Active Directory Attack Paths", "modules": "Extends M3 (identity)",
+     "desc": "A tool that maps the hidden attack paths inside an Active Directory domain "
+             "as a graph, revealing how a foothold on one ordinary machine can reach "
+             "Domain Admin through chains of permissions nobody designed on purpose — "
+             "the M3 lateral-movement lesson made visible.",
+     "how": "A collector (SharpHound) gathers AD data — users, groups, sessions, ACLs, "
+            "local-admin rights — and BloodHound loads it into a graph database. It then "
+            "answers questions like 'shortest path from this user to Domain Admins' by "
+            "walking edges (MemberOf, AdminTo, HasSession, CanRDP), exposing the "
+            "escalation routes defenders must cut.",
+     "usage": "Run SharpHound (in an authorised AD/lab) to collect, import the data into "
+              "BloodHound, and run the built-in queries to find and then CLOSE the paths.",
+     "workflow": [
+        "Collect with SharpHound in the authorised domain → produces JSON/zip.",
+        "Import the zip into the BloodHound UI.",
+        "Run a pre-built query, e.g. 'Shortest Paths to Domain Admins'.",
+        "Trace an edge (why can this user admin that box?) — that's the misconfig to fix.",
+        "Re-collect after remediation to confirm the path is gone."],
+     "commands": [
+        {"cmd": "SharpHound -c All", "desc": "Collect AD data (authorised domain only)."},
+        {"cmd": "(UI) upload the collection zip", "desc": "Load the graph."},
+        {"cmd": "(UI) Pre-Built Analytics Queries", "desc": "Find paths to high-value targets."}],
+     "tips": ["Attackers use it to find paths; defenders use it to DELETE them — same tool.",
+              "Tiering, LAPS and PAM (M3) are exactly what shorten these graphs.",
+              "Only ever run the collector against a domain you're authorised to assess."],
+     "install": "BloodHound Community Edition from specterops.io / github.com/SpecterOps/BloodHound.",
+     "learn": "bloodhound.specterops.io"},
+
+    {"name": "exiftool", "cat": "Metadata Forensics", "modules": "M5, M6",
+     "desc": "The definitive tool for reading (and writing) embedded metadata in almost "
+             "any file — photos, PDFs, Office documents. In an investigation it exposes "
+             "who authored a file, with what software, and exactly when — the evidence "
+             "that proves premeditation in M5.",
+     "how": "Files carry hidden metadata fields (EXIF in images, XMP/DocProps in "
+            "documents): Author, Create/Modify dates with timezone, GPS, camera/software. "
+            "exiftool parses each container format and prints these fields, so a "
+            "'Ghanaian supplier' document authored in a +07:00 timezone, days before it "
+            "was emailed, gives the attacker away.",
+     "usage": "Run it on any suspicious file and read the Author, Create Date (and its "
+              "UTC offset), and Producer/Creator fields. Also use it to SCRUB metadata "
+              "from files your own org publishes.",
+     "workflow": [
+        "`exiftool suspicious.pdf` — read every metadata field.",
+        "Note Author, Create Date + timezone offset, Creator/Producer.",
+        "Compare the create date to when the file was sent → premeditation (M5).",
+        "To defend: `exiftool -all= file` strips metadata before you publish."],
+     "commands": [
+        {"cmd": "exiftool file.pdf", "desc": "Dump all metadata from a file."},
+        {"cmd": "exiftool -Author -CreateDate file", "desc": "Read specific fields."},
+        {"cmd": "exiftool -time:all -a -G1 file", "desc": "All timestamps with their groups/timezones."},
+        {"cmd": "exiftool -all= file", "desc": "Strip all metadata (defensive scrubbing)."}],
+     "tips": ["The attacker is careful with the email and careless with the attachment — read the file.",
+              "'Created before sent' is the line that turns a dispute into proven fraud.",
+              "Scrub metadata from documents your organisation puts online."],
+     "install": "Pre-installed on Kali, or: apt install libimage-exiftool-perl.",
+     "learn": "exiftool.org"},
+
+    {"name": "bulk_extractor", "cat": "Forensic Carving", "modules": "M6",
+     "desc": "A digital-forensics tool that scans a disk image, memory dump or any blob "
+             "and automatically extracts useful features — email addresses, URLs, IPs, "
+             "credit-card numbers — into tidy per-type files, without needing to "
+             "understand the filesystem.",
+     "how": "It reads the raw bytes in parallel and runs 'scanners' that recognise "
+            "patterns (an email, a URL, a PAN) wherever they appear — including in "
+            "deleted, fragmented or unallocated space the filesystem can't see — and "
+            "writes each type to its own output file (url.txt, email.txt).",
+     "usage": "Point it at an image or RAM dump; read the categorised output files to "
+              "triage what indicators are present before deeper analysis.",
+     "workflow": [
+        "`bulk_extractor -o out memory.raw` to scan a RAM dump or disk image.",
+        "Read out/url.txt for C2/exfil URLs, out/email.txt for exfil addresses.",
+        "Cross-check hits against your other evidence (the M6 correlation step).",
+        "Use the histograms to see the most frequent indicators quickly."],
+     "commands": [
+        {"cmd": "bulk_extractor -o out evidence.img", "desc": "Scan an image into categorised feature files."},
+        {"cmd": "cat out/url.txt", "desc": "Extracted URLs (C2 / exfil candidates)."},
+        {"cmd": "cat out/email.txt", "desc": "Extracted email addresses."}],
+     "tips": ["It finds indicators even in unallocated space the filesystem has 'lost'.",
+              "A perfect triage pass before slow, targeted analysis.",
+              "Pairs with strings + Volatility in the M6 memory workflow."],
+     "install": "Pre-installed on Kali, or: apt install bulk-extractor.",
+     "learn": "github.com/simsong/bulk_extractor"},
 ]
 
 # Linux / Kali command reference (group, command, description). Mirrors the

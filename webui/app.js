@@ -469,12 +469,20 @@ function toolDetail(t) {
   const cmds = (t.commands || []).map(c =>
     `<div class="cmdline"><code>${esc(c.cmd)}</code><span class="dim" style="flex:2">${esc(c.desc)}</span><button data-c="${esc(c.cmd)}">copy</button></div>`).join("");
   const tips = (t.tips || []).map(x => `<li>${esc(x)}</li>`).join("");
+  const flow = (t.workflow || []).map((x, i) => `<li>${esc(x)}</li>`).join("");
   return `<div class="tool-detail">
     <p>${esc(t.desc || "")}</p>
+    ${t.how ? `<h4>How it works</h4><p class="muted">${esc(t.how)}</p>` : ""}
     ${t.usage ? `<h4>How to use it</h4><p class="muted">${esc(t.usage)}</p>` : ""}
+    ${flow ? `<h4>Typical workflow</h4><ol class="tool-flow">${flow}</ol>` : ""}
     ${cmds ? `<h4>Key commands</h4>${cmds}` : ""}
     ${tips ? `<h4>Practitioner tips</h4><ul>${tips}</ul>` : ""}
-    ${t.modules ? `<p class="dim" style="margin-top:10px">Used in: ${esc(t.modules)}</p>` : ""}
+    ${t.install ? `<h4>Getting it</h4><p class="muted">${esc(t.install)}</p>` : ""}
+    <p class="dim" style="margin-top:10px">
+      ${t.modules ? `Used in: ${esc(t.modules)}` : ""}
+      ${t.modules && t.learn ? " · " : ""}
+      ${t.learn ? `Learn more: ${esc(t.learn)}` : ""}
+    </p>
   </div>`;
 }
 function vMaterials() {
