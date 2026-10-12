@@ -2,7 +2,7 @@
 
 **Professional Certificate in Cybersecurity, AI & Digital Resilience**  
 Kofi Annan International Peacekeeping Training Centre (KAIPTC) · Cyber1Defense Communication Ltd  
-Five intensive days · 11 modules · *Generated 2026-10-11*
+Five intensive days · 11 modules · *Generated 2026-10-12*
 
 > **For external review.** This document is **auto-generated from the course repository** by `scripts/course_audit.py`. Every figure — word counts, topic lists, lab tasks, ATT&CK technique IDs, question counts — is read directly from the teaching files, lab manifests and assessment bank. It is not hand-written marketing; it can be regenerated and independently verified against the source at any time (see *How to verify* at the end).
 
@@ -14,8 +14,8 @@ Five intensive days · 11 modules · *Generated 2026-10-11*
 |---------|-------|
 | Modules (incl. Day-1 orientation) | 13 |
 | Teaching lessons | 13 |
-| Total lesson word count | ~56,899 words |
-| In-lesson diagrams (SVG + ASCII) | 29 |
+| Total lesson word count | ~61,610 words |
+| In-lesson diagrams (SVG + ASCII) | 31 |
 | Hands-on graded labs | 12 |
 | Total graded lab tasks (checks) | 173 |
 | Deliverable worksheet templates | 16 |
@@ -36,7 +36,7 @@ Every lab is **per-student randomised** (each student gets unique flags, credent
 | **JS** | 1 | Web Attack Arena — OWASP Juice Shop | 1,423 w | 9 tasks | 1 template(s) |
 | **M1** | 1 | Threat Landscape & Cyber Threat Intelligence | 5,617 w | 19 tasks | 1 template(s) |
 | **M2** | 1 | Institutional Cyber Risk & Digital Resilience | 3,253 w | 17 tasks | 2 template(s) |
-| **M3** | 2 | Network, Endpoint & Identity Security | 6,654 w | 16 tasks | 1 template(s) |
+| **M3** | 2 | Network, Endpoint & Identity Security | 11,365 w | 16 tasks | 1 template(s) |
 | **M4** | 2 | Vulnerability Management & SOC Operations | 5,580 w | 16 tasks | 1 template(s) |
 | **M5** | 3 | Cyber Fraud, BEC & Mobile Money Security | 4,990 w | 13 tasks | 1 template(s) |
 | **M6** | 3 | Digital Forensics & Incident Response | 5,174 w | 14 tasks | 2 template(s) |
@@ -269,15 +269,19 @@ Graded tasks (17 — the student is assessed on each; «your value» marks a per
 ### M3 — Network, Endpoint & Identity Security
 *Day 2*
 
-**Format:** ~6,654-word lesson · 3 diagram(s) · 16 teaching callouts · 8 worked command/example blocks.
+**Format:** ~11,365-word lesson · 5 diagram(s) · 23 teaching callouts · 24 worked command/example blocks.
 
 **Topics taught (the lesson's own chapters):**
 
 - A Network Is Conversations
 - Nmap — Seeing What Is Exposed
+- Active Enumeration — Making Services Talk
 - Traffic Analysis — Reading What Is Said
-- Endpoint Evidence — Interrogating the Suspect Host
-- Identity & Lateral Movement — How a Foothold Becomes a Catastrophe
+- Man-in-the-Middle & Layer-2 Attacks
+- Wireless Network Security
+- Endpoint Evidence & Security — Interrogating the Host
+- Password Attacks — Cracking Credentials
+- Identity & Active Directory Attacks — How a Foothold Becomes a Catastrophe
 - Defensive Architecture — Keeping Small Things Small
 - Detecting It — the Blue-Team View
 - Mapping the Chain to MITRE ATT&CK
@@ -286,7 +290,7 @@ Graded tasks (17 — the student is assessed on each; «your value» marks a per
 
 *Plus learning aids in every lesson: Common mistakes, Key takeaways, Check yourself, Glossary.*
 
-**Frameworks / technique IDs referenced:** T1003, T1021, T1036, T1040, T1046, T1071, T1071.004, T1078, T1543, T1550.002, T1558
+**Frameworks / technique IDs referenced:** T1003, T1003.006, T1021, T1036, T1040, T1046, T1053, T1053.003, T1053.005, T1059, T1068, T1071, T1071.004, T1078, T1087, T1098.004, T1110, T1110.003, T1135, T1218, T1543, T1543.002, T1543.003, T1546.003, T1547, T1547.001, T1548, T1550.002, T1557, T1557.001, T1557.002, T1558, T1558.003, T1558.004, TA0003
 
 **Hands-on lab — Network Compromise Investigation — Nmap, NSE & Wireshark**  
 *Live isolated range on `10.13.3.0/24` · ~120 min · 16 graded tasks · tools: nmap, nmap NSE, wireshark, tcpdump, netstat*
@@ -737,4 +741,4 @@ Nothing here needs to be taken on trust. An external reviewer can confirm every 
 4. **Validate the whole suite:** `python3 scripts/dry_run.py` brings every lab up, solves it against the per-student answer key, and tears it down (expect *ALL LABS PASS*); `python3 -m unittest discover -s tests` runs the engine test suite.
 5. **See the model answers:** `scripts/answer_key.py` writes the facilitator answer key for every lab and the assessment.
 
-*This audit is generated from the repository and reflects its exact state on 2026-10-11.*
+*This audit is generated from the repository and reflects its exact state on 2026-10-12.*
