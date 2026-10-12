@@ -14,8 +14,8 @@ Five intensive days · 11 modules · *Generated 2026-10-12*
 |---------|-------|
 | Modules (incl. Day-1 orientation) | 13 |
 | Teaching lessons | 13 |
-| Total lesson word count | ~61,610 words |
-| In-lesson diagrams (SVG + ASCII) | 31 |
+| Total lesson word count | ~64,774 words |
+| In-lesson diagrams (SVG + ASCII) | 32 |
 | Hands-on graded labs | 12 |
 | Total graded lab tasks (checks) | 173 |
 | Deliverable worksheet templates | 16 |
@@ -37,7 +37,7 @@ Every lab is **per-student randomised** (each student gets unique flags, credent
 | **M1** | 1 | Threat Landscape & Cyber Threat Intelligence | 5,617 w | 19 tasks | 1 template(s) |
 | **M2** | 1 | Institutional Cyber Risk & Digital Resilience | 3,253 w | 17 tasks | 2 template(s) |
 | **M3** | 2 | Network, Endpoint & Identity Security | 11,365 w | 16 tasks | 1 template(s) |
-| **M4** | 2 | Vulnerability Management & SOC Operations | 5,580 w | 16 tasks | 1 template(s) |
+| **M4** | 2 | Vulnerability Management & SOC Operations | 8,744 w | 16 tasks | 1 template(s) |
 | **M5** | 3 | Cyber Fraud, BEC & Mobile Money Security | 4,990 w | 13 tasks | 1 template(s) |
 | **M6** | 3 | Digital Forensics & Incident Response | 5,174 w | 14 tasks | 2 template(s) |
 | **M7** | 4 | AI Security, Deepfakes & Emerging Threats | 4,921 w | 12 tasks | 1 template(s) |
@@ -332,23 +332,25 @@ Graded tasks (16 — the student is assessed on each; «your value» marks a per
 ### M4 — Vulnerability Management & SOC Operations
 *Day 2*
 
-**Format:** ~5,580-word lesson · 3 diagram(s) · 13 teaching callouts · 8 worked command/example blocks.
+**Format:** ~8,744-word lesson · 4 diagram(s) · 19 teaching callouts · 15 worked command/example blocks.
 
 **Topics taught (the lesson's own chapters):**
 
 - Vulnerability Management Is a Loop
-- Web Assessment in Practice
-- Password Attacks — and Why Controls Are Mandatory
+- Scanning the Estate — Finding the Weaknesses
+- Validating Findings — Exploitation
+- Secure Credential Storage — and Why Controls Are Mandatory
 - The SOC and Alert Triage
 - Correlation — The Master Skill
 - Detection Engineering — Catching It, Not Just Finding It
+- Threat Hunting & Threat Intelligence
 - Mapping the Chain to MITRE ATT&CK
 - Scenarios — The Unpatched Flaw and the Weak Credential
 - The Worked Investigation (what the lab asks of you)
 
 *Plus learning aids in every lesson: Common mistakes, Key takeaways, Check yourself, Glossary.*
 
-**Frameworks / technique IDs referenced:** T1053, T1053.003, T1078, T1110, T1110.001, T1110.002, T1110.003, T1548, T1595, TA0004
+**Frameworks / technique IDs referenced:** T1053, T1053.003, T1053.005, T1078, T1110, T1110.001, T1110.002, T1110.003, T1190, T1548, T1595, T1595.002, TA0004
 
 **Hands-on lab — Vulnerability Management & SOC Operations**  
 *Live isolated range on `10.13.4.0/24` · ~150 min · 16 graded tasks · tools: nmap, nikto, gobuster, whatweb, hashcat, john, hydra, jq (Wazuh)*
