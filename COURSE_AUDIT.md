@@ -14,8 +14,8 @@ Five intensive days · 11 modules · *Generated 2026-10-13*
 |---------|-------|
 | Modules (incl. Day-1 orientation) | 13 |
 | Teaching lessons | 13 |
-| Total lesson word count | ~70,396 words |
-| In-lesson diagrams (SVG + ASCII) | 34 |
+| Total lesson word count | ~72,713 words |
+| In-lesson diagrams (SVG + ASCII) | 35 |
 | Hands-on graded labs | 12 |
 | Total graded lab tasks (checks) | 173 |
 | Deliverable worksheet templates | 16 |
@@ -40,7 +40,7 @@ Every lab is **per-student randomised** (each student gets unique flags, credent
 | **M4** | 2 | Vulnerability Management & SOC Operations | 8,744 w | 16 tasks | 1 template(s) |
 | **M5** | 3 | Cyber Fraud, BEC & Mobile Money Security | 7,983 w | 13 tasks | 1 template(s) |
 | **M6** | 3 | Digital Forensics & Incident Response | 7,803 w | 14 tasks | 2 template(s) |
-| **M7** | 4 | AI Security, Deepfakes & Emerging Threats | 4,921 w | 12 tasks | 1 template(s) |
+| **M7** | 4 | AI Security, Deepfakes & Emerging Threats | 7,238 w | 12 tasks | 1 template(s) |
 | **M8** | 4 | Data Protection, Privacy & Compliance | 3,778 w | 16 tasks | 2 template(s) |
 | **M9** | 5 | Cyber Governance & Business Continuity | 3,229 w | 16 tasks | 2 template(s) |
 | **M10** | 5 | Operation Cyber Resilience — Capstone | 4,037 w | 15 tasks | 1 template(s) |
@@ -494,23 +494,26 @@ Graded tasks (14 — the student is assessed on each; «your value» marks a per
 ### M7 — AI Security, Deepfakes & Emerging Threats
 *Day 4*
 
-**Format:** ~4,921-word lesson · 2 diagram(s) · 14 teaching callouts · 4 worked command/example blocks.
+**Format:** ~7,238-word lesson · 3 diagram(s) · 20 teaching callouts · 5 worked command/example blocks.
 
 **Topics taught (the lesson's own chapters):**
 
 - AI as Weapon, AI as Target
 - The LLM Attack Landscape
+- Agentic AI & Autonomous Agents — the New Frontier
 - The Frameworks Your Board Will Ask About
 - Securing an LLM Application
 - Red-Teaming & Evaluating AI
 - Beyond the Chatbot — Adversarial ML & Governance
 - Deepfakes — Why Detection Fails and Process Wins
+- Mapping the Chain to MITRE ATLAS
+- Hands-On Practicals — Do These Yourself
 - Scenarios — Synthetic Media, Real Money
 - The Worked Investigation (what the lab asks of you)
 
 *Plus learning aids in every lesson: Common mistakes, Key takeaways, Check yourself, Glossary.*
 
-**Frameworks / technique IDs referenced:** LLM01, LLM02, LLM03, LLM04, LLM05, LLM07, LLM08, LLM10
+**Frameworks / technique IDs referenced:** LLM01, LLM02, LLM03, LLM04, LLM05, LLM06, LLM07, LLM08, LLM10, T0051
 
 **Hands-on lab — AI Security — Prompt Injection, RAG Poisoning, Tool Exfil & Deepfakes**  
 *Live isolated range on `10.13.7.0/24` · ~120 min · 12 graded tasks · tools: curl, jq, ai-sandbox, exiftool*
