@@ -141,6 +141,35 @@ prompt = "Which MITRE ATT&CK technique covers the SSH brute force?"
 accept = ["T1110", "T1110.001", "T1110.003"]
 hint = "Credential Access → Brute Force"
 
+# ── Apply the toolkit (Module 4 §2–§3, §7–§8) ────────────────────────────────
+[[check]]
+id = "authenticated_scan"
+type = "string_any"
+prompt = "Name a vulnerability scanner you'd run for an AUTHENTICATED full-estate scan (not just the web)."
+accept = ["openvas", "greenbone", "nessus", "nuclei", "qualys", "rapid7", "insightvm"]
+hint = "Module 4 §2.1 — OpenVAS/Greenbone or Nessus log in to each host to find missing patches."
+
+[[check]]
+id = "validate_cmd"
+type = "string_any"
+prompt = "In Metasploit, which command VERIFIES a target is exploitable WITHOUT firing the exploit (so you report proven, not possible, risk)?"
+accept = ["check", "msf check", "the check command"]
+hint = "Module 4 §3 — validation before you escalate a scanner finding."
+
+[[check]]
+id = "container_scanner"
+type = "string_any"
+prompt = "Which tool scans a container image or a repo's dependencies for known-vulnerable packages (the Log4Shell class)?"
+accept = ["trivy", "grype", "snyk"]
+hint = "Module 4 §2.4 — the modern attack surface is dependencies & cloud, not just hosts."
+
+[[check]]
+id = "detection_test"
+type = "string_any"
+prompt = "Which free, ATT&CK-mapped toolset safely triggers techniques so you can confirm your detections actually fire?"
+accept = ["atomic red team", "atomic-red-team", "atomicredteam", "atomic red team (art)", "art"]
+hint = "Module 4 §7.3 — a detection you've never triggered is a hope; test it, map coverage on the ATT&CK Navigator."
+
 [randomize.admin_pw]
 kind = "choice"
 choices = ["password", "123456", "iloveyou", "letmein", "password1", "12345678", "monkey", "dragon", "sunshine"]

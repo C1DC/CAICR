@@ -3,6 +3,28 @@
 > **Facilitator-only.** Model answers for every lab, generated from the
 > manifests (`python3 scripts/answer_key.py`). Do not distribute to students.
 
+## JS — Web Attack Arena — Break Into OWASP Juice Shop
+*Day 1 · 9 checks · 9 points · tools: browser, curl, nmap, burpsuite*
+
+1. The Juice Shop web app is reachable on 10.13.8.10:3000
+   → _(automatic script check — verifies live state)_
+2. Open http://10.13.8.10:3000 in your browser. What is this vulnerable application called?
+   → **owasp juice shop**  _(also: juice shop, juice-shop, juiceshop, the juice shop)_
+3. The app leaks its exact version through an admin REST endpoint. Find it: what version is running?
+   → **20.2.0**  _(also: v20.2.0, 20.2)_
+4. Juice Shop hides a challenge scoreboard that is not linked in the menu. What is its route/path?
+   → **score-board**  _(also: /#/score-board, /score-board, scoreboard, #/score-board)_
+5. On the Login page, inject SQL into the EMAIL field to log in as the first user WITHOUT a password. What payload works?
+   → **' or 1=1--**  _(also: ' or 1=1-- -, 'or 1=1--, ' or 1=1 --, ' or '1'='1, ' or '1'='1'--, ' or '1'='1' --, ' or true--, ' or 1=1#, admin' --, admin'--, ' or 1=1-- -)_
+6. That bypass logs you in as the administrator. What is the admin account's email address?
+   → **admin@juice-sh.op**
+7. What class of web vulnerability did the login bypass exploit? (use the OWASP Top 10 name)
+   → **sql injection**  _(also: sqli, injection, a03, a03:2021, a03 injection, a03:2021 injection)_
+8. Name the primary code-level fix that would have stopped this injection.
+   → **parameterized queries**  _(also: parameterised queries, prepared statements, parameterized statements, parameterised statements, bind variables, use prepared statements, use parameterized queries, orm, parameterization, parameterisation, bound parameters)_
+9. Which MITRE ATT&CK technique covers breaking in by exploiting an internet-facing web app like this?
+   → **T1190**  _(also: exploit public-facing application, t1190 exploit public-facing application, t1190 exploit public facing application, exploit public facing application)_
+
 ## M1 — Threat Intelligence & OSINT — Passive Reconnaissance
 *Day 1 · 19 checks · 19 points · tools: dig, whois, theHarvester*
 
@@ -108,7 +130,7 @@
    → **mfa**  _(also: multi-factor, multi factor authentication, phishing-resistant mfa, least privilege, remove sudo, restrict sudo, fix sudo, remove the sudo misconfiguration, don't store credentials, do not store credentials, secrets management, remove the backup, strong unique password, unique password, password manager, take the backup off the web root, network segmentation, key-based ssh, disable password auth)_
 
 ## M3 — Network Compromise Investigation — Nmap, NSE & Wireshark
-*Day 2 · 16 checks · 16 points · tools: nmap, nmap NSE, wireshark, tcpdump, netstat*
+*Day 2 · 20 checks · 20 points · tools: nmap, nmap NSE, wireshark, tcpdump, netstat*
 
 1. All four lab targets are reachable on the range
    → _(automatic script check — verifies live state)_
@@ -142,9 +164,17 @@
    → **«randomized per student»** — grade on the student's own machine (`labctl verify`)
 16. Which MITRE ATT&CK technique covers the DNS command-and-control channel?
    → **T1071**  _(also: T1071.004)_
+17. The fileserver exposes SMB. Name a tool that ENUMERATES its shares, users and password policy (beyond a port scan).
+   → **enum4linux-ng**  _(also: enum4linux, smbclient, smbmap, crackmapexec, nxc, netexec, rpcclient)_
+18. On a Windows LAN, Responder captures NetNTLM hashes by answering name-resolution broadcasts. Name ONE control that stops this.
+   → **disable llmnr**  _(also: disable llmnr and nbt-ns, disable llmnr/nbt-ns, disable nbt-ns, smb signing, enforce smb signing, turn off llmnr, disable mdns)_
+19. You recovered Windows NTLM hashes. Which hashcat mode (-m) cracks them?
+   → **1000**  _(also: -m 1000, m 1000)_
+20. An attacker dumps a hash from memory and reuses it to authenticate on other hosts WITHOUT the plaintext. Name this technique.
+   → **pass-the-hash**  _(also: pass the hash, pth, t1550.002, pass-the-hash (t1550.002))_
 
 ## M4 — Vulnerability Management & SOC Operations
-*Day 2 · 16 checks · 16 points · tools: nmap, nikto, gobuster, whatweb, hashcat, john, hydra, jq (Wazuh)*
+*Day 2 · 20 checks · 20 points · tools: nmap, nikto, gobuster, whatweb, hashcat, john, hydra, jq (Wazuh)*
 
 1. The web target (10.13.4.10) is serving
    → _(automatic script check — verifies live state)_
@@ -178,6 +208,14 @@
    → **T1053**  _(also: T1053.003, cron, cron job, scheduled task, scheduled task/job)_
 16. Which MITRE ATT&CK technique covers the SSH brute force?
    → **T1110**  _(also: T1110.001, T1110.003)_
+17. Name a vulnerability scanner you'd run for an AUTHENTICATED full-estate scan (not just the web).
+   → **openvas**  _(also: greenbone, nessus, nuclei, qualys, rapid7, insightvm)_
+18. In Metasploit, which command VERIFIES a target is exploitable WITHOUT firing the exploit (so you report proven, not possible, risk)?
+   → **check**  _(also: msf check, the check command)_
+19. Which tool scans a container image or a repo's dependencies for known-vulnerable packages (the Log4Shell class)?
+   → **trivy**  _(also: grype, snyk)_
+20. Which free, ATT&CK-mapped toolset safely triggers techniques so you can confirm your detections actually fire?
+   → **atomic red team**  _(also: atomic-red-team, atomicredteam, atomic red team (art), art)_
 
 ## M5 — Business Email Compromise — Header & Attachment Forensics
 *Day 3 · 13 checks · 13 points · tools: grep, exiftool, pdfinfo, dig, whois*
@@ -414,6 +452,30 @@
 3. A colleague asks you to 'quickly scan' a partner company's website. The correct response is:
    → **Refuse without the partner's written authorisation**
    _Scanning a third party without written authorisation is an offence under Act 1038._
+
+## Red Team Primer — Your First Hack  _(`rt` · 3 questions)_
+
+1. You find SSH credentials a careless admin left in a file in the web root, and log in with them. That initial access maps to which ATT&CK technique?
+   → **T1078 Valid Accounts**
+   _Using legitimate, stolen credentials to log in is T1078 Valid Accounts — no exploit needed._
+2. `sudo -l` shows your user may run a shell as root with NOPASSWD. What is this?
+   → **A privilege-escalation misconfiguration (abuse it to become root)**
+   _A NOPASSWD sudo entry for a shell lets any foothold become root instantly — a classic misconfig (GTFOBins)._
+3. Which single control best breaks the 'credential left in the web root → SSH foothold' step?
+   → **Don't store credentials in the web root + MFA / key-based SSH**
+   _Remove the secret from the web root and require phishing-resistant MFA / keys — break the link, not the symptom._
+
+## Web Attack Arena — OWASP Juice Shop  _(`js` · 3 questions)_
+
+1. Typing  ' or 1=1--  into the login EMAIL field logs you in as the administrator with no password. What flaw is this?
+   → **SQL injection (authentication bypass)**
+   _The input closed the SQL string and made the WHERE always true — SQL injection used to bypass the login._
+2. On the OWASP Top 10 (2021), which category does this belong to?
+   → **A03 Injection**
+   _Untrusted input placed straight into a query is A03 Injection — #3 on the 2021 list._
+3. The one code-level fix that stops this injection for good is:
+   → **Parameterised queries / prepared statements**
+   _Parameterised queries separate code from data, so input can never become SQL — the permanent fix._
 
 ## Threat Landscape & Cyber Threat Intelligence  _(`m1` · 3 questions)_
 

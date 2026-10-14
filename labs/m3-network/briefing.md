@@ -1,4 +1,4 @@
-**A SOC flagged a workstation for odd traffic — prove the compromise across three evidence sources.**  ·  Day 2 · ~2 h · 16 graded tasks
+**A SOC flagged a workstation for odd traffic — prove the compromise across three evidence sources.**  ·  Day 2 · ~2 h · 20 graded tasks
 
 ::: note | What this lab is
 A Ghanaian institution's SOC flagged workstation **FIN-03** (`10.13.3.30`) for
@@ -82,7 +82,7 @@ firewalling on the exposed RDP.
 
 ## What you'll be graded on
 
-The **Verify** panel has 16 checks across the three sources. Then write it up:
+The **Verify** panel has 20 checks across the three sources. Then write it up:
 
 ```Terminal
 labctl verify m3

@@ -17,9 +17,9 @@ Five intensive days · 11 modules · *Generated 2026-10-13*
 | Total lesson word count | ~79,598 words |
 | In-lesson diagrams (SVG + ASCII) | 39 |
 | Hands-on graded labs | 12 |
-| Total graded lab tasks (checks) | 173 |
+| Total graded lab tasks (checks) | 181 |
 | Deliverable worksheet templates | 16 |
-| Module knowledge-check quizzes | 11 (33 questions) |
+| Module knowledge-check quizzes | 13 (39 questions) |
 | Final exam questions | 12 |
 | Baseline diagnostic questions | 6 |
 
@@ -36,8 +36,8 @@ Every lab is **per-student randomised** (each student gets unique flags, credent
 | **JS** | 1 | Web Attack Arena — OWASP Juice Shop | 1,423 w | 9 tasks | 1 template(s) |
 | **M1** | 1 | Threat Landscape & Cyber Threat Intelligence | 5,617 w | 19 tasks | 1 template(s) |
 | **M2** | 1 | Institutional Cyber Risk & Digital Resilience | 3,253 w | 17 tasks | 2 template(s) |
-| **M3** | 2 | Network, Endpoint & Identity Security | 11,365 w | 16 tasks | 1 template(s) |
-| **M4** | 2 | Vulnerability Management & SOC Operations | 8,744 w | 16 tasks | 1 template(s) |
+| **M3** | 2 | Network, Endpoint & Identity Security | 11,365 w | 20 tasks | 1 template(s) |
+| **M4** | 2 | Vulnerability Management & SOC Operations | 8,744 w | 20 tasks | 1 template(s) |
 | **M5** | 3 | Cyber Fraud, BEC & Mobile Money Security | 7,983 w | 13 tasks | 1 template(s) |
 | **M6** | 3 | Digital Forensics & Incident Response | 7,856 w | 14 tasks | 2 template(s) |
 | **M7** | 4 | AI Security, Deepfakes & Emerging Threats | 7,238 w | 12 tasks | 1 template(s) |
@@ -293,7 +293,7 @@ Graded tasks (17 — the student is assessed on each; «your value» marks a per
 **Frameworks / technique IDs referenced:** T1003, T1003.006, T1021, T1036, T1040, T1046, T1053, T1053.003, T1053.005, T1059, T1068, T1071, T1071.004, T1078, T1087, T1098.004, T1110, T1110.003, T1135, T1218, T1543, T1543.002, T1543.003, T1546.003, T1547, T1547.001, T1548, T1550.002, T1557, T1557.001, T1557.002, T1558, T1558.003, T1558.004, TA0003
 
 **Hands-on lab — Network Compromise Investigation — Nmap, NSE & Wireshark**  
-*Live isolated range on `10.13.3.0/24` · ~120 min · 16 graded tasks · tools: nmap, nmap NSE, wireshark, tcpdump, netstat*
+*Live isolated range on `10.13.3.0/24` · ~120 min · 20 graded tasks · tools: nmap, nmap NSE, wireshark, tcpdump, netstat*
 
 > Work a live network-compromise case across three evidence sources: scan the subnet with Nmap and its scripting engine to find exposed services, follow a packet capture in Wireshark to recover a C2 beacon AND cleartext credentials, and correlate a netstat capture from the suspect host to identify the backdoor and the C2 infrastructure. Map the chain to MITRE ATT&CK and design the controls.
 
@@ -304,7 +304,7 @@ Targets:
 - `10.13.3.30` **workstation** — SSH on :22 — the infected host (see the capture and netstat)
 - `10.13.3.40` **legacy-host** — Exposed legacy remote-access (RDP) on :3389
 
-Graded tasks (16 — the student is assessed on each; «your value» marks a per-student randomised answer):
+Graded tasks (20 — the student is assessed on each; «your value» marks a per-student randomised answer):
 
 1. All four lab targets are reachable on the range
 2. How many TARGET hosts are live on 10.13.3.0/24 (exclude the .1 gateway)?
@@ -322,6 +322,10 @@ Graded tasks (16 — the student is assessed on each; «your value» marks a per
 14. What TCP port is that malware LISTENING on as a backdoor?
 15. What external C2 IP does the malware hold an ESTABLISHED connection to? (correlates with the beacon domain)
 16. Which MITRE ATT&CK technique covers the DNS command-and-control channel?
+17. The fileserver exposes SMB. Name a tool that ENUMERATES its shares, users and password policy (beyond a port scan).
+18. On a Windows LAN, Responder captures NetNTLM hashes by answering name-resolution broadcasts. Name ONE control that stops this.
+19. You recovered Windows NTLM hashes. Which hashcat mode (-m) cracks them?
+20. An attacker dumps a hash from memory and reuses it to authenticate on other hosts WITHOUT the plaintext. Name this technique.
 
 *Per-student randomised variables (5): backdoor_port, c2_domain, c2_ip, ftp_pass, ftp_user.*
 
@@ -353,7 +357,7 @@ Graded tasks (16 — the student is assessed on each; «your value» marks a per
 **Frameworks / technique IDs referenced:** T1053, T1053.003, T1053.005, T1078, T1110, T1110.001, T1110.002, T1110.003, T1190, T1548, T1595, T1595.002, TA0004
 
 **Hands-on lab — Vulnerability Management & SOC Operations**  
-*Live isolated range on `10.13.4.0/24` · ~150 min · 16 graded tasks · tools: nmap, nikto, gobuster, whatweb, hashcat, john, hydra, jq (Wazuh)*
+*Live isolated range on `10.13.4.0/24` · ~150 min · 20 graded tasks · tools: nmap, nikto, gobuster, whatweb, hashcat, john, hydra, jq (Wazuh)*
 
 > Run a full web assessment and a cracking chain, then triage the SOC: fingerprint and scan the web server (nmap/whatweb/nikto), brute-force hidden content (gobuster) to find a leaked database backup, crack its unsalted MD5 hashes (hashcat/john), demonstrate weak SSH credentials (Hydra), and correlate the Wazuh alert feed into one attack story with a remediation register and SOC ticket.
 
@@ -361,7 +365,7 @@ Targets:
 - `10.13.4.10` **web** — Leaky Apache web server — scan, fuzz and loot
 - `10.13.4.20` **ssh** — SSH host with a weak account — authorised Hydra demo target
 
-Graded tasks (16 — the student is assessed on each; «your value» marks a per-student randomised answer):
+Graded tasks (20 — the student is assessed on each; «your value» marks a per-student randomised answer):
 
 1. The web target (10.13.4.10) is serving
 2. The SSH target (10.13.4.20) is listening
@@ -379,6 +383,10 @@ Graded tasks (16 — the student is assessed on each; «your value» marks a per
 14. Did the attacker ultimately succeed in logging in? (yes/no or the rule id)
 15. After root access, how did the attacker establish persistence (ATT&CK technique or method)?
 16. Which MITRE ATT&CK technique covers the SSH brute force?
+17. Name a vulnerability scanner you'd run for an AUTHENTICATED full-estate scan (not just the web).
+18. In Metasploit, which command VERIFIES a target is exploitable WITHOUT firing the exploit (so you report proven, not possible, risk)?
+19. Which tool scans a container image or a repo's dependencies for known-vulnerable packages (the Log4Shell class)?
+20. Which free, ATT&CK-mapped toolset safely triggers techniques so you can confirm your detections actually fire?
 
 *Per-student randomised variables (3): admin_hash, admin_pw, db_pass.*
 
@@ -716,7 +724,7 @@ Assessment is **graded and weighted**, not attendance-based:
 | Component | Weight | What it is |
 |-----------|-------:|------------|
 | Labs | 50% | the hands-on graded lab tasks above |
-| Quizzes | 25% | 11 module knowledge-checks (33 questions) |
+| Quizzes | 25% | 13 module knowledge-checks (39 questions) |
 | Exam | 25% | a 12-question final exam |
 | **Pass mark** | **70%** | composite; below this, no certificate |
 

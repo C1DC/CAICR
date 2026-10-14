@@ -1,4 +1,4 @@
-**Assess a leaky web server, loot and crack what you find, then turn the alert flood into one incident.**  ·  Day 2 · ~2.5 h · 16 graded tasks
+**Assess a leaky web server, loot and crack what you find, then turn the alert flood into one incident.**  ·  Day 2 · ~2.5 h · 20 graded tasks
 
 ::: note | What this lab is
 You are the security engineer *and* the SOC analyst for Acme Payroll. A web
@@ -89,7 +89,7 @@ Produce a **remediation register** (prioritise by CVSS + KEV + exposure) and a
 
 ## What you'll be graded on
 
-16 checks in the **Verify** panel across assessment, cracking and triage. Then:
+20 checks in the **Verify** panel — assessment, cracking, triage, and applying the toolkit. Then:
 
 ```Terminal
 labctl verify m4

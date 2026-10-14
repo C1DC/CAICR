@@ -160,6 +160,36 @@ prompt = "Which MITRE ATT&CK technique covers the DNS command-and-control channe
 accept = ["T1071", "T1071.004"]
 hint = "Command and Control → Application Layer Protocol (DNS sub-technique)"
 
+# ── Apply the toolkit (Module 3 §3, §5, §8, §9) ──────────────────────────────
+[[check]]
+id = "enum_tool"
+type = "string_any"
+prompt = "The fileserver exposes SMB. Name a tool that ENUMERATES its shares, users and password policy (beyond a port scan)."
+accept = ["enum4linux-ng", "enum4linux", "smbclient", "smbmap", "crackmapexec", "nxc", "netexec", "rpcclient"]
+hint = "Module 3 §3 — scanning finds the open port; enumeration turns it into findings."
+
+[[check]]
+id = "llmnr_defense"
+type = "string_any"
+prompt = "On a Windows LAN, Responder captures NetNTLM hashes by answering name-resolution broadcasts. Name ONE control that stops this."
+accept = ["disable llmnr", "disable llmnr and nbt-ns", "disable llmnr/nbt-ns", "disable nbt-ns",
+          "smb signing", "enforce smb signing", "turn off llmnr", "disable mdns"]
+hint = "Module 3 §5 — kill the legacy broadcast resolution, and enforce SMB signing to stop relay."
+
+[[check]]
+id = "ntlm_hashcat_mode"
+type = "string_any"
+prompt = "You recovered Windows NTLM hashes. Which hashcat mode (-m) cracks them?"
+accept = ["1000", "-m 1000", "m 1000"]
+hint = "Module 3 §8 — NTLM is hashcat mode 1000 (fast; falls quickly without a long passphrase)."
+
+[[check]]
+id = "lateral_technique"
+type = "string_any"
+prompt = "An attacker dumps a hash from memory and reuses it to authenticate on other hosts WITHOUT the plaintext. Name this technique."
+accept = ["pass-the-hash", "pass the hash", "pth", "t1550.002", "pass-the-hash (t1550.002)"]
+hint = "Module 3 §9 — the classic lateral-movement move; break it with LAPS, tiering and disabling NTLM."
+
 
 [randomize.ftp_user]
 kind = "choice"
