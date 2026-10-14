@@ -355,7 +355,7 @@ class TestReference(unittest.TestCase):
     def test_topics_discover(self):
         from engine import reference
         ids = {t["id"] for t in reference.discover()}
-        self.assertEqual(ids, {"frameworks", "ghana-law", "glossary"})
+        self.assertEqual(ids, {"frameworks", "ghana-law", "glossary", "forensics-tools"})
 
     def test_topics_render_in_both_engines(self):
         import io, contextlib

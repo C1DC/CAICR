@@ -14,7 +14,7 @@ Five intensive days · 11 modules · *Generated 2026-10-13*
 |---------|-------|
 | Modules (incl. Day-1 orientation) | 13 |
 | Teaching lessons | 13 |
-| Total lesson word count | ~79,545 words |
+| Total lesson word count | ~79,598 words |
 | In-lesson diagrams (SVG + ASCII) | 39 |
 | Hands-on graded labs | 12 |
 | Total graded lab tasks (checks) | 173 |
@@ -39,7 +39,7 @@ Every lab is **per-student randomised** (each student gets unique flags, credent
 | **M3** | 2 | Network, Endpoint & Identity Security | 11,365 w | 16 tasks | 1 template(s) |
 | **M4** | 2 | Vulnerability Management & SOC Operations | 8,744 w | 16 tasks | 1 template(s) |
 | **M5** | 3 | Cyber Fraud, BEC & Mobile Money Security | 7,983 w | 13 tasks | 1 template(s) |
-| **M6** | 3 | Digital Forensics & Incident Response | 7,803 w | 14 tasks | 2 template(s) |
+| **M6** | 3 | Digital Forensics & Incident Response | 7,856 w | 14 tasks | 2 template(s) |
 | **M7** | 4 | AI Security, Deepfakes & Emerging Threats | 7,238 w | 12 tasks | 1 template(s) |
 | **M8** | 4 | Data Protection, Privacy & Compliance | 6,301 w | 16 tasks | 2 template(s) |
 | **M9** | 5 | Cyber Governance & Business Continuity | 5,324 w | 16 tasks | 2 template(s) |
@@ -440,7 +440,7 @@ Graded tasks (13 — the student is assessed on each; «your value» marks a per
 ### M6 — Digital Forensics & Incident Response
 *Day 3*
 
-**Format:** ~7,803-word lesson · 3 diagram(s) · 22 teaching callouts · 15 worked command/example blocks.
+**Format:** ~7,856-word lesson · 3 diagram(s) · 22 teaching callouts · 15 worked command/example blocks.
 
 **Topics taught (the lesson's own chapters):**
 
@@ -734,6 +734,7 @@ A searchable in-platform reference, available to every student:
 - **Frameworks Quick-Reference** — Kill Chain, ATT&CK, CSF 2.0, OWASP LLM Top 10, Pyramid of Pain & more
 - **Ghana Cyber & Data Law** — Act 843 & Act 1038, DPC / CSA / CERT-GH, breach response
 - **Master Glossary** — Every key term from the programme, A–Z
+- **Forensics Toolbox** — DFIR tools by domain (disk, memory, mobile, Windows, macOS, Linux, email, network) — free & paid — plus online analysis services
 
 ---
 

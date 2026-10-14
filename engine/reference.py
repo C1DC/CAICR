@@ -13,6 +13,8 @@ TOPICS = [
      "Act 843 & Act 1038, DPC / CSA / CERT-GH, breach response"),
     ("glossary", "Master Glossary",
      "Every key term from the programme, A–Z"),
+    ("forensics-tools", "Forensics Toolbox",
+     "DFIR tools by domain (disk, memory, mobile, Windows, macOS, Linux, email, network) — free & paid — plus online analysis services"),
 ]
 
 
