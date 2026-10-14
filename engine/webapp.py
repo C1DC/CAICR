@@ -266,6 +266,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", ctype + ("; charset=utf-8" if ctype.startswith("text") or ctype.endswith("javascript") else ""))
         self.send_header("Content-Length", str(len(data)))
+        # Never let the browser cache the app shell/JS/CSS, so a `git pull` +
+        # restart always serves the latest UI (no hard-refresh needed).
+        self.send_header("Cache-Control", "no-store, must-revalidate")
         self.end_headers()
         self.wfile.write(data)
 

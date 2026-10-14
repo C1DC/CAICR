@@ -521,6 +521,12 @@ function vMaterials() {
 
   <div class="section-title">Online services &amp; resources</div>
   <p class="muted">Powerful websites real security professionals use every day — breach checks, malware sandboxes, threat intel, vulnerability databases and legal practice ranges. Explore them in your own time to go far beyond this course. <strong>Ethics:</strong> many double as attacker recon — only look up assets you own or sanctioned/public test data (Act 1038). Links open in a new tab.</p>
+  <div class="card click" id="forensicsRef" style="border-left:3px solid var(--kali-lt);margin-bottom:14px">
+    <strong>🧰 Forensics Toolbox</strong> — a researched catalogue of DFIR tools by domain
+    (disk, memory, Windows, macOS, Linux, mobile/Android/iOS, email, network), <strong>free &amp; paid</strong>,
+    plus online analysis services &amp; practice datasets.
+    <div class="dim" style="font-size:12.5px;margin-top:4px">Open the full reference →</div>
+  </div>
   <div id="resList">
     ${resourcesSection(BOOT.resources || [])}
   </div>
@@ -534,6 +540,8 @@ function vMaterials() {
   <p class="dim">Open a template in the Course view, or copy editable files with <code>labctl worksheet m2</code>.</p>`;
   view.querySelectorAll(".cmdline button").forEach(b => b.onclick = () => copy(b.dataset.c));
   view.querySelectorAll("[data-mid]").forEach(c => c.onclick = () => { location.hash = "course/" + c.dataset.mid; });
+  const fref = $("#forensicsRef");
+  if (fref) fref.onclick = () => { location.hash = "reference/forensics-tools"; };
   const search = $("#toolSearch");
   if (search) search.oninput = () => {
     const q = search.value.toLowerCase();
