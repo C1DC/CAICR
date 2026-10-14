@@ -14,8 +14,8 @@ Five intensive days · 11 modules · *Generated 2026-10-13*
 |---------|-------|
 | Modules (incl. Day-1 orientation) | 13 |
 | Teaching lessons | 13 |
-| Total lesson word count | ~72,713 words |
-| In-lesson diagrams (SVG + ASCII) | 35 |
+| Total lesson word count | ~75,236 words |
+| In-lesson diagrams (SVG + ASCII) | 36 |
 | Hands-on graded labs | 12 |
 | Total graded lab tasks (checks) | 173 |
 | Deliverable worksheet templates | 16 |
@@ -41,7 +41,7 @@ Every lab is **per-student randomised** (each student gets unique flags, credent
 | **M5** | 3 | Cyber Fraud, BEC & Mobile Money Security | 7,983 w | 13 tasks | 1 template(s) |
 | **M6** | 3 | Digital Forensics & Incident Response | 7,803 w | 14 tasks | 2 template(s) |
 | **M7** | 4 | AI Security, Deepfakes & Emerging Threats | 7,238 w | 12 tasks | 1 template(s) |
-| **M8** | 4 | Data Protection, Privacy & Compliance | 3,778 w | 16 tasks | 2 template(s) |
+| **M8** | 4 | Data Protection, Privacy & Compliance | 6,301 w | 16 tasks | 2 template(s) |
 | **M9** | 5 | Cyber Governance & Business Continuity | 3,229 w | 16 tasks | 2 template(s) |
 | **M10** | 5 | Operation Cyber Resilience — Capstone | 4,037 w | 15 tasks | 1 template(s) |
 
@@ -547,17 +547,20 @@ Graded tasks (12 — the student is assessed on each; «your value» marks a per
 ### M8 — Data Protection, Privacy & Compliance
 *Day 4*
 
-**Format:** ~3,778-word lesson · 3 diagram(s) · 11 teaching callouts · 1 worked command/example blocks.
+**Format:** ~6,301-word lesson · 4 diagram(s) · 22 teaching callouts · 1 worked command/example blocks.
 
 **Topics taught (the lesson's own chapters):**
 
 - Two Laws, One Duty of Care
 - Controller vs Processor — Accountability Doesn't Transfer
+- Privacy by Design, Data Classification & PETs
 - Rights, DPIAs & Cross-Border Transfers
-- The Global Benchmark — GDPR
+- The Global & Sectoral Landscape — GDPR and Beyond
 - The First 72 Hours of a Breach
 - CII and Mandatory Reporting (Act 1038)
+- Standards, Certification & Assurance
 - Building the Compliance Programme
+- Hands-On Practicals — Do These Yourself
 - Scenario — Exposure and Consequence
 - Do It — the Akoma Health Case
 
