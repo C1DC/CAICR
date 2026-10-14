@@ -1039,6 +1039,34 @@ RESOURCES = [
              "registration of data controllers and personal-data obligations.",
      "use": "Check your organisation's data-protection registration and breach duties (M8)."},
 
+    # ── Forensics & DFIR practice data ───────────────────────────────────────
+    {"name": "Malware-Traffic-Analysis.net", "cat": "Forensics Practice Data",
+     "url": "https://www.malware-traffic-analysis.net", "tag": "Free",
+     "desc": "Brad Duncan's archive of real malware packet captures (PCAP), each with "
+             "an exercise and answers. The single best place to learn network forensics.",
+     "use": "Download a capture and work it in Wireshark/tshark/NetworkMiner (M6 §7 & §13) — "
+            "never visit the live URLs; defang them."},
+    {"name": "NETRESEC — Public PCAP files", "cat": "Forensics Practice Data",
+     "url": "https://www.netresec.com/?page=PcapFiles", "tag": "Free",
+     "desc": "A large curated index of publicly available packet-capture files for "
+             "research and training, from CTFs, research projects and incident datasets.",
+     "use": "Find a capture matching the protocol or attack you want to practise analysing."},
+    {"name": "NIST CFReDS", "cat": "Forensics Practice Data",
+     "url": "https://cfreds.nist.gov", "tag": "Free",
+     "desc": "The Computer Forensic Reference Data Sets — disk images and scenarios "
+             "published by NIST specifically for practising and validating forensic tools.",
+     "use": "Load a reference disk image into Autopsy/Sleuthkit to rehearse the full case workflow."},
+    {"name": "Digital Corpora", "cat": "Forensics Practice Data",
+     "url": "https://digitalcorpora.org", "tag": "Free",
+     "desc": "Freely available disk images, memory images and network captures — including "
+             "full multi-source scenarios — for digital-forensics education and research.",
+     "use": "Practise cross-source correlation (disk + memory + pcap) on a realistic case."},
+    {"name": "Volatility Foundation — sample images", "cat": "Forensics Practice Data",
+     "url": "https://github.com/volatilityfoundation/volatility/wiki/Memory-Samples", "tag": "Free",
+     "desc": "A catalogue of public memory-dump samples for practising Volatility against "
+             "real malware and infections.",
+     "use": "Run the Volatility workflow (pstree/netscan/cmdline/malfind) on a full capture (M6 §13)."},
+
     # ── Staying current ──────────────────────────────────────────────────────
     {"name": "SANS Internet Storm Center", "cat": "News & Staying Current",
      "url": "https://isc.sans.edu", "tag": "Free",

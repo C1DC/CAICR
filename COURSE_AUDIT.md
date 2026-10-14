@@ -14,8 +14,8 @@ Five intensive days · 11 modules · *Generated 2026-10-13*
 |---------|-------|
 | Modules (incl. Day-1 orientation) | 13 |
 | Teaching lessons | 13 |
-| Total lesson word count | ~67,767 words |
-| In-lesson diagrams (SVG + ASCII) | 33 |
+| Total lesson word count | ~70,396 words |
+| In-lesson diagrams (SVG + ASCII) | 34 |
 | Hands-on graded labs | 12 |
 | Total graded lab tasks (checks) | 173 |
 | Deliverable worksheet templates | 16 |
@@ -39,7 +39,7 @@ Every lab is **per-student randomised** (each student gets unique flags, credent
 | **M3** | 2 | Network, Endpoint & Identity Security | 11,365 w | 16 tasks | 1 template(s) |
 | **M4** | 2 | Vulnerability Management & SOC Operations | 8,744 w | 16 tasks | 1 template(s) |
 | **M5** | 3 | Cyber Fraud, BEC & Mobile Money Security | 7,983 w | 13 tasks | 1 template(s) |
-| **M6** | 3 | Digital Forensics & Incident Response | 5,174 w | 14 tasks | 2 template(s) |
+| **M6** | 3 | Digital Forensics & Incident Response | 7,803 w | 14 tasks | 2 template(s) |
 | **M7** | 4 | AI Security, Deepfakes & Emerging Threats | 4,921 w | 12 tasks | 1 template(s) |
 | **M8** | 4 | Data Protection, Privacy & Compliance | 3,778 w | 16 tasks | 2 template(s) |
 | **M9** | 5 | Cyber Governance & Business Continuity | 3,229 w | 16 tasks | 2 template(s) |
@@ -440,7 +440,7 @@ Graded tasks (13 — the student is assessed on each; «your value» marks a per
 ### M6 — Digital Forensics & Incident Response
 *Day 3*
 
-**Format:** ~5,174-word lesson · 2 diagram(s) · 13 teaching callouts · 9 worked command/example blocks.
+**Format:** ~7,803-word lesson · 3 diagram(s) · 22 teaching callouts · 15 worked command/example blocks.
 
 **Topics taught (the lesson's own chapters):**
 
@@ -450,16 +450,18 @@ Graded tasks (13 — the student is assessed on each; «your value» marks a per
 - Disk Forensics
 - Decoding Attacker Artefacts
 - Memory Forensics — The Reward for Not Powering Off
+- Network Forensics — Reading the Breach on the Wire (PCAP)
 - Where the Evidence Lives — Windows DFIR Artefacts
 - Timeline Reconstruction & Correlation
 - Running the Response — Containment, Eradication, Recovery
 - Mapping the Chain to MITRE ATT&CK
 - Scenarios — When Response Makes It Better, or Worse
+- Hands-On Practicals — Do These Yourself
 - The Worked Investigation (what the lab asks of you)
 
 *Plus learning aids in every lesson: Common mistakes, Key takeaways, Check yourself, Glossary.*
 
-**Frameworks / technique IDs referenced:** T1036, T1048, T1053, T1053.005, T1059, T1059.001, T1204, T1204.002, T1555, T1566.001
+**Frameworks / technique IDs referenced:** T1036, T1048, T1053, T1053.005, T1059, T1059.001, T1070, T1070.006, T1071, T1204, T1204.002, T1555, T1566.001
 
 **Hands-on lab — Digital Forensics & Incident Response — Disk, Memory & Timeline**  
 *File-based evidence package (nothing to launch) · ~150 min · 14 graded tasks · tools: sha256sum, fls/icat/tsk_recover, strings, bulk_extractor, CyberChef, grep*
