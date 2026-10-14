@@ -51,13 +51,18 @@ Open that URL in your browser — it refreshes every few seconds as submissions
 arrive. Submissions are saved in `./classroom-submissions/` (latest wins per
 student).
 
-**Each student:**
+**Each student — terminal:**
 ```bash
 labctl submit --to http://10.0.0.5:7000        # use the IP your invite line shows
 # or set it once:
 export CAIC_CLASSROOM=http://10.0.0.5:7000
 labctl submit                                   # now just this, any time
 ```
+
+**Each student — web app (no terminal):** open the **Assessment** view → the
+**"Submit your scores"** card → either **Download score file** (Model A) or paste
+the classroom URL and **Send to classroom →** (Model B). If you launched the app
+with `CAIC_CLASSROOM` set, the URL is pre-filled, so it's one click.
 They can submit repeatedly as they complete more — the board always shows their
 latest. (Students need network line-of-sight to your laptop; the classroom Wi-Fi/
 LAN is enough. It is a facilitator-run, LAN-only tool — nothing leaves the room.)

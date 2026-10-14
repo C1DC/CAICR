@@ -660,6 +660,17 @@ async function vAssessment(arg) {
   <div class="card gauge-card">${gradeGauge(a.grade, true)}</div>
   ${certHtml}
 
+  <div class="card" id="submitCard">
+    <strong>Submit your scores to your facilitator</strong>
+    <div class="dim" style="font-size:12.5px;margin-top:3px">Download a signed score file to hand in, or — if your facilitator is running a live classroom dashboard — send it straight there.</div>
+    <div class="row" style="gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center">
+      <button class="btn" id="dlSubmit">⬇ Download score file</button>
+      <input id="roomUrl" placeholder="http://facilitator-ip:7000" value="${esc(BOOT.summary.classroomUrl || "")}"
+        style="flex:1;min-width:200px;padding:9px 12px;background:var(--panel2);border:1px solid var(--border2);border-radius:9px;color:var(--fg);font-size:14px">
+      <button class="btn" id="sendSubmit" style="background:var(--panel2);color:var(--fg);border:1px solid var(--border2)">Send to classroom →</button>
+    </div>
+  </div>
+
   ${a.baseline ? `<div class="section-title">Before you begin</div>
   <div class="grid cards-3">${card(a.baseline, "self-check, not graded")}</div>` : ""}
 
@@ -669,6 +680,29 @@ async function vAssessment(arg) {
   <div class="section-title">Final exam</div>
   <div class="grid cards-3">${card(a.exam, "counts for 25%")}</div>`;
   view.querySelectorAll("[data-quiz]").forEach(c => c.onclick = () => { location.hash = "assessment/" + c.dataset.quiz; });
+  const dl = $("#dlSubmit");
+  if (dl) dl.onclick = async () => {
+    try {
+      const sub = await api("/api/submission");
+      const name = (sub.student || "student").replace(/[^A-Za-z0-9_-]/g, "_");
+      const blob = new Blob([JSON.stringify(sub, null, 2)], { type: "application/json" });
+      const a2 = document.createElement("a");
+      a2.href = URL.createObjectURL(blob); a2.download = "caic-submit-" + name + ".json";
+      a2.click(); URL.revokeObjectURL(a2.href);
+      toast("Downloaded — hand this file to your facilitator");
+    } catch (e) { toast(e.message); }
+  };
+  const sb = $("#sendSubmit");
+  if (sb) sb.onclick = async () => {
+    const url = ($("#roomUrl").value || "").trim();
+    if (!url) { toast("Enter the classroom URL your facilitator gave you"); return; }
+    sb.disabled = true; const label = sb.textContent; sb.textContent = "Sending…";
+    try {
+      await api("/api/submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
+      toast("Sent to the classroom ✓");
+    } catch (e) { toast(e.message); }
+    finally { sb.disabled = false; sb.textContent = label; }
+  };
 }
 
 async function vQuiz(qid) {

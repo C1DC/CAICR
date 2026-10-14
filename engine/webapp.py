@@ -150,7 +150,8 @@ def _bootstrap() -> dict:
         "summary": {"labsComplete": done, "totalLabs": len(gradable),
                     "totalModules": len(mods),
                     "dockerOk": dockerctl.preflight().ok,
-                    "terminal": os.environ.get("CAIC_NO_TERMINAL") != "1"},
+                    "terminal": os.environ.get("CAIC_NO_TERMINAL") != "1",
+                    "classroomUrl": os.environ.get("CAIC_CLASSROOM", "")},
     }
 
 
@@ -320,6 +321,9 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(_assessment())
             if p == "/api/grade":
                 return self._json(grading.compute())
+            if p == "/api/submission":
+                from . import classroom
+                return self._json(classroom.build_submission())
             if p == "/api/certificate":
                 b = certificate.build()
                 b.pop("html", None)   # the SPA fetches the printable page separately
@@ -365,6 +369,16 @@ class Handler(BaseHTTPRequestHandler):
                 name = str(self._body().get("name", "")).strip()
                 state.set_student(name)
                 return self._json({"student": state.get_student()})
+            if p == "/api/submit":
+                from . import classroom
+                url = str(self._body().get("url", "")).strip()
+                if not url:
+                    return self._err("a classroom URL is required", 400)
+                try:
+                    classroom.post_submission(url, classroom.build_submission())
+                except Exception as exc:  # noqa: BLE001
+                    return self._err(f"could not reach {url}: {exc}", 502)
+                return self._json({"ok": True, "url": url})
             if p.startswith("/api/quiz/"):
                 qid = p.rsplit("/", 1)[-1]
                 answers = self._body().get("answers", [])
