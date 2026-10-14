@@ -14,8 +14,8 @@ Five intensive days · 11 modules · *Generated 2026-10-13*
 |---------|-------|
 | Modules (incl. Day-1 orientation) | 13 |
 | Teaching lessons | 13 |
-| Total lesson word count | ~77,331 words |
-| In-lesson diagrams (SVG + ASCII) | 37 |
+| Total lesson word count | ~79,545 words |
+| In-lesson diagrams (SVG + ASCII) | 39 |
 | Hands-on graded labs | 12 |
 | Total graded lab tasks (checks) | 173 |
 | Deliverable worksheet templates | 16 |
@@ -43,7 +43,7 @@ Every lab is **per-student randomised** (each student gets unique flags, credent
 | **M7** | 4 | AI Security, Deepfakes & Emerging Threats | 7,238 w | 12 tasks | 1 template(s) |
 | **M8** | 4 | Data Protection, Privacy & Compliance | 6,301 w | 16 tasks | 2 template(s) |
 | **M9** | 5 | Cyber Governance & Business Continuity | 5,324 w | 16 tasks | 2 template(s) |
-| **M10** | 5 | Operation Cyber Resilience — Capstone | 4,037 w | 15 tasks | 1 template(s) |
+| **M10** | 5 | Operation Cyber Resilience — Capstone | 6,251 w | 15 tasks | 1 template(s) |
 
 ---
 
@@ -652,20 +652,24 @@ Graded tasks (16 — the student is assessed on each; «your value» marks a per
 ### M10 — Operation Cyber Resilience — Capstone
 *Day 5*
 
-**Format:** ~4,037-word lesson · 2 diagram(s) · 11 teaching callouts · 1 worked command/example blocks.
+**Format:** ~6,251-word lesson · 4 diagram(s) · 16 teaching callouts · 2 worked command/example blocks.
 
 **Topics taught (the lesson's own chapters):**
 
 - The Orchestra, Not the Instruments
 - Incident Command — Running It Under Pressure
 - Decision-Making Under Pressure
+- Know Your Adversary — the Campaign Behind the Injects
 - The Signature Correlation — One Campaign, Not Six Problems
 - Running the Investigation
+- The Minute-by-Minute Playbook
 - Running the Response (by the playbook)
 - Crisis Communications
-- The After-Action Review
+- The After-Action Review & the 90-Day Roadmap
+- How You're Scored — the Debrief Rubric
 - Scenarios — Because This Is How Real Attacks Arrive
 - The Worked Investigation (what the lab asks of you)
+- Graduation — Your Path Forward
 
 *Plus learning aids in every lesson: Common mistakes, Key takeaways, Check yourself, Glossary.*
 
