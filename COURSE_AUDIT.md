@@ -14,8 +14,8 @@ Five intensive days · 11 modules · *Generated 2026-10-13*
 |---------|-------|
 | Modules (incl. Day-1 orientation) | 13 |
 | Teaching lessons | 13 |
-| Total lesson word count | ~75,236 words |
-| In-lesson diagrams (SVG + ASCII) | 36 |
+| Total lesson word count | ~77,331 words |
+| In-lesson diagrams (SVG + ASCII) | 37 |
 | Hands-on graded labs | 12 |
 | Total graded lab tasks (checks) | 173 |
 | Deliverable worksheet templates | 16 |
@@ -42,7 +42,7 @@ Every lab is **per-student randomised** (each student gets unique flags, credent
 | **M6** | 3 | Digital Forensics & Incident Response | 7,803 w | 14 tasks | 2 template(s) |
 | **M7** | 4 | AI Security, Deepfakes & Emerging Threats | 7,238 w | 12 tasks | 1 template(s) |
 | **M8** | 4 | Data Protection, Privacy & Compliance | 6,301 w | 16 tasks | 2 template(s) |
-| **M9** | 5 | Cyber Governance & Business Continuity | 3,229 w | 16 tasks | 2 template(s) |
+| **M9** | 5 | Cyber Governance & Business Continuity | 5,324 w | 16 tasks | 2 template(s) |
 | **M10** | 5 | Operation Cyber Resilience — Capstone | 4,037 w | 15 tasks | 1 template(s) |
 
 ---
@@ -599,18 +599,21 @@ Graded tasks (16 — the student is assessed on each; «your value» marks a per
 ### M9 — Cyber Governance & Business Continuity
 *Day 5*
 
-**Format:** ~3,229-word lesson · 3 diagram(s) · 7 teaching callouts · 1 worked command/example blocks.
+**Format:** ~5,324-word lesson · 4 diagram(s) · 16 teaching callouts · 1 worked command/example blocks.
 
 **Topics taught (the lesson's own chapters):**
 
 - Governance Is Direction and Assurance
+- Security Frameworks & Program Maturity
 - The Policy Hierarchy
 - Metrics That Matter to a Board
 - The Board-Reporting Discipline
+- The Business Case — Risk in Money, and Cyber Insurance
 - Business Continuity — Surviving and Recovering
 - Crisis Command
 - Operational Resilience — the Modern Frame
 - An Analogy
+- Hands-On Practicals — Do These Yourself
 - Scenarios — Governance Decides the Outcome
 - Do It — the Volta Pension Trust Case
 
