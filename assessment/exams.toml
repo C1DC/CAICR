@@ -25,6 +25,48 @@ options = ["Run a fast nmap scan", "Only scan the homepage",
 answer = 2
 explain = "Scanning a third party without written authorisation is an offence under Act 1038."
 
+[rt]
+title = "Red Team Primer — Your First Hack"
+[[rt.questions]]
+q = "You find SSH credentials a careless admin left in a file in the web root, and log in with them. That initial access maps to which ATT&CK technique?"
+options = ["T1190 Exploit Public-Facing Application", "T1078 Valid Accounts",
+           "T1486 Data Encrypted for Impact", "T1046 Network Service Discovery"]
+answer = 1
+explain = "Using legitimate, stolen credentials to log in is T1078 Valid Accounts — no exploit needed."
+[[rt.questions]]
+q = "`sudo -l` shows your user may run a shell as root with NOPASSWD. What is this?"
+options = ["A secure default", "A privilege-escalation misconfiguration (abuse it to become root)",
+           "Required for backups to work", "Harmless unless you know the root password"]
+answer = 1
+explain = "A NOPASSWD sudo entry for a shell lets any foothold become root instantly — a classic misconfig (GTFOBins)."
+[[rt.questions]]
+q = "Which single control best breaks the 'credential left in the web root → SSH foothold' step?"
+options = ["A longer root password", "Don't store credentials in the web root + MFA / key-based SSH",
+           "A faster server", "Blocking ICMP ping"]
+answer = 1
+explain = "Remove the secret from the web root and require phishing-resistant MFA / keys — break the link, not the symptom."
+
+[js]
+title = "Web Attack Arena — OWASP Juice Shop"
+[[js.questions]]
+q = "Typing  ' or 1=1--  into the login EMAIL field logs you in as the administrator with no password. What flaw is this?"
+options = ["Cross-site scripting (XSS)", "SQL injection (authentication bypass)",
+           "Broken TLS", "Denial of service"]
+answer = 1
+explain = "The input closed the SQL string and made the WHERE always true — SQL injection used to bypass the login."
+[[js.questions]]
+q = "On the OWASP Top 10 (2021), which category does this belong to?"
+options = ["A01 Broken Access Control", "A03 Injection",
+           "A07 Identification & Authentication Failures", "A02 Cryptographic Failures"]
+answer = 1
+explain = "Untrusted input placed straight into a query is A03 Injection — #3 on the 2021 list."
+[[js.questions]]
+q = "The one code-level fix that stops this injection for good is:"
+options = ["A stronger admin password", "Parameterised queries / prepared statements",
+           "A CAPTCHA on the login", "Hiding the login page"]
+answer = 1
+explain = "Parameterised queries separate code from data, so input can never become SQL — the permanent fix."
+
 [m1]
 title = "Threat Landscape & Cyber Threat Intelligence"
 [[m1.questions]]

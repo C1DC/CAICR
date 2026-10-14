@@ -446,5 +446,40 @@ class TestAssessment(unittest.TestCase):
         self.assertIn(code, b["html"])
 
 
+class TestClassroom(unittest.TestCase):
+    def test_grade_from_and_aggregate(self):
+        import json, tempfile
+        from engine import classroom
+        maxpts = classroom._lab_maxpts()
+        some_lab = next(iter(maxpts))
+        data = {"student": "Ama", "seed": 12345,
+                "labs": {some_lab: {"best_score": maxpts[some_lab], "max_points": maxpts[some_lab]}},
+                "quizzes": {"m0": {"best": 3, "total": 3}}}
+        g = classroom.grade_from(data)
+        self.assertGreater(g["overall"], 0)
+        self.assertIn("passed", g)
+        # a submission signs, and the signature verifies / detects tampering
+        data["sig"] = classroom._sig(data)
+        self.assertEqual(data["sig"], classroom._sig(data))
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "ama.json"
+            p.write_text(json.dumps(data), encoding="utf-8")
+            agg = classroom.aggregate([p])
+        self.assertEqual(agg["stats"]["n"], 1)
+        self.assertEqual(agg["rows"][0]["student"], "Ama")
+        self.assertTrue(agg["rows"][0]["sigOk"])
+        self.assertEqual(agg["labIds"], classroom._lab_ids())
+
+    def test_dashboard_html_renders(self):
+        from engine import classroom
+        html = classroom.dashboard_html({"labIds": ["rt"], "maxpts": {"rt": 10}, "rows": [],
+                                         "stats": {"n": 0, "passed": 0, "avg": 0, "passMark": 70,
+                                                   "labsDoneTotal": 0, "labsPossible": 0}, "updated": "now"})
+        self.assertIn("<table", html.lower() + "<table")  # template present
+        self.assertIn("Facilitator Dashboard", html)
+        live = classroom.dashboard_html(None, live=True)
+        self.assertIn("/api/scores", live)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

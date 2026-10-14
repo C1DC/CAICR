@@ -615,28 +615,28 @@ def cmd_reset_progress(args) -> int:
 
 
 def cmd_report(args) -> int:
-    """Facilitator view: aggregate collected student state.json files.
-    Point it at a directory containing one or more *.json progress files."""
+    """Facilitator view: aggregate collected student submission/state files into a
+    class scoreboard. Point it at a directory of *.json files (from `labctl submit`
+    or collected state.json). Add --html <file> for a browser dashboard."""
     import pathlib
-    labs = discover_labs()
-    lab_ids = [l.id for l in labs]
-    maxpts = {l.id: l.max_points for l in labs}
+    from . import classroom
     d = pathlib.Path(args.dir)
     files = sorted(d.glob("*.json")) if d.is_dir() else ([d] if d.is_file() else [])
     if not files:
-        ui.error(f"no .json progress files found at {args.dir}")
+        ui.error(f"no .json files found at {args.dir}")
         return 1
-    ui.banner(f"Facilitator report — {len(files)} submission(s)")
+    agg = classroom.aggregate(files)
+    lab_ids = agg["labIds"]
+    maxpts = agg["maxpts"]
+    s = agg["stats"]
+    ui.banner(f"Facilitator report — {s['n']} student(s) · {s['passed']} passed · avg {s['avg']}%")
     rows = []
-    for f in files:
-        data = state.load_file(f)
-        who = data.get("student") or f.stem
-        labs_done = data.get("labs", {})
-        done = sum(1 for lid in lab_ids
-                   if maxpts.get(lid, 0) and labs_done.get(lid, {}).get("best_score", 0) >= maxpts[lid])
+    for r in agg["rows"]:
+        g = r["grade"]
+        passed = f"{ui.GREEN}PASS{ui.RESET}" if g["passed"] else f"{ui.GREY}—{ui.RESET}"
         cells = []
         for lid in lab_ids:
-            best = labs_done.get(lid, {}).get("best_score", 0)
+            best = r["labs"].get(lid, 0)
             mp = maxpts.get(lid, 0)
             if mp and best >= mp:
                 cells.append(f"{ui.GREEN}✔{ui.RESET}")
@@ -644,8 +644,85 @@ def cmd_report(args) -> int:
                 cells.append(f"{ui.YELLOW}{best}{ui.RESET}")
             else:
                 cells.append(f"{ui.GREY}·{ui.RESET}")
-        rows.append([who, f"{done}/{len(lab_ids)}"] + cells)
-    ui.table(rows, ["STUDENT", "DONE"] + [l.upper() for l in lab_ids])
+        name = r["student"] + (f" {ui.RED}⚠{ui.RESET}" if r.get("sigOk") is False else "")
+        rows.append([name, f"{g['overall']}%", passed] + cells)
+    ui.table(rows, ["STUDENT", "GRADE", "PASS"] + [l.upper() for l in lab_ids])
+    if getattr(args, "html", None):
+        out = pathlib.Path(args.html)
+        out.write_text(classroom.dashboard_html(agg), encoding="utf-8")
+        ui.ok(f"Dashboard written: {out}")
+        if getattr(args, "open", False):
+            import webbrowser
+            webbrowser.open(out.resolve().as_uri())
+    print(f"\n  {ui.DIM}⚠ = score-signature mismatch — confirm with the student's `labctl verify`.{ui.RESET}")
+    return 0
+
+
+def cmd_submit(args) -> int:
+    """Student view: package your progress into a signed submission file — or send
+    it to a classroom server (`--to URL`, or set CAIC_CLASSROOM)."""
+    import json as _json
+    import os as _os
+    import pathlib
+    from . import classroom
+    sub = classroom.build_submission()
+    g = sub["grade"]
+    ui.header(f"Submission for {sub['student']} — grade {g['overall']}% "
+              f"({'PASS' if g['passed'] else 'not yet'})")
+    target = args.to or _os.environ.get("CAIC_CLASSROOM")
+    sent = False
+    if target:
+        try:
+            classroom.post_submission(target, sub)
+            ui.ok(f"Sent to the classroom server at {target}")
+            sent = True
+        except Exception as exc:  # noqa: BLE001
+            ui.warn(f"Could not reach {target} ({exc}); saving a file instead.")
+    if not sent:
+        safe = "".join(c for c in sub["student"] if c.isalnum() or c in "-_") or "student"
+        out = pathlib.Path(args.out) if args.out else pathlib.Path(f"caic-submit-{safe}.json")
+        out.write_text(_json.dumps(sub, indent=2), encoding="utf-8")
+        ui.ok(f"Wrote {out}")
+        ui.info("Hand this file to your facilitator (USB / shared folder / upload).")
+    ui.info(f"Verification code: {ui.BOLD}{sub['sig']}{ui.RESET}  (ties this score to your machine's seed)")
+    return 0
+
+
+def cmd_classroom(args) -> int:
+    """Facilitator view: run a live LAN dashboard students submit to.
+    Students then: labctl submit --to http://<your-ip>:<port>"""
+    import socket
+    from . import classroom
+    host = args.host
+    port = args.port
+    subdir = args.dir or "classroom-submissions"
+    try:
+        httpd, sub = classroom.serve(host, port, subdir)
+    except OSError as exc:
+        ui.error(f"could not start server on {host}:{port} — {exc}")
+        return 2
+    # best-effort LAN IP for the invite line
+    ip = "127.0.0.1"
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("10.255.255.255", 1)); ip = s.getsockname()[0]; s.close()
+    except OSError:
+        pass
+    ui.banner("CAIC CyberLab — Classroom dashboard (live)")
+    ui.ok(f"Dashboard:  http://{ip}:{port}/   (open in your browser)")
+    ui.info(f"Submissions saved in: {sub.resolve()}")
+    print(f"\n  Tell students to run:\n     {ui.cmd(f'labctl submit --to http://{ip}:{port}')}")
+    print(f"  or set once:          {ui.cmd(f'export CAIC_CLASSROOM=http://{ip}:{port}')}  then {ui.cmd('labctl submit')}")
+    print(f"\n  {ui.DIM}LAN-only, facilitator-run. Ctrl-C to stop.{ui.RESET}\n")
+    if getattr(args, "open", False):
+        import webbrowser
+        webbrowser.open(f"http://127.0.0.1:{port}/")
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print()
+        ui.info("Classroom dashboard stopped.")
+        httpd.server_close()
     return 0
 
 
@@ -702,8 +779,18 @@ def build_parser() -> argparse.ArgumentParser:
     who.add_argument("name", nargs="*", help="set your name")
     rp = add("reset-progress", cmd_reset_progress, "erase your saved scores", lab="none")
     rp.add_argument("--yes", action="store_true", help="skip the confirmation prompt")
-    rep = add("report", cmd_report, "facilitator: aggregate student progress files", lab="none")
-    rep.add_argument("dir", help="directory of collected *.json progress files")
+    rep = add("report", cmd_report, "facilitator: aggregate collected submissions into a scoreboard", lab="none")
+    rep.add_argument("dir", help="directory of collected *.json submission/state files")
+    rep.add_argument("--html", metavar="FILE", help="also write a browser dashboard to FILE")
+    rep.add_argument("--open", action="store_true", help="open the HTML dashboard in a browser")
+    sub_ = add("submit", cmd_submit, "student: package your scores (file, or --to a classroom server)", lab="none")
+    sub_.add_argument("--to", metavar="URL", help="POST to a classroom server (or set CAIC_CLASSROOM)")
+    sub_.add_argument("--out", metavar="FILE", help="write the submission to FILE")
+    cls = add("classroom", cmd_classroom, "facilitator: run the live LAN dashboard students submit to", lab="none")
+    cls.add_argument("--port", type=int, default=7000, help="port (default 7000)")
+    cls.add_argument("--host", default="0.0.0.0", help="bind address (default 0.0.0.0 = LAN)")
+    cls.add_argument("--dir", metavar="DIR", help="where to store submissions (default ./classroom-submissions)")
+    cls.add_argument("--open", action="store_true", help="open the dashboard locally in a browser")
     return p
 
 
